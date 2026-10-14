@@ -1,0 +1,86 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A pipeline you can trust on a Monday without opening a single thread.",
+  "summary_text": "Move deals when the conversation moves, so Friday tidying stops.",
+  "icon": "🔁",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "The last real contact logged",
+    "A stage moved only when the thread earns it",
+    "Deals gone quiet, with how long",
+    "No deal invented without a thread"
+  ],
+  "what_it_does": [
+    "Logs the last real contact, not the last automated one",
+    "Moves a stage only when something in the thread justifies it",
+    "Flags deals that have gone quiet, with how long",
+    "Never invents a deal that has no thread behind it"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read threads with people already on a deal",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "move deal stages and log activity",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The conversations it reads."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "hubspot",
+      "requirement_label": "HubSpot",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The records it keeps in step."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "pipeline",
+      "label": "Which pipeline",
+      "input_type": "list"
+    },
+    {
+      "input_key": "mailbox",
+      "label": "Whose mail it reads",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 18 * * 1-5",
+      "read_timezone_from": "ask_the_installer",
+      "label": "every evening",
+      "note": "Every weekday evening, at your time"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it before a pipeline review"
+    }
+  ]
+}

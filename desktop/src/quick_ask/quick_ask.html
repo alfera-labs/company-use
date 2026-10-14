@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Ask Alfera</title>
+<style>
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; background:transparent; overflow:hidden; font:20px/1.2 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing:antialiased; }
+  .bar { height:100%; display:flex; align-items:center; gap:13px; padding:0 20px; -webkit-app-region:drag; }
+  .mark { width:24px; height:24px; border-radius:7px; background:#f74e00; flex:none; display:grid; place-items:center; }
+  .mark svg { width:15px; height:15px; fill:#fff; }
+  .words { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  input { -webkit-app-region:no-drag; width:100%; border:0; outline:0; background:transparent; font:inherit; letter-spacing:-.01em; color:#1a1918; }
+  input::placeholder { color:#a8a29a; }
+  input:disabled { opacity:.55; }
+  /* One quiet line under the question: why it was not sent, and what to do. */
+  #note { font-size:12px; line-height:1.2; color:#6f6a64; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #note:empty { display:none; }
+  kbd { font:600 11px -apple-system, sans-serif; border:1px solid rgba(0,0,0,.12); border-radius:5px; padding:2px 6px; color:#6f6a64; background:rgba(255,255,255,.6); flex:none; }
+  @media (prefers-color-scheme:dark) { input { color:#f3f1ed; } #note { color:#c9c4bc; } kbd { color:#c9c4bc; background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="mark"><svg viewBox="0 0 1024 1024"><title>Alfera</title><path d="M512 120 408 300l308 536h204zM290 507l205 1-188 328H103z"/></svg></span>
+  <span class="words">
+    <input id="question" placeholder="Ask Alfera" autocomplete="off" spellcheck="false" aria-describedby="note">
+    <span id="note" role="status"></span>
+  </span>
+  <kbd>↵</kbd>
+</div>
+<script>
+  const question = document.getElementById('question');
+  const note = document.getElementById('note');
+  question.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') alfera_quick_ask.hide();
+    if (event.key !== 'Enter' || event.isComposing || !question.value.trim()) return;
+    question.disabled = true;
+    note.textContent = '';
+    alfera_quick_ask.send(question.value);
+  });
+  // The question goes only when Alfera has it. Until then it stays, with one line that says why.
+  alfera_quick_ask.on_outcome((outcome, sentence) => {
+    question.disabled = false;
+    if (outcome === 'sent') question.value = '';
+    note.textContent = sentence;
+    question.focus();
+  });
+  alfera_quick_ask.on_shown(() => question.focus());
+  question.focus();
+</script>
+</body>
+</html>

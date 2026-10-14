@@ -1,0 +1,77 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Every number that reaches a customer is one you would have given yourself.",
+  "summary_text": "Keep every number that reaches a customer inside your own rules.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "founders",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Quotes only numbers that are in your file",
+    "Gives every discount a reason and an expiry",
+    "Never discounts because someone hesitated",
+    "Says what is not included before anyone asks"
+  ],
+  "guidance": [
+    {
+      "label": "List price",
+      "value": "Quote from the file, never from memory"
+    },
+    {
+      "label": "Discount",
+      "value": "A reason and an expiry, or no discount"
+    },
+    {
+      "label": "The floor",
+      "value": "Below it, a named person decides"
+    },
+    {
+      "label": "Not included",
+      "value": "Said before anyone has to ask"
+    }
+  ],
+  "used_when_text": "Used whenever it writes a number",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before writing any price",
+      "risk": "reads_data"
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "list_prices",
+      "label": "Your list prices",
+      "input_type": "table",
+      "example_answer": "Setup £1,200 · Retainer £400/mo"
+    },
+    {
+      "input_key": "floor",
+      "label": "The lowest you go",
+      "input_type": "text",
+      "example_answer": "10% off, with a 12-month term"
+    },
+    {
+      "input_key": "approver",
+      "label": "Who approves more than that",
+      "input_type": "text",
+      "example_answer": "Founder only"
+    },
+    {
+      "input_key": "never_say",
+      "label": "Never say",
+      "input_type": "text",
+      "example_answer": "Let me see what I can do"
+    }
+  ],
+  "starts_when": []
+}

@@ -1,0 +1,156 @@
+{
+  "node_key": "granola-list_notes-1",
+  "display_name": "List Notes",
+  "description": "List Granola meeting notes, one page at a time. Filter by creation or update date and by folder, then page with the returned cursor. Returns metadata only: id, title, owner, created_at, updated_at. Only notes with a finished AI summary and transcript appear here \u2014 a meeting still being processed is absent. Read a note's summary with granola-read_notes-1 and its spoken lines with granola-read_transcripts-1.",
+  "required_scopes": ["personal_notes", "public_notes"],
+  "implementation": "execute",
+  "provider": {
+    "endpoint": "GET /v1/notes",
+    "docs": "https://docs.granola.ai/api-reference/list-notes",
+    "openapi": "https://docs.granola.ai/api-reference/openapi.json",
+    "query_parameters": [
+      "created_before",
+      "created_after",
+      "updated_after",
+      "folder_id",
+      "cursor",
+      "page_size"
+    ]
+  },
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "created_after": {
+        "type": "string",
+        "description": "Return notes created after this date. \"2026-01-27\" or \"2026-01-27T15:30:00Z\"."
+      },
+      "created_before": {
+        "type": "string",
+        "description": "Return notes created before this date. \"2026-01-27\" or \"2026-01-27T15:30:00Z\"."
+      },
+      "updated_after": {
+        "type": "string",
+        "description": "Return notes updated after this date. \"2026-01-27\" or \"2026-01-27T15:30:00Z\"."
+      },
+      "folder_id": {
+        "type": "string",
+        "description": "Return notes in this folder and its child folders. Looks like fol_00000000000001."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous page."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 30,
+        "description": "Notes per page, 1 to 30. Granola defaults to 10."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["notes", "next_cursor", "has_more"],
+    "additionalProperties": false,
+    "properties": {
+      "notes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "title", "owner", "created_at", "updated_at"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Looks like not_00000000000001."
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "owner": {
+              "type": "object",
+              "required": ["name", "email"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": ["string", "null"]
+                },
+                "email": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Pass back as cursor to read the next page. Null on the last page."
+      },
+      "has_more": {
+        "type": "boolean"
+      }
+    }
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "GET /v1/notes. Lenient on purpose. Granola's OpenAPI document marks most of these required, but a node that dies on a vendor's new null returns nothing at all.",
+    "type": "object",
+    "required": ["notes"],
+    "properties": {
+      "notes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "created_at", "updated_at"],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "owner": {
+              "type": ["object", "null"],
+              "properties": {
+                "name": {
+                  "type": ["string", "null"]
+                },
+                "email": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "hasMore": {
+        "type": ["boolean", "null"]
+      },
+      "cursor": {
+        "type": ["string", "null"]
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "JSON-first definitions carry no declarative response-to-output mapping, and this node renames the provider's hasMore and cursor into has_more and next_cursor. That rename is the only code in execute.ts.",
+    "provider_ingress": "The lenient JSON Schema ingress on the provider's own payload is response_schema above. The runtime compiles it and runs it on the way in; execute.ts only names the shape it guaranteed.",
+    "dates": "Granola accepts a plain date (2026-01-27) or an RFC 3339 timestamp (2026-01-27T15:30:00Z). The node passes the string through and lets the provider judge it, rather than pinning a format the vendor may widen.",
+    "ordering": "The OpenAPI document does not promise an order. The node does not claim one either."
+  }
+}

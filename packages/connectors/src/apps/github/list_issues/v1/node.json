@@ -1,0 +1,146 @@
+{
+  "node_key": "github-list_issues-1",
+  "display_name": "List GitHub Issues",
+  "description": "List issues across one or more GitHub repositories. Pull requests are excluded. Every repository returns its own array of issues and its own next_cursor; send that cursor back on the same repository to read the next page.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": ["repo"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "repos": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "description": "The repositories to read, one provider call each.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string", "minLength": 1 },
+            "repo": { "type": "string", "minLength": 1 },
+            "full_name": {
+              "type": "string",
+              "minLength": 3,
+              "description": "The repository as owner/repo, which is the option id github-list_repos-1 hands the picker. Send this, or send owner and repo."
+            },
+            "cursor": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$",
+              "description": "The page cursor this repository returned last time. Paging is per repository, because each repository is its own provider call with its own pages."
+            }
+          },
+          "anyOf": [{ "required": ["full_name"] }, { "required": ["owner", "repo"] }]
+        }
+      },
+      "state": { "type": "string", "enum": ["open", "closed", "all"] },
+      "labels": { "type": "array", "items": { "type": "string" } },
+      "since": {
+        "type": "string",
+        "description": "ISO 8601, e.g. 2026-09-01T00:00:00Z. Only issues updated at or after this time come back."
+      }
+    },
+    "required": ["repos"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "repos": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": { "type": "integer" },
+            "owner": { "type": "string" },
+            "repo": { "type": "string" },
+            "ok": { "type": "boolean" },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "number": { "type": "integer" },
+                  "title": { "type": "string" },
+                  "state": { "type": "string" },
+                  "html_url": { "type": "string" },
+                  "body": { "type": ["string", "null"] },
+                  "labels": { "type": "array", "items": { "type": "string" } },
+                  "author": { "type": ["string", "null"] },
+                  "created_time": { "type": "string" },
+                  "last_updated_time": { "type": "string" }
+                },
+                "required": [
+                  "number",
+                  "title",
+                  "state",
+                  "html_url",
+                  "body",
+                  "labels",
+                  "author",
+                  "created_time",
+                  "last_updated_time"
+                ]
+              }
+            },
+            "next_cursor": { "type": ["string", "null"] },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" },
+                "retryable": { "type": "boolean" }
+              },
+              "required": ["code", "message", "retryable"]
+            }
+          },
+          "required": ["index", "owner", "repo", "ok", "issues", "next_cursor", "error"]
+        }
+      }
+    },
+    "required": ["repos"]
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Lenient ingress on GET /repos/{owner}/{repo}/issues. Reads the fields the node maps and lets GitHub keep adding the rest.",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "number": { "type": "number" },
+        "title": { "type": "string" },
+        "state": { "type": "string" },
+        "html_url": { "type": "string" },
+        "body": { "type": ["string", "null"] },
+        "labels": {
+          "type": ["array", "null"],
+          "items": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "object", "properties": { "name": { "type": ["string", "null"] } } }
+            ]
+          }
+        },
+        "user": {
+          "type": ["object", "null"],
+          "properties": { "login": { "type": "string" } },
+          "required": ["login"]
+        },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" },
+        "pull_request": {
+          "type": ["object", "null"],
+          "properties": { "html_url": { "type": ["string", "null"] } }
+        }
+      },
+      "required": ["number", "title", "state", "html_url", "created_at", "updated_at"]
+    }
+  },
+  "quirks": {
+    "endpoint": "GET /repos/{owner}/{repo}/issues",
+    "why_execute": "GitHub has no endpoint that lists issues for several repositories at once, and the plural contract also has to drop pull requests and keep a cursor per repository. A declarative http mapping cannot express a fan-out with per-item results, so the work is code.",
+    "pull_requests_are_issues": "The issues endpoint serves pull requests too, because GitHub counts every pull request as an issue. Only a pull request carries the `pull_request` key, so that key is the filter. Use github-list_pull_requests-1 to read the ones dropped here.",
+    "pagination": "GitHub answers with a `Link` header carrying `rel=\"next\"`, which a node cannot read: send_request hands back the parsed JSON body and nothing else. So the cursor is the page number and a full page (100 records) is the signal that another page exists. Fullness is measured on the page GitHub served, before the pull request filter.",
+    "labels_filter": "GitHub takes the label filter as one comma-separated string; the node joins the array."
+  }
+}

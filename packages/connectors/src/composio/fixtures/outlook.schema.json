@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "outlook",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "OUTLOOK_LIST_MAIL_FOLDERS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "OUTLOOK_LIST_MESSAGES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

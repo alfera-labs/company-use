@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["issues"],
+  "properties": {
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "lastSeen"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "culprit": { "type": ["string", "null"] },
+          "level": { "type": "string" },
+          "count": { "type": "string" },
+          "status": { "type": "string" },
+          "permalink": { "type": "string" },
+          "lastSeen": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "next_cursor": { "type": ["string", "null"] }
+  }
+}

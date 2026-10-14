@@ -1,0 +1,40 @@
+{
+  "created_company": {
+    "data": {
+      "id": {
+        "workspace_id": "14beef7a-99f7-4534-a87e-70b564330a4c",
+        "object_id": "97052eb9-e65e-443f-a297-f2d9a4a7f795",
+        "record_id": "891dcbfc-9141-415d-9b2a-2238a6cc012d"
+      },
+      "created_at": "2026-09-05T10:14:02.000000000Z",
+      "web_url": "https://app.attio.com/salarya/company/891dcbfc-9141-415d-9b2a-2238a6cc012d",
+      "values": {
+        "name": [
+          {
+            "active_from": "2026-09-05T10:14:02.000000000Z",
+            "active_until": null,
+            "created_by_actor": { "type": "api-token", "id": null },
+            "attribute_type": "text",
+            "value": "Attio"
+          }
+        ],
+        "domains": [
+          {
+            "active_from": "2026-09-05T10:14:02.000000000Z",
+            "active_until": null,
+            "created_by_actor": { "type": "api-token", "id": null },
+            "attribute_type": "domain",
+            "domain": "attio.com",
+            "root_domain": "attio.com"
+          }
+        ]
+      }
+    }
+  },
+  "unique_attribute_conflict": {
+    "status_code": 400,
+    "type": "invalid_request_error",
+    "code": "value_not_unique",
+    "message": "Record with domains \"attio.com\" already exists."
+  }
+}

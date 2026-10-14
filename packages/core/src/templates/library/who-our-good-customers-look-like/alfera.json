@@ -1,0 +1,71 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Lists that come back sorted by who to call, with a reason beside everything that was cut.",
+  "summary_text": "Teach it your book once, and every task that touches companies gets sharper.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Sorts lists by who to call, not alphabetically",
+    "Gives every cut its reason",
+    "Names the thing that made them a fit",
+    "Says when a company matches nothing"
+  ],
+  "guidance": [
+    {
+      "label": "A fit",
+      "value": "What your best accounts already share"
+    },
+    {
+      "label": "Order",
+      "value": "By who to call, never alphabetically"
+    },
+    {
+      "label": "A cut",
+      "value": "Carries the reason it was cut"
+    },
+    {
+      "label": "No match",
+      "value": "Said plainly, never stretched"
+    }
+  ],
+  "used_when_text": "Used whenever it picks or scores companies",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill when picking or scoring companies",
+      "risk": "reads_data"
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "best_customers",
+      "label": "Your five best customers",
+      "input_type": "list",
+      "example_answer": "Northwind, Globex, Initech, Umbrella, Hooli"
+    },
+    {
+      "input_key": "shared",
+      "label": "What they have in common",
+      "input_type": "text",
+      "example_answer": "40–200 staff, own their warehouse"
+    },
+    {
+      "input_key": "never_sell_to",
+      "label": "Who you never sell to",
+      "input_type": "text",
+      "example_answer": "Agencies and resellers"
+    }
+  ],
+  "starts_when": []
+}

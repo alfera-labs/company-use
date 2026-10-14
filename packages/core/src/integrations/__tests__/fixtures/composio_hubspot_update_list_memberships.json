@@ -1,0 +1,148 @@
+{
+  "slug": "HUBSPOT_UPDATE_LIST_MEMBERSHIPS",
+  "name": "Update list memberships",
+  "toolkit": {
+    "slug": "hubspot",
+    "name": "hubspot",
+    "logo": "https://logos.composio.dev/api/hubspot"
+  },
+  "description": "Adds records to or removes records from a manual or snapshot CRM list.",
+  "input_parameters": {
+    "type": "object",
+    "title": "UpdateListMembershipsRequest",
+    "required": ["list_id", "operation", "record_ids"],
+    "properties": {
+      "list_id": {
+        "type": "string",
+        "title": "List Id",
+        "examples": ["123"],
+        "description": "Unique ID of the manual or snapshot list to update."
+      },
+      "operation": {
+        "enum": ["add", "remove"],
+        "type": "string",
+        "title": "Operation",
+        "description": "Membership operation to perform: add records or remove records."
+      },
+      "record_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Record Ids",
+        "examples": [["101", "202"]],
+        "minItems": 1,
+        "description": "One or more CRM record IDs to add to or remove from the list."
+      }
+    },
+    "description": "Request for adding records to or removing records from a CRM list."
+  },
+  "output_parameters": {
+    "type": "object",
+    "$defs": {
+      "UpdateListMembershipsResponse": {
+        "type": "object",
+        "title": "UpdateListMembershipsResponse",
+        "properties": {
+          "recordsIdsAdded": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Records Ids Added",
+            "description": "Record IDs successfully added to the list, when adding members."
+          },
+          "recordIdsMissing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Record Ids Missing",
+            "description": "Requested record IDs that HubSpot could not find."
+          },
+          "recordIdsRemoved": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Record Ids Removed",
+            "description": "Record IDs successfully removed from the list, when removing members."
+          }
+        },
+        "description": "Record IDs affected or not found during the membership update.",
+        "additionalProperties": true
+      }
+    },
+    "title": "UpdateListMembershipsResponseWrapper",
+    "required": ["data", "successful"],
+    "properties": {
+      "data": {
+        "$ref": "#/$defs/UpdateListMembershipsResponse",
+        "title": "Data",
+        "description": "Data from the action execution"
+      },
+      "error": {
+        "type": "string",
+        "title": "Error",
+        "description": "Error if any occurred during the execution of the action"
+      },
+      "successful": {
+        "type": "boolean",
+        "title": "Successful",
+        "description": "Whether or not the action execution was successful or not"
+      }
+    }
+  },
+  "tags": ["Lists", "openWorldHint", "updateHint", "idempotentHint"],
+  "available_versions": ["20261008_00"],
+  "version": "20261008_00",
+  "scopes": [
+    "crm.lists.write",
+    "crm.segments.read",
+    "cms.membership.access_groups.write",
+    "crm.lists.read",
+    "crm.segments.write"
+  ],
+  "scope_requirements": {
+    "all_of": [
+      {
+        "any_of": [
+          {
+            "all_of": ["crm.lists.write", "crm.segments.read"]
+          },
+          {
+            "all_of": ["cms.membership.access_groups.write", "crm.lists.read"]
+          },
+          {
+            "all_of": ["crm.segments.read", "crm.segments.write"]
+          },
+          {
+            "all_of": ["crm.lists.read", "crm.segments.write"]
+          },
+          {
+            "all_of": ["crm.lists.read", "crm.lists.write"]
+          },
+          {
+            "all_of": ["cms.membership.access_groups.write", "crm.segments.read"]
+          }
+        ],
+        "source": [
+          "https://developers.hubspot.com/docs/api-reference/legacy/crm/lists/memberships/add-to-list",
+          "https://developers.hubspot.com/docs/api-reference/legacy/crm/lists/memberships/remove-from-list"
+        ]
+      }
+    ]
+  },
+  "is_deprecated": false,
+  "deprecated": {
+    "displayName": "Update list memberships",
+    "is_deprecated": false,
+    "version": "20261008_00",
+    "available_versions": ["20261008_00"],
+    "toolkit": {
+      "logo": "https://logos.composio.dev/api/hubspot"
+    }
+  },
+  "no_auth": false,
+  "human_description": "Add CRM records to or remove CRM records from a HubSpot manual or snapshot list, returning the affected and missing record IDs."
+}

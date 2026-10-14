@@ -1,0 +1,93 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "You walk into every call already knowing what changed since the last one.",
+  "summary_text": "Get a concise company brief before each external meeting.",
+  "icon": "🔎",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Who in the room is not a colleague",
+    "What changed since your last thread",
+    "Two or three things to open with",
+    "A plain “found nothing” when that is true"
+  ],
+  "what_it_does": [
+    "Reads the invite and works out which attendees are not colleagues",
+    "Pulls what changed at their company since your last thread with them",
+    "Digs up the two or three things worth opening with",
+    "Says plainly when it found nothing, instead of padding the page"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read your calendar and past threads with these people",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "look the company up on the web",
+      "risk": "reaches_outside"
+    },
+    {
+      "capability": "email you the brief",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_calendar",
+      "requirement_label": "Google Calendar",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The meetings it reads and the timing it works from."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the brief lands."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "lead_time",
+      "label": "How long before the meeting",
+      "input_type": "clock"
+    },
+    {
+      "input_key": "recipient",
+      "label": "Where the brief lands",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "google_calendar-event_starting_soon",
+        "app_key": "google_calendar",
+        "listener_config": {}
+      },
+      "label": "before each meeting",
+      "note": "Only meetings with someone outside your team"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for a brief on any company"
+    }
+  ]
+}

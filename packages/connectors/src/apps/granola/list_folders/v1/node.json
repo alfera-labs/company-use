@@ -1,0 +1,120 @@
+{
+  "node_key": "granola-list_folders-1",
+  "display_name": "List Granola Folders",
+  "description": "List the Granola folders this API key can see, one page at a time, as the options a person picks from. Each option's id is the folder id granola-list_notes-1 takes as folder_id, and that filter already includes the folder's child folders. Pass the returned next_cursor back as `cursor` to read the next page; a null next_cursor means the last page. This is the browse node behind the granola sync picker, so its output is the scope-option shape.",
+  "required_scopes": ["personal_notes", "public_notes"],
+  "implementation": "http",
+  "provider": {
+    "endpoint": "GET /v1/folders",
+    "docs": "https://docs.granola.ai/api-reference",
+    "openapi": "https://docs.granola.ai/api-reference/openapi.json",
+    "query_parameters": ["cursor", "page_size"]
+  },
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. This node lists every folder in one flat page; see quirks."
+      },
+      "query": {
+        "type": "string",
+        "description": "Ignored. GET /v1/folders takes no text filter."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous page. Omit for the first page."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 30,
+        "description": "Folders per page, 1 to 30. Granola defaults to 10."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Pass back as cursor to read the next page. Null on the last page."
+      }
+    }
+  },
+  "http": {
+    "method": "GET",
+    "path": "/v1/folders",
+    "paginate": {
+      "cursor_query_parameter": "cursor",
+      "cursor_from_input": { "$": "input.cursor" },
+      "limit_query_parameter": "page_size",
+      "limit_from_input": { "$": "input.limit" }
+    },
+    "response_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "GET /v1/folders. Lenient on purpose. Granola's OpenAPI document marks id, object, name and parent_folder_id all required, but a node that dies on a vendor's new null returns nothing at all.",
+      "type": "object",
+      "required": ["folders"],
+      "properties": {
+        "folders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "object": { "type": ["string", "null"] },
+              "name": { "type": ["string", "null"] },
+              "parent_folder_id": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "hasMore": { "type": ["boolean", "null"] },
+        "cursor": { "type": ["string", "null"] }
+      }
+    },
+    "to_output": {
+      "options": {
+        "$map": {
+          "from": { "$": "response.folders" },
+          "to": {
+            "id": { "$": "item.id" },
+            "label": { "$default": [{ "$": "item.name" }, { "$": "item.id" }] },
+            "kind": "folder",
+            "selectable": true
+          }
+        }
+      },
+      "next_cursor": { "$default": [{ "$": "response.cursor" }, null] }
+    }
+  },
+  "quirks": [
+    "No code: the whole call is a declarative http mapping. The provider's own cursor and page size are its query parameters, so the runtime's paginate record expresses them, and the mapping renames `cursor` to `next_cursor` on the way out.",
+    "Flat, not a tree, even though a folder carries parent_folder_id. One page holds every folder a key can see whatever its depth, and granola-list_notes-1 already includes a folder's child folders when it filters on folder_id, so picking a parent picks what is under it. A nested picker would be a v2 that pages per parent.",
+    "GET /v1/folders takes no text filter, so `query` is accepted and ignored. Granola pages at 30 folders, so the picker filters what it has fetched.",
+    "The whole list is what the key can see: a personal key reaches private folders shared with the person, a workspace key reaches the spaces granted API access. See app.json auth.key_permissions."
+  ]
+}

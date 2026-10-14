@@ -1,0 +1,92 @@
+{
+  "node_key": "gmail-list_labels-1",
+  "display_name": "List Gmail Labels",
+  "description": "List the Gmail labels of the connected mailbox, as the options a person picks from. Returns the mailboxes a person recognises — INBOX, SENT, STARRED — plus every label they made themselves. `query` keeps only labels whose name contains that text. This is the browse node behind the gmail sync picker, so its output is the scope-option shape: id, label, sublabel, kind, selectable. The ids come back as the label_ids gmail-list_messages-1 filters on.",
+  "required_scopes": ["https://www.googleapis.com/auth/gmail.readonly"],
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. Gmail labels are a flat list, so there is nothing to open."
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Keep only labels whose name contains this text, ignoring case."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Ignored. labels.list answers with the whole list in one call and never pages."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "description": "Ignored. labels.list takes no page size."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Always null. Gmail returns every label in one answer."
+      }
+    }
+  },
+  "requests": {
+    "labels_list": {
+      "method": "GET",
+      "path": "/users/me/labels",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "users.labels.list. Lenient on purpose: Gmail sends visibility and colour fields this node does not read, and adds more between releases.",
+        "type": "object",
+        "properties": {
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "type": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "The node hides the label ids nobody syncs and filters by name, and JSON-first definitions carry no filter operator. That filter is the only code in execute.ts.",
+    "hidden_system_labels": "CHAT holds Hangouts history and the CATEGORY_* labels are the Inbox tabs Gmail assigns by itself, not folders anyone files mail into. Both are dropped, so the picker shows mailboxes and real labels only. Every other system label — INBOX, SENT, DRAFT, SPAM, TRASH, STARRED, IMPORTANT, UNREAD — stays.",
+    "no_message_counts": "labels.list answers without messagesTotal; only labels.get carries it, which would cost one request per label. So no option carries a count in its sublabel.",
+    "no_paging": "labels.list has no cursor and no page size. next_cursor is always null and the cursor and limit inputs are accepted and ignored, so one generic picker can call every browse node the same way.",
+    "endpoint": "GET /users/me/labels"
+  }
+}

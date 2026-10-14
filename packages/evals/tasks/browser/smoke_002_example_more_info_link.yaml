@@ -1,0 +1,10 @@
+task_id: smoke_002_example_more_info_link
+suite: smoke
+goal: >-
+  On example.com, find the "More information..." link and follow it. Report the
+  page title you land on.
+start_url: https://example.com
+max_steps: 8
+graders:
+  - grader_type: url_matches
+    pattern: "iana\\.org"

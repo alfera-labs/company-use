@@ -1,0 +1,14 @@
+task_id: sandbox_002_file_survives_fresh_process
+prompt: "Write a file and prove a fresh workspace process can still read it."
+workspace_provider: local
+graders:
+  - grader_type: file_exists
+    path: artifacts/persisted.txt
+  - grader_type: file_contains
+    path: artifacts/persisted.txt
+    text: "fresh process ok"
+  - grader_type: db_assertion
+    assertion: fresh_process_read
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

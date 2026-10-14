@@ -1,0 +1,33 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ad_attribution": "./src/ad_attribution.ts",
+    "./secure_strings_equal": "./src/secure_strings_equal.server.ts",
+    "./test_support/key_shaped_value": "./src/test_support/key_shaped_value.ts",
+    "./model_profiles.json": "./src/model_profiles.json",
+    "./model_prompt_profiles.json": "./src/model_prompt_profiles.json",
+    "./model_proxies.json": "./src/model_proxies.json",
+    "./model_use_cases.json": "./src/model_use_cases.json",
+    "./volume_storage_layouts.json": "./src/volume_storage_layouts.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun --no-env-file ../../node_modules/vitest/vitest.mjs run --root ../.. packages/shared/src"
+  },
+  "dependencies": {
+    "@zip.js/zip.js": "^2.8.33",
+    "typeid-js": "^1.2.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

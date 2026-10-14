@@ -1,0 +1,79 @@
+{
+  "_source": "doc-derived, not recorded: shaped from Salesforce's documented describeGlobal answer for GET /services/data/v61.0/sobjects (the DescribeGlobalResult, cut to the fields this node reads). Object names are Salesforce's own standard ones plus an invented custom object; no real org data and no tokens.",
+  "describe_global": {
+    "encoding": "UTF-8",
+    "maxBatchSize": 200,
+    "sobjects": [
+      {
+        "name": "Account",
+        "label": "Account",
+        "labelPlural": "Accounts",
+        "queryable": true,
+        "custom": false,
+        "createable": true,
+        "deprecatedAndHidden": false,
+        "keyPrefix": "001"
+      },
+      {
+        "name": "AccountShare",
+        "label": "Account Share",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": false
+      },
+      {
+        "name": "AccountHistory",
+        "label": "Account History",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": false
+      },
+      {
+        "name": "AccountFeed",
+        "label": "Account Feed",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": false
+      },
+      {
+        "name": "AccountChangeEvent",
+        "label": "Account Change Event",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": false
+      },
+      {
+        "name": "Opportunity",
+        "label": "Opportunity",
+        "labelPlural": "Opportunities",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": false,
+        "keyPrefix": "006"
+      },
+      {
+        "name": "AcceptedEventRelation",
+        "label": "Accepted Event Relation",
+        "queryable": false,
+        "custom": false,
+        "deprecatedAndHidden": false
+      },
+      {
+        "name": "OldRetiredThing",
+        "label": "Old Retired Thing",
+        "queryable": true,
+        "custom": false,
+        "deprecatedAndHidden": true
+      },
+      {
+        "name": "Roast_Batch__c",
+        "label": "Roast Batch",
+        "labelPlural": "Roast Batches",
+        "queryable": true,
+        "custom": true,
+        "deprecatedAndHidden": false,
+        "keyPrefix": "a0X"
+      }
+    ]
+  }
+}

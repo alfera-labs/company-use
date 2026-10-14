@@ -1,0 +1,476 @@
+{
+  "node_key": "hubspot-search_records-1",
+  "display_name": "Search HubSpot Records",
+  "description": "Search HubSpot CRM records of one object type by property filters or free text, one page at a time. Filter groups are ORed and the filters inside a group are ANDed. Returns matching records plus next_cursor; pass it back as cursor to read the next page. HubSpot search is eventually consistent, so a record created in the last few seconds may not appear yet.",
+  "implementation": "http",
+  "required_scopes": [
+    "crm.objects.contacts.read",
+    "crm.objects.companies.read",
+    "crm.objects.deals.read"
+  ],
+  "endpoints": [
+    {
+      "purpose": "search",
+      "method": "POST",
+      "path": "/crm/v3/objects/{object_type}/search",
+      "max_page_size": 200
+    }
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$|^\\d+-\\d+$",
+        "description": "contacts, companies, deals, tickets, or a custom object type id like 2-1234567"
+      },
+      "filter_groups": {
+        "type": "array",
+        "maxItems": 5,
+        "description": "Filter groups are ORed with each other; the filters inside one group are ANDed. HubSpot allows at most 5 groups, 6 filters per group, and 18 filters in total.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "property": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The HubSpot property name, for example \"email\"."
+                  },
+                  "operator": {
+                    "type": "string",
+                    "enum": [
+                      "EQ",
+                      "NEQ",
+                      "LT",
+                      "LTE",
+                      "GT",
+                      "GTE",
+                      "BETWEEN",
+                      "IN",
+                      "NOT_IN",
+                      "HAS_PROPERTY",
+                      "NOT_HAS_PROPERTY",
+                      "CONTAINS_TOKEN",
+                      "NOT_CONTAINS_TOKEN"
+                    ]
+                  },
+                  "value": {
+                    "description": "For every operator except IN, NOT_IN, BETWEEN.",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  "values": {
+                    "description": "For IN and NOT_IN.",
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    }
+                  },
+                  "low_value": {
+                    "description": "The lower bound for BETWEEN.",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  "high_value": {
+                    "description": "The upper bound for BETWEEN.",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "required": ["property", "operator"]
+              }
+            }
+          },
+          "required": ["filters"]
+        }
+      },
+      "query": {
+        "description": "Free-text search across the object default properties.",
+        "type": "string"
+      },
+      "properties": {
+        "description": "Which properties to return. HubSpot returns a small default set when omitted.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "cursor": {
+        "description": "The next_cursor from the previous page.",
+        "type": "string"
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 200
+      }
+    },
+    "required": ["object_type"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "records": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "created_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "archived": {
+              "type": "boolean"
+            }
+          },
+          "required": ["id", "properties", "created_at", "updated_at", "archived"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "total": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "required": ["records", "next_cursor", "total"],
+    "additionalProperties": false
+  },
+  "http": {
+    "method": "POST",
+    "path": "/crm/v3/objects/{input.object_type}/search",
+    "body": {
+      "filterGroups": {
+        "$map": {
+          "from": {
+            "$": "input.filter_groups"
+          },
+          "to": {
+            "filters": {
+              "$map": {
+                "from": {
+                  "$": "item.filters"
+                },
+                "to": {
+                  "propertyName": {
+                    "$": "item.property"
+                  },
+                  "operator": {
+                    "$": "item.operator"
+                  },
+                  "value": {
+                    "$default": [
+                      {
+                        "$": "item.low_value"
+                      },
+                      {
+                        "$": "item.value"
+                      }
+                    ]
+                  },
+                  "values": {
+                    "$": "item.values"
+                  },
+                  "highValue": {
+                    "$": "item.high_value"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "query": {
+        "$": "input.query"
+      },
+      "properties": {
+        "$": "input.properties"
+      },
+      "after": {
+        "$": "input.cursor"
+      },
+      "limit": {
+        "$": "input.limit"
+      }
+    },
+    "response_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "updatedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "archived": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paging": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "next": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "after": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "link": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "to_output": {
+      "records": {
+        "$map": {
+          "from": {
+            "$": "response.results"
+          },
+          "to": {
+            "id": {
+              "$": "item.id"
+            },
+            "properties": {
+              "$default": [
+                {
+                  "$": "item.properties"
+                },
+                {}
+              ]
+            },
+            "created_at": {
+              "$default": [
+                {
+                  "$": "item.createdAt"
+                },
+                null
+              ]
+            },
+            "updated_at": {
+              "$default": [
+                {
+                  "$": "item.updatedAt"
+                },
+                null
+              ]
+            },
+            "archived": {
+              "$default": [
+                {
+                  "$": "item.archived"
+                },
+                false
+              ]
+            }
+          }
+        }
+      },
+      "next_cursor": {
+        "$default": [
+          {
+            "$": "response.paging.next.after"
+          },
+          null
+        ]
+      },
+      "total": {
+        "$default": [
+          {
+            "$": "response.total"
+          },
+          null
+        ]
+      }
+    }
+  },
+  "quirks": [
+    "HubSpot carries the cursor and the page size in the request BODY (after, limit), not the query string, so this node has no paginate block. The body maps input.cursor onto \"after\".",
+    "Filter groups are ORed with each other and the filters inside one group are ANDed. The input mirrors HubSpot own grouping so both are reachable.",
+    "BETWEEN spells its lower bound as plain \"value\" and its upper bound as \"highValue\". The body maps low_value and high_value onto those.",
+    "No filter_groups produces an empty filterGroups array, which HubSpot reads as \"no filter\".",
+    "The search index is eventually consistent. A record written seconds ago may not be found yet.",
+    "\"total\" is capped by HubSpot and is an estimate, not a promise."
+  ]
+}

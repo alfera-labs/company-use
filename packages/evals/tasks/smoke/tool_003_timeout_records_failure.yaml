@@ -1,0 +1,13 @@
+task_id: tool_003_timeout_records_failure
+prompt: "Run a slow command and verify the tool call records a timeout."
+workspace_provider: local
+graders:
+  - grader_type: tool_call_recorded
+    tool_name: workspace-run_command
+  - grader_type: db_assertion
+    assertion: timeout_recorded
+  - grader_type: db_assertion
+    assertion: tool_events_linked
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

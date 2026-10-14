@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A forecast made of deals that are actually alive.",
+  "summary_text": "Surface the deals with no next step before the forecast uses them.",
+  "icon": "🧭",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Deals with no next step or date",
+    "A list per owner, not one anonymous one",
+    "Sorted by value at risk",
+    "Nothing sent in a clean week"
+  ],
+  "what_it_does": [
+    "Finds deals with no next step and no date on them",
+    "Names the owner rather than posting one anonymous list",
+    "Sorts by value at risk, not alphabetically",
+    "Says nothing at all in a week where nothing is stale"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read every open deal",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "message each owner their list",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "hubspot",
+      "requirement_label": "HubSpot",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The pipeline it audits."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "Where each owner gets their own list."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "pipeline",
+      "label": "Which pipeline",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where each owner is messaged",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 * * FRI",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it before a forecast meeting"
+    }
+  ]
+}

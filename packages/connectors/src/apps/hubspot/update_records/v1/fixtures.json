@@ -1,0 +1,61 @@
+{
+  "batch_update_complete": {
+    "completedAt": "2026-09-02T12:20:05.612Z",
+    "startedAt": "2026-09-02T12:20:05.401Z",
+    "status": "COMPLETE",
+    "results": [
+      {
+        "id": "51201",
+        "properties": {
+          "createdate": "2026-03-02T14:10:22.023Z",
+          "hs_object_id": "51201",
+          "lastmodifieddate": "2026-09-02T12:20:05.508Z",
+          "lifecyclestage": "customer"
+        },
+        "createdAt": "2026-03-02T14:10:22.023Z",
+        "updatedAt": "2026-09-02T12:20:05.508Z",
+        "archived": false
+      },
+      {
+        "id": "51202",
+        "properties": {
+          "createdate": "2026-04-19T08:02:44.117Z",
+          "hs_object_id": "51202",
+          "lastmodifieddate": "2026-09-02T12:20:05.544Z",
+          "lifecyclestage": "customer"
+        },
+        "createdAt": "2026-04-19T08:02:44.117Z",
+        "updatedAt": "2026-09-02T12:20:05.544Z",
+        "archived": false
+      }
+    ]
+  },
+  "batch_update_partly_missing": {
+    "completedAt": "2026-09-02T12:24:41.006Z",
+    "startedAt": "2026-09-02T12:24:40.822Z",
+    "status": "COMPLETE",
+    "numErrors": 1,
+    "results": [
+      {
+        "id": "51201",
+        "properties": {
+          "createdate": "2026-03-02T14:10:22.023Z",
+          "hs_object_id": "51201",
+          "lastmodifieddate": "2026-09-02T12:24:40.930Z",
+          "lifecyclestage": "customer"
+        },
+        "createdAt": "2026-03-02T14:10:22.023Z",
+        "updatedAt": "2026-09-02T12:24:40.930Z",
+        "archived": false
+      }
+    ],
+    "errors": [
+      {
+        "status": "error",
+        "category": "OBJECT_NOT_FOUND",
+        "message": "Could not get some CONTACT objects, they may be deleted or not exist. Check that ids are valid.",
+        "context": { "ids": ["51202"] }
+      }
+    ]
+  }
+}

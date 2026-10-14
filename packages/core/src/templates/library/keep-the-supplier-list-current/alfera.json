@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A supplier list that is true, so quoting off it stops being a gamble.",
+  "summary_text": "Check prices, contacts, and lead times against what suppliers sent.",
+  "icon": "📇",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "operations-managers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Prices checked against the last invoice",
+    "Contacts who stopped replying, flagged",
+    "Lead times that quietly doubled",
+    "An audit column saying what changed"
+  ],
+  "what_it_does": [
+    "Checks each price against the most recent actual invoice",
+    "Notices when the named contact stopped replying",
+    "Flags lead times that have quietly doubled",
+    "Leaves an audit column saying what changed and from where"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the list and recent supplier email",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "update the entries that have drifted",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The supplier list it maintains."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The correspondence it checks against."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "supplier_list",
+      "label": "The supplier list",
+      "input_type": "document"
+    },
+    {
+      "input_key": "mailbox",
+      "label": "Which mailbox to check against",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 1 * *",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it before a quoting round"
+    }
+  ]
+}

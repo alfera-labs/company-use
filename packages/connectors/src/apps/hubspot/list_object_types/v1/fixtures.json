@@ -1,0 +1,49 @@
+{
+  "_source": "doc-derived, not recorded: shaped from HubSpot's published OpenAPI document for the CRM Schemas API v3 (the ObjectSchema resource returned by GET /crm/v3/schemas), cut to the fields this node reads. Portal ids and object names are invented; no real portal data and no tokens.",
+  "custom_schemas": {
+    "results": [
+      {
+        "id": "2-3399991",
+        "objectTypeId": "2-3399991",
+        "name": "roast_batches",
+        "fullyQualifiedName": "p2201_roast_batches",
+        "labels": { "singular": "Roast batch", "plural": "Roast batches" },
+        "primaryDisplayProperty": "batch_name",
+        "requiredProperties": ["batch_name"],
+        "associations": [],
+        "properties": [],
+        "archived": false,
+        "createdAt": "2026-02-11T10:04:02.117Z",
+        "updatedAt": "2026-07-30T08:14:55.902Z"
+      },
+      {
+        "id": "2-3400012",
+        "objectTypeId": "2-3400012",
+        "name": "retired_thing",
+        "fullyQualifiedName": "p2201_retired_thing",
+        "labels": { "singular": "Retired thing", "plural": "Retired things" },
+        "associations": [],
+        "properties": [],
+        "archived": true
+      },
+      {
+        "id": "2-3400044",
+        "name": "unlabelled_object",
+        "fullyQualifiedName": "p2201_unlabelled_object",
+        "labels": {},
+        "associations": [],
+        "properties": [],
+        "archived": false
+      }
+    ]
+  },
+  "custom_schemas_empty": {
+    "results": []
+  },
+  "custom_schemas_forbidden": {
+    "status": "error",
+    "message": "This app hasn't been granted all required scopes to make this call. Read more about required scopes here: https://developers.hubspot.com/scopes.",
+    "correlationId": "8f5f5b8e-0f4a-4c76-9bbd-3d9a1e2f5b21",
+    "category": "MISSING_SCOPES"
+  }
+}

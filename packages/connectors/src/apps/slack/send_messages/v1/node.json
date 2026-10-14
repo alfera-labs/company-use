@@ -1,0 +1,109 @@
+{
+  "node_key": "slack-send_messages-1",
+  "display_name": "Send Slack Messages",
+  "description": "Post a batch of messages to Slack channels. Each message names its own channel_id and text, and may set thread_ts to reply inside a thread. Messages for the same channel are sent in order. Every message gets its own result row, so one failure never stops the rest.",
+  "implementation": "execute",
+  "required_scopes": ["chat:write"],
+  "requests": {
+    "post_message": {
+      "method": "POST",
+      "path": "/chat.postMessage",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "chat.postMessage. Lenient on purpose: the echoed message carries many more fields.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "error": { "type": "string" },
+          "warning": { "type": "string" },
+          "channel": { "type": "string" },
+          "ts": { "type": "string" },
+          "message": {
+            "type": "object",
+            "properties": {
+              "ts": { "type": "string" },
+              "thread_ts": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "quirks": [
+    "Slack answers HTTP 200 with {ok:false, error} for its own failures. execute.ts turns ok=false into the connector error contract and puts it on that message's own result row, so a refused message is never reported as sent.",
+    "chat.postMessage posts ONE message. Slack has no batch endpoint for it, so the plural contract runs as bounded concurrent singles.",
+    "Slack accepts about one message per SECOND per channel, and does not queue different channels behind each other. So the fan-out unit is the CHANNEL, not the message: messages are grouped by channel_id, one worker sends each group in the caller's order, and two messages for the same channel never overlap.",
+    "The app-wide rate limit bucket cannot express a per-channel rule, which is why the grouping lives in the node."
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["messages"],
+    "properties": {
+      "messages": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["channel_id", "text"],
+          "properties": {
+            "channel_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The channel id to post in, such as C012AB3CD. A user id posts a direct message."
+            },
+            "text": { "type": "string", "minLength": 1 },
+            "thread_ts": {
+              "type": "string",
+              "description": "The parent message's ts. Set it to reply inside that thread."
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["results"],
+    "properties": {
+      "results": {
+        "type": "array",
+        "description": "One row per input message, in the caller's order.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "index",
+            "channel_id",
+            "ok",
+            "message_ts",
+            "thread_ts",
+            "error_code",
+            "error_message"
+          ],
+          "properties": {
+            "index": {
+              "type": "integer",
+              "description": "The message's position in the caller's messages array."
+            },
+            "channel_id": { "type": "string" },
+            "ok": { "type": "boolean" },
+            "message_ts": {
+              "type": ["string", "null"],
+              "description": "The posted message's timestamp id. Use it as thread_ts to reply to it."
+            },
+            "thread_ts": { "type": ["string", "null"] },
+            "error_code": { "type": ["string", "null"] },
+            "error_message": { "type": ["string", "null"] }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["files"],
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "modifiedTime"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "mimeType": { "type": "string" },
+          "size": { "type": "integer" },
+          "webViewLink": { "type": "string" },
+          "owners": { "type": "array", "items": { "type": "string" } },
+          "modifiedTime": { "type": "string", "format": "date-time" },
+          "trashed": { "type": "boolean" }
+        }
+      }
+    },
+    "next_page_token": { "type": ["string", "null"] }
+  }
+}

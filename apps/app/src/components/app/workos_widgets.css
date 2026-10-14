@@ -1,0 +1,151 @@
+:root {
+  --woswidgets-accent-color: var(--primary);
+  --woswidgets-background-color: var(--popover);
+  --woswidgets-border-color: var(--border);
+  --woswidgets-foreground-color: var(--popover-foreground);
+}
+
+/*
+ * The widgets render their buttons, inputs, tables, and cards with Radix
+ * Themes, which paints the accent from its own --accent-9 scale (blue by
+ * default) and rounds corners from --radius-*. Pin those Radix variables to
+ * the app's own tokens, scoped to the widget root so the rest of the app is
+ * untouched. --primary flips with .dark on its own, so this tracks both modes.
+ */
+.coworker-workos-widget-root {
+  --accent-9: var(--primary);
+  --accent-10: color-mix(in oklch, var(--primary) 88%, black);
+  --accent-contrast: var(--primary-foreground);
+  --accent-indicator: var(--primary);
+  --accent-track: var(--primary);
+  --focus-8: var(--ring);
+}
+
+/* Soften the widget buttons beyond Radix's default, without rounding the
+ * surrounding cards and inputs. Radix sets the button radius to
+ * max(--radius-N, --radius-full); raising --radius-full lifts that floor. */
+.coworker-workos-widget-root :where(.rt-BaseButton) {
+  --radius-full: 8px;
+}
+
+.woswidgets-root {
+  color-scheme: light;
+  font-family: var(--font-sans-stack);
+}
+
+.dark .woswidgets-root {
+  color-scheme: dark;
+}
+
+.coworker-workos-widget-root.woswidgets-root {
+  block-size: auto;
+  min-block-size: 0;
+}
+
+/*
+ * The profile widget's modals are Radix Themes dialogs (.rt-BaseDialogContent
+ * inside a .rt-BaseDialogOverlay). Radix already centers, sizes, scrolls, and
+ * animates them, and the WorkOsWidgets provider renders the portal inside its
+ * own Radix <Theme>, so the dialog inherits our colors and dark mode on its own.
+ * The widget tags the real Radix overlay with `woswidgets-dialog-overlay` and
+ * the real Radix content with `woswidgets-dialog`, so these selectors land on
+ * Radix's own elements — only paint them, never re-position or re-layer them.
+ * (A previous version forced position/inset/transform/z-index here, which fought
+ * Radix's centering + enter animation: the dialog flashed off-center then
+ * snapped, and the re-stacked overlay swallowed clicks on the email field.)
+ */
+/* Radix paints the backdrop on .rt-BaseDialogOverlay::before from
+ * --color-overlay; retint that token instead of stacking a second layer. */
+.woswidgets-dialog-overlay {
+  --color-overlay: oklch(0 0 0 / 38%);
+}
+
+.dark .woswidgets-dialog-overlay {
+  --color-overlay: oklch(0 0 0 / 62%);
+}
+
+.woswidgets-dialog {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow:
+    0 24px 80px oklch(0 0 0 / 18%),
+    0 6px 24px oklch(0 0 0 / 10%);
+}
+
+.woswidgets-dialog :where(.rt-Heading) {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.woswidgets-dialog :where(.rt-Text) {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+.woswidgets-dialog :where(.rt-Text[style*="font-weight"]) {
+  color: var(--foreground);
+}
+
+.woswidgets-dialog :where(.rt-Button) {
+  min-height: 2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.woswidgets-dialog :where(.rt-BaseButton.rt-variant-solid) {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.woswidgets-dialog :where(.rt-BaseButton.rt-variant-solid:hover) {
+  background: color-mix(in oklch, var(--primary) 88%, black);
+}
+
+.woswidgets-dialog :where(.rt-BaseButton.rt-variant-surface) {
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.woswidgets-dialog :where(.rt-BaseButton.rt-variant-surface:hover) {
+  background: var(--accent);
+}
+
+@media (max-width: 520px) {
+  .woswidgets-dialog {
+    width: calc(100vw - 1rem);
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 900px) {
+  [data-woswidgets-widget-id="user-profile"] .rt-DataListRoot,
+  [data-woswidgets-widget-id="user-profile"] .rt-DataListItem {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  [data-woswidgets-widget-id="user-profile"] :where(.rt-DataListLabel, .rt-DataListValue) {
+    width: 100%;
+    /* biome-ignore lint/complexity/noImportantStyles: WorkOS sets this value inline. */
+    min-width: 0 !important;
+  }
+
+  [data-woswidgets-widget-id="user-profile"] .rt-DataListValue .rt-Flex {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/connectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun --no-env-file ../../node_modules/vitest/vitest.mjs run --root ../.. --maxWorkers=1 packages/connectors/src"
+  },
+  "dependencies": {
+    "@coworker/core": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "ajv": "^8.20.0",
+    "drizzle-orm": "^0.45.0",
+    "p-limit": "^7.0.0",
+    "tldts": "^7.0.30"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

@@ -1,0 +1,9 @@
+task_id: trace_001_context_snapshot_exists
+prompt: "Persist one engine input context snapshot for the run."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: context_snapshot_exists
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

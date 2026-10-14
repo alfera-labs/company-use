@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["jobs"],
+  "properties": {
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["job_id", "settings"],
+        "properties": {
+          "job_id": { "type": "integer" },
+          "creator_user_name": { "type": "string" },
+          "created_time": { "type": "integer" },
+          "settings": {
+            "type": "object",
+            "properties": { "name": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "next_page_token": { "type": ["string", "null"] }
+  }
+}

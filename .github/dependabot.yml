@@ -1,0 +1,8 @@
+# Keeps the SHA-pinned actions in .github/workflows current. Actions are pinned to commits so a
+# moved tag cannot change what CI runs; this is what moves the pins forward on purpose.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

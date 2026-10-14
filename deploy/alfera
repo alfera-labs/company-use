@@ -1,0 +1,2096 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# The .env holds every secret of the install, and so does each file written on the way to it.
+umask 077
+
+install_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly install_dir
+readonly env_file="$install_dir/.env"
+
+# One line per setting: capability | env name | what to ask for | how many of the capability's
+# settings it needs ("all" of them, or "one" of them). status, doctor and add all read this
+# table, so a capability cannot be set up one way and checked another. A setting marked
+# "shared" is needed too, but it also serves other things, so it alone starts no capability.
+readonly capability_table='model|ANTHROPIC_API_KEY|Anthropic API key (sk-ant-...)|one
+model|OPENAI_API_KEY|OpenAI API key (sk-...)|one
+model|VERCEL_AI_GATEWAY_API_KEY|Vercel AI Gateway key (vck_...)|one
+model|OPENROUTER_API_KEY|OpenRouter key (sk-or-...)|one
+model|GEMINI_API_KEY|Google AI Studio key (AIza...)|one
+model|OPENAI_COMPATIBLE_BASE_URL|Address of a model you host, or another OpenAI-compatible address|one
+sign-in|WORKOS_API_KEY|WorkOS API key (sk_...)|all
+sign-in|WORKOS_CLIENT_ID|WorkOS client id (client_...)|all
+apps|COMPOSIO_API_KEY|Composio API key|all
+triggers|COMPOSIO_WEBHOOK_SECRET|Signing secret of the webhook subscription of your Composio project|all
+triggers|API_PUBLIC_URL|Public address of this API (https://...)|shared
+slack|SLACK_CLIENT_ID|Slack app client id|all
+slack|SLACK_CLIENT_SECRET|Slack app client secret|all
+slack|SLACK_SIGNING_SECRET|Slack app signing secret|all
+slack|API_PUBLIC_URL|Public address of this API (https://...)|shared
+email|RESEND_API_KEY|Resend API key|all
+email|INBOUND_EMAIL_DOMAIN|Domain that receives mail|all
+email|RESEND_INBOUND_WEBHOOK_SECRET|Resend inbound webhook secret|all
+storage|ARTIFACT_UPLOAD_BUCKET|Bucket name|all
+storage|R2_BUCKET_ENDPOINT|Bucket endpoint (https://...)|all
+storage|R2_ACCESS_KEY_ID|Bucket access key id|all
+storage|R2_SECRET_ACCESS_KEY|Bucket secret access key|all
+search|TAVILY_API_KEY|Tavily API key|one
+search|BRAVE_SEARCH_API_KEY|Brave Search API key|one
+search|FIRECRAWL_API_KEY|Firecrawl API key|one'
+
+readonly capability_summaries='model|The model your agent thinks with. Required.
+sign-in|Single sign-on through WorkOS, in place of the sign-in links the install makes itself.
+apps|Actions in outside apps, through the hosted app catalogue.
+triggers|Automations that start when something happens in an app. Needs apps and a public address.
+slack|Talk to it in your Slack. Needs a public address.
+email|Talk to it by email, and get its notifications by email.
+storage|Keep uploaded files in a bucket instead of on this machine.
+search|Web search for research tasks.'
+
+# The worker takes a sandbox's private addresses away with this image. The same tag is in
+# packages/runtime-platform/src/orchestrator/docker_sandbox_guard.ts.
+readonly route_helper_image='busybox:1.37'
+
+# Where a container finds a model server that runs on this machine. 11434 is the port of Ollama.
+readonly own_model_default_address='http://host.docker.internal:11434/v1'
+
+readonly generated_secrets='COWORKER_API_PROXY_SECRET WORKOS_COOKIE_PASSWORD COWORKER_BROWSER_STATE_ENCRYPTION_KEY RIVET_TOKEN POSTGRES_PASSWORD'
+
+readonly secrets_dir="$install_dir/secrets"
+readonly master_key_file="$secrets_dir/master_key"
+readonly master_key_fallbacks_file="$secrets_dir/master_key_fallbacks"
+readonly setup_token_hash_file="$secrets_dir/setup_token_hash"
+readonly backups_dir="$install_dir/backups"
+
+problems=0
+
+progress='no'
+# 'yes' when the command line holds --yes: the answer to the one yes-or-no question of a command.
+said_yes='no'
+arguments=()
+for argument in "$@"; do
+  case "$argument" in
+    --progress) progress='yes' ;;
+    --yes) said_yes='yes' ;;
+    *) arguments+=("$argument") ;;
+  esac
+done
+set -- ${arguments[@]+"${arguments[@]}"}
+
+# The step a progress line is about, and whether a failed line was written for this run.
+current_step='arguments'
+failure_was_reported='no'
+
+# With --progress, stdout belongs to the program that reads it: descriptor 3 keeps it for the
+# progress lines, and everything else this script and Docker print goes to stderr.
+if [ "$progress" = 'yes' ]; then
+  exec 3>&1 1>&2
+fi
+
+# One line of text inside a JSON string. A control character has no place in one, so each
+# becomes a space: a strict parser refuses the line otherwise.
+json_text() {
+  printf '%s' "$1" | LC_ALL=C tr '\000-\037\177' ' ' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+# report_progress <state> [<name> <value>]...: one JSON line about the current step.
+report_progress() {
+  [ "$progress" = 'yes' ] || return 0
+  local line
+  line="$(printf '{"step":"%s","state":"%s"' "$current_step" "$1")"
+  shift
+  while [ "$#" -ge 2 ]; do
+    line="$line$(printf ',"%s":"%s"' "$1" "$(json_text "$2")")"
+    shift 2
+  done
+  printf '%s}\n' "$line" >&3
+}
+
+# The sentence a person reads in an app for each reason a command stops. No command, no file
+# name: that person has no terminal. A reason that is not listed here keeps the terminal words.
+plain_sentence_for() {
+  case "$1" in
+    not_installed) printf 'Alfera is not set up on this server yet. Run the setup first.' ;;
+    sign_in_through_workos) printf 'This Alfera signs people in through WorkOS, so it makes no sign-in links.' ;;
+    bad_address) printf 'That address cannot be used. Enter the address other people will open, such as alfera.example.com, then try again.' ;;
+    address_does_not_lead_here) printf 'That address does not lead to this server now. Check the address, or enter the name of this server, then try again.' ;;
+    address_missing) printf 'No address was given. Enter the address people will open, then try again.' ;;
+    public_address_unknown) printf 'The server could not work out its public address. Enter the name people will open, then try again.' ;;
+    served_over_https) printf 'This Alfera is already open to other machines at its https address. Use that address.' ;;
+    own_domain_needed) printf 'Sign-in through WorkOS needs a domain of your own. Point a domain at this server, enter it, then try again.' ;;
+    bad_minutes) printf 'A sign-in link lasts from 1 to 60 minutes. Choose a number in that range.' ;;
+    setting_has_line_break) printf 'One of the values holds a line break. Paste it again as one line.' ;;
+    dashboard_did_not_answer) printf 'Alfera restarted but did not answer in time. Try again in a minute.' ;;
+    certificate_not_issued) printf 'The server did not get its security certificate. Check that the name points at this server and that ports 80 and 443 are open, then try again.' ;;
+    sign_in_link_not_made) printf 'Alfera made no sign-in link. Try again in a minute.' ;;
+    setup_token_not_usable) printf 'The setup link of this server is not valid. Delete this server and start again.' ;;
+    backup_failed) printf 'The database could not be saved, so nothing changed. Try again in a minute.' ;;
+    version_not_published) printf 'That version of Alfera could not be downloaded, so nothing changed. Try again later.' ;;
+    update_rolled_back) printf 'The new version did not start, so Alfera went back to the version it had, with all its data.' ;;
+    update_failed) printf 'The new version did not start, and going back did not work either. Ask for help, and keep the backup file.' ;;
+    unexpected) printf 'The command stopped for a reason it did not expect. Try again. If it stops again, copy the log and ask for help.' ;;
+    *) printf '%s' "$2" ;;
+  esac
+}
+
+# fail <reason id> <words for a terminal>. The reason id is for a program and never changes;
+# INSTALLER_CONTRACT.md lists every one. A call with the words alone gets the reason `unlisted`.
+fail() {
+  local reason='unlisted'
+  if [ "$#" -ge 2 ]; then
+    reason="$1"
+    shift
+  fi
+  printf 'error: %s\n' "$*" >&2
+  failure_was_reported='yes'
+  report_progress failed reason "$reason" message "$(plain_sentence_for "$reason" "$*")"
+  exit 1
+}
+
+# A stop that no `fail` explained still gets its failed line: a command that broke, or a signal.
+# A run that a Ctrl-C ends leaves no half-written copy of .env, and a terminal that shows what
+# is typed again.
+tidy_up_at_the_end() {
+  local status="$?"
+  [ "$status" -eq 0 ] || [ "$failure_was_reported" = 'yes' ] ||
+    report_progress failed reason unexpected message "$(plain_sentence_for unexpected)"
+  rm -f "$env_file.next"
+  [ -z "${terminal_state:-}" ] || stty "$terminal_state" </dev/tty 2>/dev/null || true
+}
+
+# run_step <step id> <command>...: the started line, the work, the done line.
+run_step() {
+  current_step="$1"
+  shift
+  report_progress started
+  "$@"
+  report_progress done
+}
+
+compose() {
+  (cd "$install_dir" && docker compose "$@")
+}
+
+# A value in double quotes is read the way Docker Compose reads it: without the quotes, and
+# with each backslash taken off the character it guards.
+read_setting() {
+  [ -f "$env_file" ] || return 0
+  awk -v key="$1" 'index($0, key "=") == 1 {
+    value = substr($0, length(key) + 2)
+    if (length(value) >= 2 && value ~ /^".*"$/) {
+      quoted = substr(value, 2, length(value) - 2)
+      value = ""
+      for (at = 1; at <= length(quoted); at++) {
+        if (substr(quoted, at, 1) == "\\" && at < length(quoted)) at++
+        value = value substr(quoted, at, 1)
+      }
+    }
+    print value
+    exit
+  }' "$env_file"
+}
+
+is_set() {
+  [ -n "$(read_setting "$1")" ]
+}
+
+write_setting() {
+  local key="$1" value="$2"
+  case "$value" in
+    *$'\n'* | *$'\r'*) fail setting_has_line_break "the value for $key holds a line break. One setting is one line." ;;
+  esac
+  # Docker Compose changes a bare value that holds a dollar sign, a quote or " #", and it reads
+  # this file for every container. So any value outside the plain characters goes in double
+  # quotes, with a backslash before each backslash, double quote and dollar sign: Compose and
+  # read_setting then both give back what was typed.
+  SETTING_KEY="$key" SETTING_VALUE="$value" awk '
+    BEGIN {
+      key = ENVIRON["SETTING_KEY"]; value = ENVIRON["SETTING_VALUE"]
+      if (value ~ /[^A-Za-z0-9_@%+=:,.\/-]/) {
+        gsub(/[\\"$]/, "\\\\&", value)
+        value = "\"" value "\""
+      }
+    }
+    index($0, key "=") == 1 && !done { print key "=" value; done = 1; next }
+    { print }
+    END { if (!done) print key "=" value }
+  ' "$env_file" >"$env_file.next"
+  mv "$env_file.next" "$env_file"
+  chmod 0600 "$env_file"
+}
+
+capability_names() {
+  printf '%s\n' "$capability_summaries" | cut -d'|' -f1
+}
+
+capability_summary() {
+  printf '%s\n' "$capability_summaries" | awk -F'|' -v name="$1" '$1 == name { print $2 }'
+}
+
+capability_rows() {
+  printf '%s\n' "$capability_table" | awk -F'|' -v name="$1" '$1 == name'
+}
+
+# Prints the env names a capability still needs, one per line. Nothing means it is set up.
+missing_settings() {
+  local rows needs key any_set='no' missing=''
+  rows="$(capability_rows "$1")"
+  needs="$(printf '%s\n' "$rows" | head -1 | cut -d'|' -f4)"
+  while IFS='|' read -r _ key _ _; do
+    if is_set "$key"; then any_set='yes'; else missing="$missing$key"$'\n'; fi
+  done <<<"$rows"
+  if [ "$needs" = 'one' ]; then
+    [ "$any_set" = 'yes' ] || printf '%s' "$missing" | paste -sd' ' - | sed 's/ / or /g'
+    return
+  fi
+  printf '%s' "$missing"
+}
+
+app_address() {
+  printf 'http://localhost:%s' "$(read_setting APP_PORT)"
+}
+
+api_address() {
+  printf 'http://localhost:%s' "$(read_setting API_PORT)"
+}
+
+runs_in_local_mode() {
+  [ "$(read_setting COWORKER_AUTH_MODE)" = 'local' ]
+}
+
+runs_in_team_mode() {
+  [ "$(read_setting COWORKER_AUTH_MODE)" = 'team' ]
+}
+
+signs_in_through_workos() {
+  [ -n "$(read_setting WORKOS_API_KEY)$(read_setting WORKOS_CLIENT_ID)" ]
+}
+
+# `add https` puts a Caddy container in front: it holds ports 80 and 443 and gets the certificate.
+is_served_over_https() {
+  case ",$(read_setting COMPOSE_PROFILES)," in
+    *,https,*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# The host of an address, without the port and the path. An IPv6 host keeps its brackets.
+host_of_address() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' |
+    sed -E 's|^[a-z]+://||; s|[/?#].*$||; s|^[^@]*@||; s|^(\[[^]]*\]).*$|\1|; /^\[/!s|:.*$||; s|\.$||'
+}
+
+# An address as a browser writes it, so the API compares it with what a browser sends: the
+# scheme and the host in small letters, no dot at the end of the host, no port that the scheme
+# already means, and no path. `normalize_origin` in packages/config does the same for the API.
+origin_of_address() {
+  local scheme rest host port=''
+  scheme="$(printf '%s' "${1%%://*}" | tr '[:upper:]' '[:lower:]')"
+  rest="${1#*://}"
+  rest="${rest%%[/?#]*}"
+  rest="${rest##*@}"
+  case "$rest" in
+    \[*\]:*) host="${rest%%\]*}]" port="${rest##*\]:}" ;;
+    \[*\]) host="$rest" ;;
+    *:*) host="${rest%%:*}" port="${rest##*:}" ;;
+    *) host="$rest" ;;
+  esac
+  host="$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')"
+  host="${host%.}"
+  case "$scheme:$port" in http:80 | https:443) port='' ;; esac
+  printf '%s://%s%s' "$scheme" "$host" "${port:+:$port}"
+}
+
+# The address people open the dashboard at. The installer and `add team` write it. It is read
+# as a browser writes it, so an address an older `add team` stored with capitals reads the same
+# here and in the API.
+team_address() {
+  local address
+  address="$(read_setting NEXT_PUBLIC_APP_URL)"
+  [ -z "$address" ] || origin_of_address "$address"
+}
+
+# An address that leads back to the machine that opens it, so no other machine can use it.
+is_an_address_of_this_machine_only() {
+  case "$(host_of_address "$1")" in
+    localhost | *.localhost | 127.[0-9]* | '[::1]' | 0.0.0.0 | host.docker.internal) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Who can open this install, from the two lines of .env that decide it: the address people are
+# given (NEXT_PUBLIC_APP_URL) and where the dashboard port is published (APP_BIND). status,
+# doctor and add team all say what this prints, and the Team page gets the same answer from the
+# API, which reads the same two lines (read_team_address in packages/config). It prints
+# `this_machine_only`, `other_machines`, or `through_a_proxy_on_this_machine`: the address is
+# for other machines and the port is not, so a proxy or a tunnel on this machine carries it.
+who_can_open_this_install() {
+  if is_an_address_of_this_machine_only "$(team_address)"; then
+    printf 'this_machine_only'
+    return
+  fi
+  case "$(read_setting APP_BIND)" in
+    '' | 127.* | localhost | ::1 | '[::1]') printf 'through_a_proxy_on_this_machine' ;;
+    *) printf 'other_machines' ;;
+  esac
+}
+
+# The port is published to other machines, and the address people are given leads nowhere for
+# them. An install that an older `add team` opened at a localhost address is in this state.
+port_is_open_and_the_address_is_not() {
+  [ "$(who_can_open_this_install)" = 'this_machine_only' ] || return 1
+  case "$(read_setting APP_BIND)" in
+    '' | 127.* | localhost | ::1 | '[::1]') return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+print_capabilities() {
+  local name missing
+  for name in $(capability_names); do
+    missing="$(missing_settings "$name" | paste -sd' ' -)"
+    if [ -z "$missing" ]; then
+      printf '  %-10s set up\n' "$name"
+    elif [ "$name" = 'sign-in' ] && runs_in_local_mode; then
+      printf '  %-10s off: local mode has no sign-in   (./alfera team link turns sign-in on)\n' "$name"
+    elif [ "$name" = 'sign-in' ] && runs_in_team_mode; then
+      printf '  %-10s this install makes its own sign-in links; no outside sign-in provider is set up\n' "$name"
+    elif [ "$name" = 'triggers' ]; then
+      printf '  %-10s app events are off; automations on a schedule, on request and from the web work   (./alfera add triggers)\n' "$name"
+    elif [ "$name" = 'storage' ] && is_set COWORKER_FILE_STORAGE_PATH; then
+      printf '  %-10s on this machine   (./alfera add storage for a bucket)\n' "$name"
+    else
+      printf '  %-10s not set up   (./alfera add %s)\n' "$name" "$name"
+    fi
+  done
+}
+
+# One line for the switch that lets an owner or admin add an MCP server on a private address.
+print_local_mcp() {
+  if [ "$(read_setting COWORKER_MCP_PRIVATE_ADDRESSES)" = 'open' ]; then
+    printf '  %-10s on: an owner or admin can add MCP servers on this machine or your network\n' 'local-mcp'
+  else
+    printf '  %-10s off: MCP servers on this machine or your network are refused   (./alfera add local-mcp)\n' 'local-mcp'
+  fi
+}
+
+print_services() {
+  local services
+  services="$(compose ps --format '{{.Service}}|{{.Status}}' 2>/dev/null || true)"
+  if [ -z "$services" ]; then
+    printf '  not running   (./alfera start)\n'
+    return
+  fi
+  printf '%s\n' "$services" | awk -F'|' '{ printf "  %-10s %s\n", $1, $2 }'
+}
+
+# One line when install.sh gave the stack an address range by name, and why.
+print_named_address_range() {
+  local file="$install_dir/docker-compose.override.yml"
+  [ -f "$file" ] && grep -q '^# Written by install.sh' "$file" || return 0
+  printf 'Network    address range %s, named in docker-compose.override.yml because Docker had none free at install\n' \
+    "$(sed -n 's/^ *- subnet: //p' "$file" | head -1)"
+}
+
+# The line of status that says who can open a team install. An address that no longer leads to
+# this machine is said here too, in the words of doctor.
+print_team_mode() {
+  local address_problem
+  address_problem="$(sure_problem_with_the_team_address)"
+  if [ -n "$address_problem" ]; then
+    printf 'Mode       sign-in links, but %s   (%s)\n' "$address_problem" "$(fix_for_a_team_address_that_does_not_lead_here)"
+    return
+  fi
+  case "$(who_can_open_this_install)" in
+    other_machines) printf 'Mode       sign-in links, open to other machines   (./alfera team link for a new link)\n' ;;
+    this_machine_only) printf 'Mode       sign-in links, this machine only   (./alfera add team lets other machines in)\n' ;;
+    *) printf 'Mode       sign-in links, open to other machines through a proxy on this machine   (./alfera team link for a new link)\n' ;;
+  esac
+}
+
+show_status() {
+  [ -f "$env_file" ] || fail "no .env in $install_dir. Run install.sh first."
+  if runs_in_team_mode; then
+    printf 'Dashboard  %s\n' "$(team_address)"
+    print_team_mode
+  elif runs_in_local_mode; then
+    printf 'Dashboard  %s\n' "$(app_address)"
+    printf 'Mode       local: no sign-in   (./alfera team link turns sign-in on)\n'
+  else
+    printf 'Dashboard  %s\n' "$(app_address)"
+    printf 'Mode       team: sign-in through WorkOS\n'
+  fi
+  print_named_address_range
+  printf '\nServices\n'
+  print_services
+  printf '\nCapabilities\n'
+  print_capabilities
+  print_local_mcp
+}
+
+report_ok() {
+  printf '  ok    %s\n' "$1"
+}
+
+report_problem() {
+  problems=$((problems + 1))
+  printf '  FIX   %s\n        %s\n' "$1" "$2"
+}
+
+report_warning() {
+  printf '  WARN  %s\n' "$1"
+}
+
+check_docker() {
+  if docker info >/dev/null 2>&1; then
+    report_ok 'docker is reachable'
+  else
+    report_problem 'docker is not reachable' 'Start Docker, then run this again.'
+  fi
+}
+
+# The API does not start in team mode with a proxy secret under 32 characters, and the
+# installer makes none shorter, so a shorter one was typed by hand or cut off.
+check_generated_secrets() {
+  local key short=''
+  for key in $generated_secrets; do
+    [ "$(read_setting "$key" | wc -c)" -ge 33 ] || short="$short $key"
+  done
+  [ "$(cat "$master_key_file" 2>/dev/null | wc -c)" -ge 33 ] || short="$short secrets/master_key"
+  if [ -z "$short" ]; then
+    report_ok 'the generated secrets are in place'
+  else
+    report_problem "missing or under 32 characters:$short" 'Set each one to the output of: openssl rand -hex 32'
+  fi
+}
+
+# Asks the provider to list its models with the key. That proves the key without spending a
+# token. Prints the HTTP status, or 000 when the provider could not be reached. The key goes to
+# curl on stdin, so it is never on a command line another process can read.
+model_key_status() {
+  local key_name="$1" key_value="$2"
+  case "$key_name" in
+    ANTHROPIC_API_KEY)
+      printf 'x-api-key: %s\n' "$key_value" |
+        curl -s -o /dev/null -m 15 -w '%{http_code}' -H @- -H 'anthropic-version: 2023-06-01' \
+          https://api.anthropic.com/v1/models || true
+      ;;
+    OPENAI_API_KEY)
+      printf 'Authorization: Bearer %s\n' "$key_value" |
+        curl -s -o /dev/null -m 15 -w '%{http_code}' -H @- https://api.openai.com/v1/models || true
+      ;;
+    VERCEL_AI_GATEWAY_API_KEY)
+      printf 'Authorization: Bearer %s\n' "$key_value" |
+        curl -s -o /dev/null -m 15 -w '%{http_code}' -H @- \
+          https://ai-gateway.vercel.sh/v1/models || true
+      ;;
+    OPENROUTER_API_KEY)
+      printf 'Authorization: Bearer %s\n' "$key_value" |
+        curl -s -o /dev/null -m 15 -w '%{http_code}' -H @- https://openrouter.ai/api/v1/key || true
+      ;;
+    GEMINI_API_KEY)
+      printf 'x-goog-api-key: %s\n' "$key_value" |
+        curl -s -o /dev/null -m 15 -w '%{http_code}' -H @- \
+          https://generativelanguage.googleapis.com/v1beta/models || true
+      ;;
+    *) printf 'unchecked' ;;
+  esac
+}
+
+# A container reaches this machine as host.docker.internal. This script runs on the machine
+# itself, where the same server is at localhost.
+address_from_this_machine() {
+  printf '%s' "$1" | sed -E 's#//host\.docker\.internal([:/]|$)#//localhost\1#'
+}
+
+# Asks a model server which models it has. Prints what it answered, then the HTTP status on a
+# line of its own: 000 when nothing answers. The key goes to curl on stdin.
+ask_own_model_server_for_its_models() {
+  local address="$1" key="$2"
+  printf 'Authorization: Bearer %s\n' "${key:-no-key}" |
+    curl -s -m 15 -w '\n%{http_code}' -H @- "$(address_from_this_machine "$address")/models" 2>/dev/null || true
+}
+
+# The model names in an answer on stdin, one per line.
+model_names_in_an_answer() {
+  grep -o '"id" *: *"[^"]*"' | sed 's/.*"\([^"]*\)"$/\1/' || true
+}
+
+# The model names a server lists, on one line. Nothing when it lists none.
+own_model_names() {
+  ask_own_model_server_for_its_models "$1" "$2" | sed '$d' | model_names_in_an_answer |
+    head -20 | paste -sd',' - | sed 's/,/, /g'
+}
+
+# Sends one chat request with one tool and room for one token. That proves the address, the
+# key, the model name and tool calling together, and it costs one token. Prints the answer,
+# then the HTTP status on a line of its own. The key goes to curl on stdin.
+ask_own_model_for_one_token() {
+  local address="$1" model="$2" key="$3"
+  printf 'Authorization: Bearer %s\n' "${key:-no-key}" |
+    curl -s -m 120 -w '\n%{http_code}' -H @- -H 'content-type: application/json' \
+      -d "{\"model\":\"$model\",\"max_tokens\":1,\"messages\":[{\"role\":\"user\",\"content\":\"Say ok\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"say_ok\",\"description\":\"Says ok.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}}]}" \
+      "$(address_from_this_machine "$address")/chat/completions"
+}
+
+# Prints what is wrong with a model at an address, in one sentence. Prints nothing when the
+# model answers a request that holds a tool.
+own_model_problem() {
+  local address="$1" model="$2" key="$3" answer status names curl_exit=0
+  case "$model" in
+    *'"'* | *'\'*) printf 'A model name holds no quote and no backslash.'; return ;;
+  esac
+  answer="$(ask_own_model_for_one_token "$address" "$model" "$key")" || curl_exit=$?
+  status="$(printf '%s' "$answer" | tail -n 1)"
+  answer="$(printf '%s' "$answer" | tr '[:upper:]' '[:lower:]')"
+  [ "$status" != '200' ] || return 0
+  if [ "$curl_exit" = '28' ]; then
+    printf 'The model %s at %s did not answer within two minutes. Load it on the model server, then try again.' "$model" "$address"
+    return
+  fi
+  case "$status" in
+    000) printf 'Nothing answers at %s. Start the model server, then try again.' "$address"; return ;;
+    401 | 403) printf 'The server at %s refused the key.' "$address"; return ;;
+  esac
+  case "$answer" in
+    *tool* | *'function calling'*)
+      printf 'The model %s does not support tool calling, and Alfera needs it. Choose a model that does.' "$model"
+      ;;
+    *model*'not found'* | *model*'does not exist'* | *'no such model'*)
+      names="$(own_model_names "$address" "$key")"
+      printf 'The server at %s has no model named %s.%s' "$address" "$model" "${names:+ It has: $names.}"
+      ;;
+    *)
+      if [ "$status" = '404' ]; then
+        printf 'The server at %s answered with status 404. Give the address that ends in /v1.' "$address"
+      else
+        printf 'The server at %s answered with status %s, and no answer of the model. The logs of the model server say why.' "$address" "$status"
+      fi
+      ;;
+  esac
+}
+
+worker_is_running() {
+  compose ps --status running --services 2>/dev/null | grep -qx 'worker'
+}
+
+# The request above came from this machine. The worker calls the model from inside its
+# container, and on Linux a server that listens on 127.0.0.1 only is out of its reach.
+check_worker_reaches_own_model() {
+  local address="$1"
+  worker_is_running || return 0
+  if compose exec -T -e MODEL_ADDRESS="$address" worker bun --no-env-file -e \
+    "fetch(process.env.MODEL_ADDRESS + '/models', { signal: AbortSignal.timeout(10000) }).then(() => process.exit(0), () => process.exit(1))" \
+    >/dev/null 2>&1; then
+    report_ok 'the worker reaches the model address from its container'
+  else
+    report_problem "the worker cannot reach $address from its container" \
+      'Make the model server listen on all addresses, not on 127.0.0.1 only (Ollama: OLLAMA_HOST=0.0.0.0), then run this again.'
+  fi
+}
+
+check_own_model() {
+  local address model problem
+  address="$(read_setting OPENAI_COMPATIBLE_BASE_URL)"
+  model="$(read_setting OPENAI_COMPATIBLE_MODEL)"
+  if [ -z "$model" ]; then
+    report_problem "a model address is set ($address), but no model name" './alfera add model'
+    return
+  fi
+  problem="$(own_model_problem "$address" "$model" "$(read_setting OPENAI_COMPATIBLE_API_KEY)")"
+  if [ -n "$problem" ]; then
+    report_problem "$problem" './alfera add model'
+    return
+  fi
+  report_ok "the model $model at $address answers, and takes a tool"
+  check_worker_reaches_own_model "$address"
+}
+
+check_model_keys() {
+  local key status found='no'
+  for key in ANTHROPIC_API_KEY OPENAI_API_KEY VERCEL_AI_GATEWAY_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY; do
+    is_set "$key" || continue
+    found='yes'
+    status="$(model_key_status "$key" "$(read_setting "$key")")"
+    case "$status" in
+      200) report_ok "$key works" ;;
+      unchecked) report_ok "$key is set (this provider has no key check)" ;;
+      401 | 403) report_problem "$key was refused by the provider" './alfera add model' ;;
+      *) report_problem "$key could not be checked (status $status)" 'Check the network, then run this again.' ;;
+    esac
+  done
+  if is_set OPENAI_COMPATIBLE_BASE_URL; then
+    found='yes'
+    check_own_model
+  fi
+  [ "$found" = 'yes' ] || report_problem 'no model key' './alfera add model'
+}
+
+# Sends the proxy secret on stdin, so it is never on a command line another process can read.
+ask_api_as_this_machine() {
+  printf 'x-coworker-api-secret: %s\n' "$(read_setting COWORKER_API_PROXY_SECRET)" |
+    curl -s -m 20 -X POST -H @- -H 'content-type: application/json' "$@"
+}
+
+# An address on plain http is fine inside a private network and nowhere else.
+is_private_address() {
+  local host
+  host="$(printf '%s' "$1" | sed -E 's#^[a-z]+://##; s#[:/].*$##')"
+  case "$host" in
+    localhost | 127.* | 10.* | 192.168.* | 169.254.*) return 0 ;;
+    172.1[6-9].* | 172.2[0-9].* | 172.3[01].*) return 0 ;;
+    100.6[4-9].* | 100.[7-9][0-9].* | 100.1[01][0-9].* | 100.12[0-7].*) return 0 ;;
+    *.local | *.lan | *.internal | *.home.arpa) return 0 ;;
+    *.*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+warn_about_plain_http() {
+  local address
+  address="$(team_address)"
+  case "$address" in
+    https://*) return 0 ;;
+  esac
+  is_private_address "$address" || is_an_address_of_this_machine_only "$address" ||
+    report_warning "$address is plain http outside a private network, so sign-in links and sessions cross it unencrypted: put the dashboard behind https (see SELF_HOSTING.md)."
+}
+
+# What a browser with no session gets from the dashboard at an address: the page and its
+# status, as one checksum. Nothing when no dashboard answers there within a few seconds.
+dashboard_answer_at() {
+  local answer
+  answer="$(curl -s --connect-timeout 3 -m 6 -H 'accept: text/html' -w '\n%{http_code}' "$1/sign-in" 2>/dev/null)" || return 0
+  case "$answer" in 000 | *$'\n'000) return 0 ;; esac
+  printf '%s' "$answer" | cksum
+}
+
+# Where the address people are given leads, asked from this machine itself: the dashboard must
+# answer there what it answers here. It prints `leads_here`, `no_answer`, `another_server`, or
+# `not_checked` when the dashboard is down here too or the address is checked in another way
+# (localhost needs no check, and check_https asks an https name on this machine). Another
+# machine cannot be asked from here, so a firewall between the two stays unseen.
+where_the_team_address_leads() {
+  local here there
+  if is_served_over_https || [ "$(who_can_open_this_install)" = 'this_machine_only' ]; then
+    printf 'not_checked'
+    return
+  fi
+  here="$(dashboard_answer_at "$(app_address)")"
+  [ -n "$here" ] || { printf 'not_checked'; return; }
+  there="$(dashboard_answer_at "$(team_address)")"
+  if [ -z "$there" ]; then
+    printf 'no_answer'
+  elif [ "$there" = "$here" ]; then
+    printf 'leads_here'
+  else
+    printf 'another_server'
+  fi
+}
+
+# Docker publishes the dashboard port at a plain http address of a private network: then an
+# address that does not answer from this machine answers from no machine. Any other address
+# goes through a proxy, a tunnel or a public route, and some networks give a machine no way
+# to its own public address, so no answer from here proves nothing there.
+this_machine_serves_the_team_address_itself() {
+  [ "$(who_can_open_this_install)" = 'other_machines' ] || return 1
+  case "$(team_address)" in http://*) is_private_address "$(team_address)" ;; *) return 1 ;; esac
+}
+
+# One clause for a team address that does not lead to this install, from where it leads.
+words_for_where_the_team_address_leads() {
+  case "$1" in
+    another_server) printf '%s does not lead to this machine now: another server answers there' "$(team_address)" ;;
+    *) printf '%s does not lead to this machine now, most often because the machine changed network' "$(team_address)" ;;
+  esac
+}
+
+# The clause above when the address surely leads nowhere for other machines. Nothing otherwise.
+sure_problem_with_the_team_address() {
+  local leads
+  this_machine_serves_the_team_address_itself || return 0
+  leads="$(where_the_team_address_leads)"
+  case "$leads" in
+    no_answer | another_server) words_for_where_the_team_address_leads "$leads" ;;
+  esac
+}
+
+# The exact command that gives the install an address that leads here again.
+fix_for_a_team_address_that_does_not_lead_here() {
+  local other
+  other="$(address_for_other_machines)"
+  if [ -z "$other" ]; then
+    printf 'Connect this machine to a network, then run: ./alfera add team'
+  elif [ "$other" = "$(team_address)" ]; then
+    printf 'Check that this machine is on its network, then run: ./alfera doctor'
+  else
+    printf './alfera add team %s' "$other"
+  fi
+}
+
+check_team_address_leads_here() {
+  local leads sure_problem
+  leads="$(where_the_team_address_leads)"
+  case "$leads" in
+    not_checked) return 0 ;;
+    leads_here)
+      report_ok "$(team_address) leads to this install, asked from this machine itself (doctor cannot ask from another machine)"
+      return 0
+      ;;
+  esac
+  if this_machine_serves_the_team_address_itself; then
+    sure_problem="$(words_for_where_the_team_address_leads "$leads")"
+    report_problem "$sure_problem, so no other machine can open Alfera or use a sign-in link" \
+      "$(fix_for_a_team_address_that_does_not_lead_here)"
+  else
+    report_warning "$(team_address) gave no answer of this install when asked from this machine itself. Some networks give a machine no way to its own public address, so open it from another machine to be sure."
+  fi
+}
+
+# A link at an address that leads nowhere would send a person, and the secret in the link, to
+# no server or to another one. So no link is made there, and the words say how to fix it.
+refuse_an_address_that_does_not_lead_here() {
+  local sure_problem fix
+  sure_problem="$(sure_problem_with_the_team_address)"
+  [ -n "$sure_problem" ] || return 0
+  fix="$(fix_for_a_team_address_that_does_not_lead_here)"
+  case "$fix" in ./alfera*) fix="Run: $fix" ;; esac
+  fail address_does_not_lead_here "$sure_problem, so no sign-in link is made there. $fix"
+}
+
+# A session token no install ever made. Team mode answers it 401; any other mode has no such
+# route. Nothing is created by asking.
+check_team_mode() {
+  local status
+  if signs_in_through_workos; then
+    report_problem 'sign-in links and WorkOS sign-in are both set, so the API refuses to start' \
+      'Empty WORKOS_API_KEY and WORKOS_CLIENT_ID in .env, then run: ./alfera restart'
+    return
+  fi
+  status="$(ask_api_as_this_machine -o /dev/null -w '%{http_code}' \
+    -d '{"session_token":"0000000000000000000000000000000000000000000"}' \
+    "$(api_address)/v1/team-sign-in/session" || true)"
+  if [ "$status" != '401' ]; then
+    report_problem "team mode is set in .env, but the API does not run in it (status $status)" './alfera restart'
+  else
+    case "$(who_can_open_this_install)" in
+      other_machines) report_ok 'people sign in with links this install makes, and the dashboard port is open to other machines' ;;
+      this_machine_only) report_ok 'people sign in with links this install makes, and only this machine can open it' ;;
+      *) report_ok 'people sign in with links this install makes, and other machines open it through a proxy on this machine' ;;
+    esac
+    check_team_address_leads_here
+  fi
+  ! port_is_open_and_the_address_is_not ||
+    report_warning "the dashboard port is open to other machines, but people are given $(team_address), which only this machine can use: run ./alfera add team and give the address other machines use."
+  warn_about_plain_http
+}
+
+check_sign_in_mode() {
+  if runs_in_team_mode; then
+    check_team_mode
+    return
+  fi
+  if runs_in_local_mode; then
+    report_problem 'local mode has no sign-in: it serves anyone who can reach its port, and that includes the code the coworker runs' \
+      './alfera team link    (turns sign-in on and keeps your workspace)'
+    return
+  fi
+  if [ -z "$(missing_settings sign-in)" ]; then
+    report_ok 'sign-in through WorkOS is set up'
+  else
+    report_problem 'no sign-in is set up' './alfera team link    (turns sign-in on)'
+  fi
+}
+
+# Prints the capability's own settings that hold a value. A shared setting does not count.
+own_settings_that_are_set() {
+  local key needs
+  while IFS='|' read -r _ key _ needs; do
+    [ "$needs" = 'shared' ] || ! is_set "$key" || printf '%s\n' "$key"
+  done <<<"$(capability_rows "$1")"
+}
+
+# A capability with some of its settings and not the rest does not work, and nothing else says so.
+check_half_set_capabilities() {
+  local name missing
+  for name in $(capability_names); do
+    [ "$(capability_rows "$name" | head -1 | cut -d'|' -f4)" = 'all' ] || continue
+    missing="$(missing_settings "$name" | paste -sd' ' -)"
+    if [ -n "$missing" ] && [ -n "$(own_settings_that_are_set "$name")" ]; then
+      report_problem "$name is half set up: $missing missing" "./alfera add $name"
+    fi
+  done
+}
+
+check_service_answers() {
+  local name="$1" url="$2"
+  if curl -fsS -o /dev/null -m 10 "$url" 2>/dev/null; then
+    report_ok "$name answers"
+  else
+    report_problem "$name does not answer at $url" './alfera logs    then    ./alfera restart'
+  fi
+}
+
+# Team mode serves no page without a session, so 401 is the right answer there, and a page
+# would mean the dashboard is open to anyone who can reach it.
+check_dashboard_answers() {
+  local url status serves_a_page='no'
+  url="$(app_address)/sign-in"
+  status="$(curl -s -o /dev/null -m 10 -w '%{http_code}' -H 'accept: text/html' "$url" || true)"
+  if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then serves_a_page='yes'; fi
+  if runs_in_team_mode && [ "$status" = '401' ]; then
+    report_ok 'the dashboard answers, and asks for a sign-in link'
+  elif runs_in_team_mode && [ "$serves_a_page" = 'yes' ]; then
+    report_problem 'the dashboard serves a page to a browser with no sign-in link' './alfera restart'
+  elif [ "$serves_a_page" = 'yes' ]; then
+    report_ok 'the dashboard answers'
+  else
+    report_problem "the dashboard does not answer at $url (status $status)" './alfera logs    then    ./alfera restart'
+  fi
+}
+
+# Every sandbox container goes on this network, apart from the stack's own. install.sh makes
+# it, after a look at the routes of this machine. When it is gone, the worker makes it again
+# when a chat runs a command.
+check_sandbox_network() {
+  local name
+  name="$(read_setting COWORKER_SANDBOX_NETWORK)"
+  name="${name:-alfera-sandbox}"
+  if docker network inspect "$name" >/dev/null 2>&1; then
+    report_ok "the sandbox network $name is there, apart from the network of the stack"
+  else
+    report_ok "the sandbox network $name is not there yet: the worker makes it when a chat first runs a command"
+  fi
+}
+
+# Docker pulls the helper image the first time a sandbox starts. Pulling it here shows a
+# machine that cannot get it before a chat fails.
+check_sandbox_helper_image() {
+  [ "$(read_setting COWORKER_SANDBOX_PRIVATE_ADDRESSES)" != 'open' ] || return 0
+  if docker image inspect "$route_helper_image" >/dev/null 2>&1 ||
+    docker pull "$route_helper_image" >/dev/null 2>&1; then
+    report_ok "the sandbox helper image $route_helper_image is on this machine"
+  else
+    report_problem "the sandbox helper image $route_helper_image could not be pulled, so no chat can run a command" \
+      "docker pull $route_helper_image"
+  fi
+}
+
+check_migrations_and_worker() {
+  if compose ps -a --format '{{.Service}} {{.State}} {{.ExitCode}}' 2>/dev/null | grep -q '^migrations exited 0$'; then
+    report_ok 'the database migrations ran'
+  else
+    report_problem 'the database migrations did not finish' './alfera logs migrations'
+  fi
+  if compose logs worker 2>/dev/null | grep 'worker ready' >/dev/null; then
+    report_ok 'the worker is connected'
+  else
+    report_problem 'the worker is not connected, so no agent run can start' './alfera logs worker'
+  fi
+}
+
+# Prints the status of the https address, asked on this machine itself, so no route has to lead
+# back in. A certificate that Caddy signed itself, or one of a test authority, is not checked.
+https_status() {
+  local name trust=''
+  name="$(read_setting ALFERA_PUBLIC_HOST)"
+  case "$(read_setting CADDY_GLOBAL_OPTIONS)" in
+    *local_certs* | *acme_ca*) trust='--insecure' ;;
+  esac
+  curl -s -o /dev/null -m 10 -w '%{http_code}' $trust --resolve "$name:443:127.0.0.1" \
+    "https://$name/health" 2>/dev/null || true
+}
+
+check_https() {
+  is_served_over_https || return 0
+  if [ "$(https_status)" = '200' ]; then
+    report_ok "$(team_address) answers with a certificate"
+  else
+    report_problem "$(team_address) does not answer with a certificate" \
+      'The name must point at this machine, and ports 80 and 443 must be open. Then: ./alfera logs caddy'
+  fi
+  case "$(read_setting CADDY_GLOBAL_OPTIONS)" in
+    *local_certs* | *acme_ca*) report_warning 'CADDY_GLOBAL_OPTIONS names another certificate authority, so a browser may not trust the certificate.' ;;
+  esac
+}
+
+run_doctor() {
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  printf 'Checking %s\n' "$install_dir"
+  check_docker
+  check_generated_secrets
+  check_model_keys
+  check_sign_in_mode
+  check_half_set_capabilities
+  check_service_answers 'the API' "$(api_address)/health"
+  check_dashboard_answers
+  check_https
+  check_sandbox_network
+  check_sandbox_helper_image
+  check_migrations_and_worker
+  printf '\n'
+  if [ "$problems" -eq 0 ]; then
+    printf 'Everything checks out.\n'
+    return
+  fi
+  printf '%s to fix.\n' "$problems"
+  exit 1
+}
+
+# Three rules hold for every question a person is asked at a terminal. It says what is asked
+# and why. It never comes again without a sentence that says why. And there is always a way
+# out: q stops the command, and b goes back to the first choice where there was one. Every
+# question of a command comes before its first write, so a stop changes nothing.
+
+# What the person typed last, with the spaces around it taken off.
+answer=''
+# 'yes' after a question that the person left with b.
+went_back='no'
+# 'yes' while the questions that come after a first choice are asked.
+may_go_back='no'
+# What the questions of a command add up to: one NAME=value line per setting to write.
+chosen_settings=''
+# The rows of the capability table the questions are about.
+chosen_rows=''
+# How the terminal was before a hidden answer. A Ctrl-C there must not leave it without echo.
+terminal_state=''
+# The exit status of a command the person stopped at a question.
+readonly stopped_by_the_person=3
+
+say() {
+  printf '%s\n' "$*" >/dev/tty 2>/dev/null || true
+}
+
+need_a_terminal() {
+  { : >/dev/tty; } 2>/dev/null || fail 'this command asks questions, and there is no terminal to ask on.'
+}
+
+# stop_asking [<sentence that says why>]: the person stops, or cannot answer any more.
+stop_asking() {
+  say "${1:-Stopped.} Nothing was changed."
+  exit "$stopped_by_the_person"
+}
+
+# read_answer <shown|hidden>: one line from the terminal. A key or a secret is not shown while
+# it is typed. A terminal that is gone ends the command: it can ask nothing more.
+read_answer() {
+  answer=''
+  if [ "$1" = 'hidden' ]; then
+    terminal_state="$(stty -g </dev/tty 2>/dev/null || true)"
+    IFS= read -rs answer </dev/tty || stop_asking 'The terminal closed.'
+    printf '\n' >/dev/tty
+  else
+    IFS= read -r answer </dev/tty || stop_asking 'The terminal closed.'
+  fi
+  answer="$(printf '%s' "$answer" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+}
+
+say_the_ways_out() {
+  if [ "$may_go_back" = 'yes' ]; then
+    say 'To go back to the first choice, type b. To stop, type q.'
+  else
+    say 'To stop with nothing changed, type q.'
+  fi
+}
+
+# Takes b and q. Returns 0 when the answer was one of them and the caller has no more to do.
+answer_is_a_way_out() {
+  case "$answer" in
+    q | Q) stop_asking ;;
+    b | B)
+      [ "$may_go_back" = 'yes' ] || return 1
+      went_back='yes'
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+# ask <shown|hidden> <prompt> <sentence for an empty answer>: asks until `answer` holds
+# something. An empty answer gets the sentence, the second one the ways out as well, and the
+# third one stops the command.
+ask() {
+  local how="$1" prompt="$2" why="$3" empty=0
+  went_back='no'
+  while :; do
+    printf '%s' "$prompt" >/dev/tty
+    read_answer "$how"
+    ! answer_is_a_way_out || return 0
+    [ -z "$answer" ] || return 0
+    empty=$((empty + 1))
+    [ "$empty" -lt 3 ] || stop_asking 'There was no answer three times, so this stops here.'
+    say "$why"
+    [ "$empty" -lt 2 ] || say_the_ways_out
+  done
+}
+
+# choose_a_number <highest> <prompt> [<one more sentence for a wrong answer>] [<names>]: asks
+# until `answer` is a number from 1 to the highest. A name from the list of names, one per
+# line, counts as the number of its line, also past the highest. The third wrong answer stops
+# the command.
+choose_a_number() {
+  local highest="$1" prompt="$2" hint="${3:-}" names="${4:-}" wrong=0 by_name
+  went_back='no'
+  while :; do
+    printf '%s' "$prompt" >/dev/tty
+    read_answer shown
+    ! answer_is_a_way_out || return 0
+    by_name="$(printf '%s\n' "$names" | grep -nxF -- "$answer" | head -1 | cut -d: -f1 || true)"
+    if [ -n "$answer" ] && [ -n "$by_name" ]; then
+      answer="$by_name"
+      return 0
+    fi
+    case "$answer" in
+      '' | *[!0-9]* | ?????*) ;;
+      *) if [ "$answer" -ge 1 ] && [ "$answer" -le "$highest" ]; then return 0; fi ;;
+    esac
+    wrong=$((wrong + 1))
+    [ "$wrong" -lt 3 ] || stop_asking 'There was no choice three times, so this stops here.'
+    if [ -z "$answer" ]; then
+      say 'Nothing was chosen.'
+    else
+      say "\"$answer\" is not one of the choices."
+    fi
+    [ -z "$hint" ] || say "$hint"
+    [ "$wrong" -lt 2 ] || say_the_ways_out
+  done
+}
+
+# Asks a question with two answers. Only y or yes is a yes. An answer that is neither gets
+# the question once more with the reason, and then counts as no.
+person_says_yes() {
+  local tries=0
+  need_a_terminal
+  while :; do
+    printf '%s Type y for yes or n for no, then press Enter: ' "$1" >/dev/tty
+    read_answer shown
+    case "$answer" in
+      y | Y | yes | Yes | YES) return 0 ;;
+      n | N | no | No | NO) return 1 ;;
+    esac
+    tries=$((tries + 1))
+    if [ "$tries" -ge 2 ]; then
+      say 'That was not y or n again, so it is taken as no.'
+      return 1
+    fi
+    if [ -z "$answer" ]; then say 'Nothing was typed.'; else say "\"$answer\" is neither y nor n."; fi
+  done
+}
+
+# On Linux, host.docker.internal is the Docker bridge, and a server that listens on 127.0.0.1
+# only does not answer there. ./alfera doctor checks it from the worker once the stack runs.
+say_how_containers_reach_this_machine() {
+  case "$1" in
+    *//host.docker.internal | *//host.docker.internal[:/]*) ;;
+    *) return 0 ;;
+  esac
+  [ "$(uname -s)" = 'Linux' ] || return 0
+  say 'On Linux, the model server must listen on all addresses, not on 127.0.0.1 only, or the containers cannot reach it (Ollama: OLLAMA_HOST=0.0.0.0).'
+}
+
+readonly key_pages_words='No key yet? Get one at console.anthropic.com/settings/keys, platform.openai.com/api-keys or vercel.com/ai-gateway, then come back.'
+
+# The first question about the model. A plain Enter chooses nothing: no way is the silent one.
+ask_how_alfera_gets_its_model() {
+  may_go_back='no'
+  say ''
+  say 'Alfera needs an AI model to think with. Choose how it gets one:'
+  say ''
+  say '  1  Paste an API key'
+  say '     You need a key from Anthropic, OpenAI or Vercel AI Gateway. That provider bills you for the use.'
+  say '  2  Use a model I host'
+  say '     You need a model server that runs now on this machine or your network, such as Ollama.'
+  say ''
+  choose_a_number 2 'Type 1 or 2, then press Enter: ' "$key_pages_words"
+}
+
+# Each provider's keys start in their own way. Prints the setting and the name of the provider.
+provider_of_key() {
+  case "$1" in
+    sk-ant-*) printf 'ANTHROPIC_API_KEY|Anthropic' ;;
+    vck_*) printf 'VERCEL_AI_GATEWAY_API_KEY|Vercel AI Gateway' ;;
+    sk-or-*) printf 'OPENROUTER_API_KEY|OpenRouter' ;;
+    AIza*) printf 'GEMINI_API_KEY|Google' ;;
+    sk-*) printf 'OPENAI_API_KEY|OpenAI' ;;
+  esac
+}
+
+# Asks the provider of a key whether it works. Returns 0 when the key is to be kept: the
+# provider took it, or could not be asked. A refused key returns 1, with the reason said.
+provider_takes_the_key() {
+  local key="$1" provider key_name provider_name
+  provider="$(provider_of_key "$key")"
+  if [ -z "$provider" ]; then
+    say 'That is not a key of these providers. An Anthropic key starts with sk-ant-, an OpenAI key with sk-, a Vercel AI Gateway key with vck_. Check that the start of the key is not missing, then paste it again.'
+    return 1
+  fi
+  key_name="${provider%%|*}"
+  provider_name="${provider#*|}"
+  say "Asking $provider_name whether the key works."
+  case "$(model_key_status "$key_name" "$key")" in
+    401 | 403)
+      say "$provider_name refused that key. Check that no character is missing at its start or its end, then paste it again."
+      return 1
+      ;;
+    200) say "$provider_name took the key." ;;
+    *) say "$provider_name could not be reached to check the key, so the key is kept as it is. ./alfera doctor checks it again later." ;;
+  esac
+  chosen_settings="$key_name=$key"
+}
+
+ask_for_a_provider_key() {
+  local refused=0
+  may_go_back='yes'
+  say ''
+  say 'Paste your API key, then press Enter.'
+  say 'The key stays hidden while you paste it, so the line looks empty. To go back to the first choice, type b.'
+  while :; do
+    ask hidden 'Key: ' 'No key was pasted. Copy the whole key from the page of your provider, then paste it here.'
+    [ "$went_back" = 'no' ] || return 0
+    ! provider_takes_the_key "$answer" || return 0
+    refused=$((refused + 1))
+    [ "$refused" -lt 3 ] || say "That is $refused keys in a row that did not work. To go back to the first choice, type b. To stop, type q."
+  done
+}
+
+# The model server the questions are about: its address, its key, the models it lists (one
+# per line), the status of its answer to that question, and the model the person chose.
+server_address=''
+server_key=''
+server_models=''
+server_status=''
+server_model=''
+
+ask_for_the_address_of_the_model_server() {
+  local default="$1"
+  went_back='no'
+  while :; do
+    say ''
+    if [ "$default" = "$own_model_default_address" ]; then
+      say "Address of the model server. Press Enter for $default (Ollama on this machine),"
+    else
+      say "Address of the model server. Press Enter for $default,"
+    fi
+    say 'or type another address that ends in /v1.'
+    printf 'Address: ' >/dev/tty
+    read_answer shown
+    ! answer_is_a_way_out || return 0
+    case "$answer" in
+      '') server_address="$default" ;;
+      http://?* | https://?*) server_address="${answer%/}" ;;
+      *)
+        say "\"$answer\" is not an address. An address starts with http:// or https://, such as http://192.168.1.20:11434/v1."
+        say_the_ways_out
+        continue
+        ;;
+    esac
+    return 0
+  done
+}
+
+look_at_the_model_server() {
+  local look
+  look="$(ask_own_model_server_for_its_models "$server_address" "$server_key")"
+  server_status="$(printf '%s' "$look" | tail -n 1)"
+  server_models="$(printf '%s\n' "$look" | sed '$d' | model_names_in_an_answer)"
+}
+
+# One sentence for a server that gave no list of models, and what to do next.
+say_why_there_is_no_list_of_models() {
+  if [ "$server_status" = '000' ] && [ "$server_address" = "$own_model_default_address" ]; then
+    say "No model server was found on this machine: nothing answers at $(address_from_this_machine "$server_address")."
+    say 'Start one, for example Ollama (ollama.com), then press Enter to look again. Or type another address.'
+  elif [ "$server_status" = '000' ]; then
+    say "Nothing answers at $server_address. Check the address and that the model server is running, then press Enter to look again."
+  elif [ "$server_status" = '200' ]; then
+    say "The server at $server_address answers, but it has no model yet. Add one to it (Ollama: ollama pull, then a model name), then press Enter to look again."
+  else
+    say "The server at $server_address answers, but with no list of models (status $server_status). On most servers the address ends in /v1."
+  fi
+  say_the_ways_out
+}
+
+ask_for_the_key_of_the_model_server() {
+  say ''
+  say "The model server at $server_address asks for a key. Paste it, then press Enter."
+  say 'The key stays hidden while you paste it, so the line looks empty.'
+  ask hidden 'Key of the model server: ' 'No key was pasted, and this server gives no answer without one.'
+  [ "$went_back" = 'yes' ] || server_key="$answer"
+}
+
+# Shows the models the server has as a numbered list, and asks for one of them. The person
+# never has to know a name by heart. A server with one model needs only Enter.
+choose_a_model_of_the_server() {
+  local count shown
+  count="$(printf '%s\n' "$server_models" | grep -c .)"
+  shown="$count"
+  [ "$count" -le 20 ] || shown=20
+  say ''
+  went_back='no'
+  if [ "$count" = '1' ]; then
+    say "The server at $server_address has one model: $server_models"
+    printf 'Press Enter to use it: ' >/dev/tty
+    read_answer shown
+    ! answer_is_a_way_out || return 0
+    server_model="$server_models"
+    return 0
+  fi
+  say "The server at $server_address has these models:"
+  printf '%s\n' "$server_models" | head -20 | awk '{ printf "  %2d  %s\n", NR, $0 }' >/dev/tty
+  [ "$count" -le 20 ] || say "  and $((count - 20)) more. To use one of those, type its exact name."
+  choose_a_number "$shown" 'Type the number of the model to use, then press Enter: ' \
+    "Type a number from 1 to $shown." "$server_models"
+  [ "$went_back" = 'yes' ] || server_model="$(printf '%s\n' "$server_models" | sed -n "${answer}p")"
+}
+
+# Asks for a model server and one of its models, and goes on only when that model answers a
+# request that holds a tool. Each way it can fail says why, and asks again from the right place.
+ask_for_a_model_server() {
+  local default problem
+  may_go_back='yes'
+  server_address=''
+  server_key="$(read_setting OPENAI_COMPATIBLE_API_KEY)"
+  default="$(read_setting OPENAI_COMPATIBLE_BASE_URL)"
+  default="${default:-$own_model_default_address}"
+  say ''
+  say 'Alfera asks your model server which models it has, so the server must be running now.'
+  while :; do
+    if [ -z "$server_address" ]; then
+      ask_for_the_address_of_the_model_server "$default"
+      [ "$went_back" = 'no' ] || return 0
+    fi
+    look_at_the_model_server
+    default="$server_address"
+    case "$server_status" in
+      401 | 403)
+        ask_for_the_key_of_the_model_server
+        [ "$went_back" = 'no' ] || return 0
+        continue
+        ;;
+    esac
+    if [ "$server_status" != '200' ] || [ -z "$server_models" ]; then
+      say_why_there_is_no_list_of_models
+      server_address=''
+      continue
+    fi
+    choose_a_model_of_the_server
+    [ "$went_back" = 'no' ] || return 0
+    say "Asking $server_model for one word. A model that is not loaded yet takes up to two minutes."
+    problem="$(own_model_problem "$server_address" "$server_model" "$server_key")"
+    [ -n "$problem" ] || break
+    say "$problem"
+    case "$problem" in
+      *'refused the key.')
+        ask_for_the_key_of_the_model_server
+        [ "$went_back" = 'no' ] || return 0
+        ;;
+      *)
+        if [ "$(printf '%s\n' "$server_models" | grep -c .)" = '1' ]; then
+          say 'This server has no other model. Add one to it that supports tool calling, then press Enter to look again.'
+          say_the_ways_out
+        else
+          say 'Choose another model, or the same one to try again.'
+        fi
+        ;;
+    esac
+  done
+  say "$server_model answered. Alfera will use it."
+  say_how_containers_reach_this_machine "$server_address"
+  chosen_settings="$(printf 'OPENAI_COMPATIBLE_BASE_URL=%s\nOPENAI_COMPATIBLE_MODEL=%s\nOPENAI_COMPATIBLE_API_KEY=%s' "$server_address" "$server_model" "$server_key")"
+}
+
+# Asks how Alfera gets its model, and for what that way needs. Prints the settings to write,
+# one NAME=value per line. install.sh calls it too, before there is a .env.
+ask_for_a_model() {
+  need_a_terminal
+  while :; do
+    ask_how_alfera_gets_its_model
+    if [ "$answer" = '1' ]; then ask_for_a_provider_key; else ask_for_a_model_server; fi
+    [ "$went_back" = 'yes' ] || break
+  done
+  printf '%s\n' "$chosen_settings"
+}
+
+write_chosen_settings() {
+  local line
+  while IFS= read -r line; do
+    [ -z "$line" ] || write_setting "${line%%=*}" "${line#*=}"
+  done <<<"$1"
+}
+
+# A model address comes before every key. So a person who now pastes a key is asked which of
+# the two runs the chats, before anything is written.
+ask_whether_the_key_replaces_the_model_server() {
+  local address
+  address="$(read_setting OPENAI_COMPATIBLE_BASE_URL)"
+  [ -n "$address" ] || return 0
+  case "$chosen_settings" in OPENAI_COMPATIBLE_*) return 0 ;; esac
+  say ''
+  say "Chats run on the model server at $address now, and it comes before a key."
+  if person_says_yes 'Use the new key for chats in its place?'; then
+    chosen_settings="$chosen_settings"$'\n''OPENAI_COMPATIBLE_BASE_URL='
+  else
+    say "The key is saved, and chats stay on the model server at $address."
+  fi
+}
+
+# Among the keys, the first one of this order that is set runs the chats.
+say_which_key_runs_the_chats() {
+  local key first=''
+  is_set OPENAI_COMPATIBLE_BASE_URL && return 0
+  for key in OPENAI_API_KEY ANTHROPIC_API_KEY VERCEL_AI_GATEWAY_API_KEY; do
+    is_set "$key" || continue
+    if [ -z "$first" ]; then
+      first="$key"
+    else
+      printf '%s is also set. Chats run on %s. To use the other key, empty %s in .env, then run: ./alfera restart\n' "$key" "$first" "$first"
+    fi
+  done
+}
+
+add_model() {
+  local settings status=0
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  settings="$(ask_for_a_model)" || status="$?"
+  [ "$status" -eq 0 ] || exit "$status"
+  chosen_settings="$settings"
+  ask_whether_the_key_replaces_the_model_server
+  write_chosen_settings "$chosen_settings"
+  compose up -d
+  say_which_key_runs_the_chats
+  printf 'model is set up.\n'
+}
+
+# What a person needs at hand before the questions of a capability.
+readonly capability_needs='sign-in|You need a WorkOS account. Its dashboard shows the API key and the client id.
+apps|You need a Composio account of your own, and its API key.
+triggers|You need apps set up, a public https address for this install, and a webhook subscription in your Composio project that calls it. SELF_HOSTING.md has the steps under "An automation that starts on an app event".
+slack|You need a Slack app of your own, and a public https address for this install.
+email|You need a Resend account, and a domain that receives mail there.
+storage|You need a bucket that speaks the S3 API, and an access key that may write to it.
+search|You need a key of one of these: Tavily, Brave Search or Firecrawl.'
+
+# Asks for one setting. One that is set already is kept with Enter. One that is not set is
+# needed: the capability does not work with a part of its settings.
+ask_for_one_setting() {
+  local name="$1" key="$2" question="$3" how='shown'
+  case "$key" in *_KEY | *_SECRET) how='hidden' ;; esac
+  say ''
+  say "$question"
+  [ "$how" = 'shown' ] || say 'It stays hidden while you paste it, so the line looks empty.'
+  if is_set "$key"; then
+    printf 'Press Enter to keep the one that is set, or give a new one: ' >/dev/tty
+    read_answer "$how"
+    answer_is_a_way_out || true
+    return 0
+  fi
+  ask "$how" 'Type or paste it, then press Enter: ' "$name does not work without this value, so nothing is saved until every value is given."
+}
+
+# A capability that needs one of its settings: the person chooses which one they have.
+choose_one_row() {
+  local rows="$1" count
+  count="$(printf '%s\n' "$rows" | grep -c .)"
+  say ''
+  say 'Which one do you have?'
+  printf '%s\n' "$rows" | awk -F'|' '{ printf "  %d  %s\n", NR, $3 }' >/dev/tty
+  choose_a_number "$count" 'Type its number, then press Enter: ' "Type a number from 1 to $count."
+  chosen_rows="$(printf '%s\n' "$rows" | sed -n "${answer}p")"
+}
+
+# Asks for every setting of a capability before anything is written.
+ask_for_the_settings_of() {
+  local name="$1" key question
+  need_a_terminal
+  may_go_back='no'
+  chosen_settings=''
+  chosen_rows="$(capability_rows "$name")"
+  say "$(capability_summary "$name")"
+  say "$(printf '%s\n' "$capability_needs" | awk -F'|' -v name="$name" '$1 == name { print $2 }')"
+  say 'To stop with nothing changed, type q at any question.'
+  [ "$(printf '%s\n' "$chosen_rows" | head -1 | cut -d'|' -f4)" != 'one' ] || choose_one_row "$chosen_rows"
+  while IFS='|' read -r _ key question _; do
+    ask_for_one_setting "$name" "$key" "$question"
+    [ -z "$answer" ] || chosen_settings="$chosen_settings$key=$answer"$'\n'
+  done <<<"$chosen_rows"
+}
+
+# WorkOS sign-in replaces the install's own links, and the dashboard port opens to the network.
+finish_sign_in() {
+  [ -z "$(missing_settings sign-in)" ] || return 0
+  write_setting COWORKER_AUTH_MODE ''
+  if is_served_over_https; then
+    printf 'Add this redirect in WorkOS -> Redirects:  %s/auth/callback\n' "$(team_address)"
+    return
+  fi
+  write_setting APP_BIND '0.0.0.0'
+  printf 'Add this redirect in WorkOS -> Redirects:  %s/auth/callback\n' "$(app_address)"
+}
+
+# This machine's address on its network, for the default answer of `add team`. It prints
+# `localhost` when the machine has none it can find.
+lan_address() {
+  local address='' interface=''
+  address="$(ip -4 route get 1.1.1.1 2>/dev/null |
+    awk '{ for (i = 1; i < NF; i++) if ($i == "src") { print $(i + 1); exit } }' || true)"
+  if [ -z "$address" ]; then
+    interface="$(route -n get default 2>/dev/null | awk '/interface:/ { print $2 }' || true)"
+    [ -z "$interface" ] || address="$(ipconfig getifaddr "$interface" 2>/dev/null || true)"
+  fi
+  printf '%s' "${address:-localhost}"
+}
+
+# The name other machines find this machine by, whatever network it is on: an address changes
+# with the network, and this name does not. A Mac always answers to its Bonjour name. A Linux
+# machine answers to <host name>.local only while avahi announces it, and its bare host name
+# reaches other machines only when the router happens to know it, which nothing here can
+# check. So on Linux without avahi this prints nothing, and the address is offered instead.
+name_on_the_network() {
+  local name=''
+  if [ "$(uname -s)" = 'Darwin' ]; then
+    name="$(scutil --get LocalHostName 2>/dev/null || true)"
+  elif pgrep -x avahi-daemon >/dev/null 2>&1; then
+    name="$(hostname 2>/dev/null || true)"
+    name="${name%%.*}"
+  fi
+  name="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+  case "$name" in
+    '' | localhost | -* | *[!a-z0-9-]*) return 0 ;;
+  esac
+  printf '%s.local' "$name"
+}
+
+# The address of this install by the name of this machine, or nothing when it has no such name.
+named_address_for_other_machines() {
+  local name
+  name="$(name_on_the_network)"
+  [ -z "$name" ] || printf 'http://%s:%s' "$name" "$(read_setting APP_PORT)"
+}
+
+# The address of this install by this machine's address on the network it is on now, or
+# nothing when the helper finds no such address.
+numbered_address_for_other_machines() {
+  local host
+  host="$(lan_address)"
+  ! is_an_address_of_this_machine_only "http://$host" || return 0
+  printf 'http://%s:%s' "$host" "$(read_setting APP_PORT)"
+}
+
+# The address other machines would use for this install: by name when the machine has one,
+# because that survives a change of network, and by address otherwise. Nothing when the
+# machine has neither.
+address_for_other_machines() {
+  local named
+  named="$(named_address_for_other_machines)"
+  if [ -n "$named" ]; then
+    printf '%s' "$named"
+  else
+    numbered_address_for_other_machines
+  fi
+}
+
+# An address to show as an example: the one of this machine, or a made-up one at the port of
+# this install when the machine shows none.
+example_address_for_other_machines() {
+  local other
+  other="$(address_for_other_machines)"
+  printf '%s' "${other:-http://192.168.1.20:$(read_setting APP_PORT)}"
+}
+
+# One sentence for an address that only this machine can use, with the one to give in its place.
+words_for_an_address_of_this_machine_only() {
+  local other
+  other="$(address_for_other_machines)"
+  printf '%s leads to this machine only, so no other machine can open it. Give the address other machines use%s.' \
+    "$1" "${other:+, such as $other}"
+}
+
+# What is wrong with an answer to the address question, in one sentence. Nothing when it is fine.
+problem_with_a_team_address() {
+  case "$1" in
+    '') printf 'No address was typed.' ;;
+    http://?* | https://?*)
+      ! is_an_address_of_this_machine_only "$1" || words_for_an_address_of_this_machine_only "$1"
+      ;;
+    *) printf '"%s" is not an address. It starts with http:// or https://, such as %s.' "$1" "$(example_address_for_other_machines)" ;;
+  esac
+}
+
+# Says which addresses of this machine the question offers, and what each one is good for.
+say_the_addresses_on_offer() {
+  local named="$1" numbered="$2"
+  if [ -n "$named" ] && [ -n "$numbered" ]; then
+    say "Press Enter for $named. That is the name of this machine, and it stays the same when the machine changes network."
+    say "Type 2 for $numbered. That is its address on the network it is on now, and it changes with the network."
+    say 'Or type another address.'
+  elif [ -n "$named$numbered" ]; then
+    say "Press Enter for $named$numbered, or type another address."
+    [ -n "$named" ] || say 'That is the address of this machine on the network it is on now. When the machine changes network, run this command again.'
+  else
+    say "This machine shows no address on a network, so type the address other machines use, such as $(example_address_for_other_machines)."
+  fi
+}
+
+# Asks for the address other machines open. Enter takes the name of this machine when it has
+# one, and its address on the network otherwise. 2 takes the address when both are on offer.
+ask_for_team_address() {
+  local named numbered default wrong=0 problem
+  { : >/dev/tty; } 2>/dev/null || fail address_missing "this command asks one question, and there is no terminal to ask on. Give the address instead: ./alfera add team $(example_address_for_other_machines)"
+  may_go_back='no'
+  named="$(named_address_for_other_machines)"
+  numbered="$(numbered_address_for_other_machines)"
+  default="${named:-$numbered}"
+  say 'People on other machines open Alfera at one address, and it must lead to this machine.'
+  say_the_addresses_on_offer "$named" "$numbered"
+  while :; do
+    printf 'Address: ' >/dev/tty
+    read_answer shown
+    answer_is_a_way_out || true
+    answer="${answer:-$default}"
+    [ "$answer" != '2' ] || [ -z "$named" ] || [ -z "$numbered" ] || answer="$numbered"
+    problem="$(problem_with_a_team_address "$answer")"
+    [ -n "$problem" ] || return 0
+    wrong=$((wrong + 1))
+    [ "$wrong" -lt 3 ] || stop_asking 'That was not an address for other machines three times, so this stops here.'
+    say "$problem To stop with nothing changed, type q."
+  done
+}
+
+wait_for_the_dashboard() {
+  local attempt=0
+  while [ "$attempt" -lt 60 ]; do
+    [ "$(curl -s -o /dev/null -m 5 -w '%{http_code}' "$(app_address)/sign-in" || true)" = '000' ] || return 0
+    attempt=$((attempt + 1))
+    sleep 2
+  done
+  fail dashboard_did_not_answer 'the dashboard did not come back. Read the logs with: ./alfera logs app'
+}
+
+# An install from before sign-in was the rule runs in local mode. Its workspace and chats stay,
+# and the local person becomes the owner.
+turn_sign_in_on() {
+  printf 'Turning sign-in on. Your workspace and chats are kept, and you are the owner.\n'
+  write_setting COWORKER_AUTH_MODE 'team'
+  compose up -d
+  wait_for_the_dashboard
+}
+
+# The owner signs in with a link like everyone else. Whoever can run this command already
+# runs the server, so it asks the API as the machine itself.
+print_owner_link() {
+  local minutes="${1:-60}" answer token
+  current_step='sign_in_link'
+  case "$minutes" in
+    '' | *[!0-9]*) fail bad_minutes 'the life of a link is a number of minutes, from 1 to 60.' ;;
+  esac
+  ! signs_in_through_workos || fail sign_in_through_workos 'this install signs people in through WorkOS, so it makes no sign-in links.'
+  runs_in_team_mode || turn_sign_in_on
+  # A link is made at the https name. A name that is mistyped has no certificate here, and a
+  # link at it would send the person, and the secret in the link, to another server.
+  ! is_served_over_https || [ "$(https_status)" = '200' ] ||
+    fail certificate_not_issued "$(team_address) does not answer with a certificate here, so no link is made at that name. Check the name: ./alfera doctor. A new name: ./alfera add https <name>"
+  refuse_an_address_that_does_not_lead_here
+  answer="$(ask_api_as_this_machine "$(api_address)/v1/team-sign-in/owner-link?minutes=$minutes" || true)"
+  token="$(printf '%s' "$answer" | sed -n 's/.*"token":"\([A-Za-z0-9_-]*\)".*/\1/p')"
+  [ -n "$token" ] || fail sign_in_link_not_made 'the API made no link. Run ./alfera doctor to see why.'
+  # With --progress the link is in the one line on stdout, and in no line a log would keep.
+  if [ "$progress" = 'yes' ]; then
+    report_progress done link "$(team_address)/join/$token" minutes "$minutes"
+    return
+  fi
+  printf 'Sign-in link for the owner. It works once, for %s minutes:\n\n  %s/join/%s\n\n' "$minutes" "$(team_address)" "$token"
+}
+
+add_origin_the_api_allows() {
+  local origin="$1" allowed
+  allowed="$(read_setting ALLOWED_ORIGINS)"
+  case ",$allowed," in
+    *",$origin,"*) return 0 ;;
+  esac
+  write_setting ALLOWED_ORIGINS "${allowed:+$allowed,}$origin"
+}
+
+# Sign-in is already on. This opens the dashboard port to other machines and records the
+# address people use, so the owner can invite a team.
+write_team_settings() {
+  write_setting COWORKER_AUTH_MODE 'team'
+  write_setting APP_BIND '0.0.0.0'
+  write_setting NEXT_PUBLIC_APP_URL "$1"
+  add_origin_the_api_allows "$1"
+}
+
+start_what_changed() {
+  compose up -d
+}
+
+add_team() {
+  local address="${1:-}"
+  current_step='settings'
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  ! signs_in_through_workos ||
+    fail sign_in_through_workos 'sign-in through WorkOS is set up, and an install has one kind of sign-in. To use sign-in links, empty WORKOS_API_KEY and WORKOS_CLIENT_ID in .env, then run this again.'
+  # Over https the install is open already, and the plain port must stay on this machine.
+  ! is_served_over_https ||
+    fail served_over_https "this install is already open to other machines at $(team_address). Invite people in Settings -> Team. The plain port stays on this machine."
+  printf 'This opens the install to other machines. People sign in with one-time links. No outside account.\n'
+  # A program is asked nothing: it gives the address.
+  [ -n "$address" ] || [ "$progress" != 'yes' ] ||
+    fail address_missing "give the address people will open: ./alfera add team $(example_address_for_other_machines) --progress"
+  if [ -z "$address" ]; then
+    ask_for_team_address
+    address="$answer"
+  fi
+  case "$address" in
+    http://?* | https://?*) ;;
+    *) fail bad_address "the address must start with http:// or https://. Got: $address" ;;
+  esac
+  ! is_an_address_of_this_machine_only "$address" ||
+    fail bad_address "$(words_for_an_address_of_this_machine_only "$address") Nothing was changed."
+  # A browser writes a host in small letters, and the API compares addresses as a browser
+  # writes them, so the address is stored that way whatever way it was typed.
+  address="$(origin_of_address "$address")"
+  run_step settings write_team_settings "$address"
+  run_step restart start_what_changed
+  run_step dashboard wait_for_the_dashboard
+  current_step='add_team'
+  refuse_an_address_that_does_not_lead_here
+  printf '\nOther machines can now open %s\n' "$address"
+  if [ "$progress" = 'yes' ]; then
+    report_progress done address "$address"
+    return
+  fi
+  printf 'A session belongs to one address, so here is a link for you at the new one.\n'
+  print_owner_link
+  printf 'Then invite people in Settings -> Team.\n'
+  warn_about_plain_http
+}
+
+# Off unless the person who runs the install says so here. The setting is read by the API and
+# the worker, never by a sandbox, and the coworker cannot add such a server by itself.
+add_local_mcp() {
+  [ -f "$env_file" ] || fail "no .env in $install_dir. Run install.sh first."
+  [ "$said_yes" = 'yes' ] || { : >/dev/tty; } 2>/dev/null ||
+    fail 'this command asks for a yes, and there is no terminal to ask on, so give the yes on the command line: ./alfera add local-mcp --yes'
+  printf 'This lets every owner and admin of this Alfera add MCP servers that run on this machine or on your private network.\n'
+  printf 'Alfera then sends requests to the private addresses they give, so turn it on only if you trust each owner and admin with that.\n'
+  [ "$said_yes" = 'yes' ] || person_says_yes 'Turn it on?' || stop_asking
+  write_setting COWORKER_MCP_PRIVATE_ADDRESSES 'open'
+  compose up -d
+  printf 'local-mcp is on. Add the server in the dashboard: Integrations, MCP server.\n'
+  printf 'SELF_HOSTING.md, "An MCP server on this machine or on your own network", says which address to give.\n'
+  printf 'To turn it off, set COWORKER_MCP_PRIVATE_ADDRESSES=closed in .env, then run: ./alfera restart\n'
+}
+
+run_team_command() {
+  case "${1:-}" in
+    link) print_owner_link "${2:-60}" ;;
+    *) fail 'use: ./alfera team link [minutes]' ;;
+  esac
+}
+
+# The name people open over https, set by choose_https_name.
+https_name=''
+
+# A name the person gave, or one made from this machine's public address: 203.0.113.7 becomes
+# 203-0-113-7.sslip.io, which a public name service answers with that address. So a server
+# with no domain of its own still has a name a certificate authority accepts.
+choose_https_name() {
+  local name="${1:-auto}" address
+  if [ "$name" = 'auto' ]; then
+    check_name_prefix
+    address="$(public_address)"
+    [ -n "$address" ] ||
+      fail public_address_unknown "this machine has no public address on its own network interface (it has $(lan_address)), and no cloud names one, so no name can be made from it. Give the name people will open, such as alfera.example.com."
+    name="${ALFERA_NAME:+$ALFERA_NAME-}$(printf '%s' "$address" | tr '.' '-').sslip.io"
+  fi
+  name="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | sed -E 's#^https://##; s#/+$##; s#\.$##')"
+  case "$name" in
+    *[!a-z0-9.-]* | .* | *. | *..* | -*) fail bad_address "the name for https is a host name with no port and no path, such as alfera.example.com. Got: $name" ;;
+    *.*) ;;
+    *) fail bad_address "the name for https is a host name with no port and no path, such as alfera.example.com. Got: $name" ;;
+  esac
+  https_name="$name"
+}
+
+readonly public_address_sources='interface digitalocean aws'
+readonly metadata_address="${ALFERA_METADATA_ADDRESS:-169.254.169.254}"
+
+is_public_ipv4() {
+  printf '%s' "$1" | grep -Eqx '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' && ! is_private_address "$1"
+}
+
+address_from_interface() {
+  lan_address
+}
+
+address_from_digitalocean() {
+  curl -fsS -m 2 "http://$metadata_address/metadata/v1/interfaces/public/0/ipv4/address" 2>/dev/null
+}
+
+address_from_aws() {
+  local token
+  token="$(curl -fsS -m 2 -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' "http://$metadata_address/latest/api/token" 2>/dev/null)" || return 0
+  printf 'X-aws-ec2-metadata-token: %s\n' "$token" |
+    curl -fsS -m 2 -H @- "http://$metadata_address/latest/meta-data/public-ipv4" 2>/dev/null
+}
+
+public_address() {
+  local source address
+  for source in $public_address_sources; do
+    address="$("address_from_$source" || true)"
+    if is_public_ipv4 "$address"; then
+      printf '%s' "$address"
+      return 0
+    fi
+  done
+}
+
+check_name_prefix() {
+  local name="${ALFERA_NAME:-}"
+  case "$name" in
+    *[!a-z0-9]*) fail bad_address "the name before the address is 1 to 20 small letters and digits. Got: $name" ;;
+  esac
+  [ "${#name}" -le 20 ] || fail bad_address "the name before the address is 1 to 20 small letters and digits. Got: $name"
+}
+
+# `shared` for a name on a name service that everyone shares, `own` for any other. Whoever
+# runs that service, or gets this machine's address after it, can get a certificate for the
+# same name. So a shared name is for trying things out.
+https_name_kind() {
+  case "$1" in
+    *.sslip.io | *.nip.io) printf 'shared' ;;
+    *) printf 'own' ;;
+  esac
+}
+
+readonly shared_name_words='This name is on a name service that everyone shares, so it is for trying things out. For real use, point a domain of your own at this machine, then run: ./alfera add https your.name'
+
+# With WorkOS the session cookie is not held to one host, so a shared name is not safe there.
+refuse_a_shared_name_with_workos() {
+  [ "$(https_name_kind "$1")" = 'shared' ] && signs_in_through_workos || return 0
+  fail own_domain_needed "sign-in through WorkOS needs a domain of your own, and $1 is on a name service that everyone shares. Point a domain at this machine, then run: ./alfera add https your.name"
+}
+
+# The dashboard and the API share the one name: Caddy sends /v1 and /health to the API and the
+# rest to the dashboard. The dashboard port stays on this machine, so nobody goes around Caddy.
+write_https_settings() {
+  local origin="https://$1"
+  write_setting COMPOSE_PROFILES 'https'
+  write_setting ALFERA_PUBLIC_HOST "$1"
+  write_setting APP_BIND '127.0.0.1'
+  write_setting NEXT_PUBLIC_APP_URL "$origin"
+  write_setting NEXT_PUBLIC_API_URL "$origin"
+  write_setting API_PUBLIC_URL "$origin"
+  write_setting NEXT_PUBLIC_WORKOS_REDIRECT_URI "$origin/auth/callback"
+  write_setting WORKOS_REDIRECT_URI "$origin/auth/callback"
+  add_origin_the_api_allows "$origin"
+  signs_in_through_workos || write_setting COWORKER_AUTH_MODE 'team'
+}
+
+builds_from_a_clone() {
+  [ -f "$install_dir/../apps/api/Dockerfile" ]
+}
+
+wait_for_the_certificate() {
+  local attempt=0
+  while [ "$attempt" -lt 90 ]; do
+    [ "$(https_status)" != '200' ] || return 0
+    attempt=$((attempt + 1))
+    sleep 2
+  done
+  fail certificate_not_issued "$(team_address) did not answer with a certificate within three minutes. The name must point at this machine, and ports 80 and 443 must be open to the internet. The stack runs, and it goes on asking for the certificate. Read why with: ./alfera logs caddy"
+}
+
+add_https() {
+  current_step='settings'
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  [ -f "$install_dir/Caddyfile" ] || fail not_installed "no Caddyfile in $install_dir. Get the one of this version from the deploy folder of the repository, then run this again."
+  choose_https_name "${1:-auto}"
+  refuse_a_shared_name_with_workos "$https_name"
+  printf 'This serves the install at https://%s, on ports 80 and 443. The certificate is free and renews by itself.\n' "$https_name"
+  run_step settings write_https_settings "$https_name"
+  run_step restart start_what_changed
+  run_step dashboard wait_for_the_dashboard
+  run_step https wait_for_the_certificate
+  current_step='add_https'
+  printf '\nAlfera is now at https://%s\n' "$https_name"
+  [ "$(https_name_kind "$https_name")" != 'shared' ] || printf '%s\n' "$shared_name_words"
+  if [ "$progress" = 'yes' ]; then
+    report_progress done address "https://$https_name" name_kind "$(https_name_kind "$https_name")"
+    return
+  fi
+  if signs_in_through_workos; then
+    printf 'Add this redirect in WorkOS -> Redirects:  https://%s/auth/callback\n' "$https_name"
+    return
+  fi
+  printf 'A session belongs to one address, so here is a link for you at the new one.\n'
+  print_owner_link
+  printf 'Then invite people in Settings -> Team.\n'
+}
+
+load_app_catalogue() {
+  [ -z "$(missing_settings apps)" ] || return 0
+  printf 'Loading the app catalogue. This takes a few minutes.\n'
+  compose run --rm migrations bun --no-env-file scripts/sync-composio-catalog.js --confirm ||
+    printf 'The catalogue did not load. Run ./alfera logs migrations to see why.\n'
+}
+
+add_capability() {
+  local name="${1:-}"
+  if [ "$name" = 'https' ]; then
+    add_https "${2:-}"
+    return
+  fi
+  if [ "$name" = 'team' ]; then
+    add_team "${2:-}"
+    return
+  fi
+  if [ "$name" = 'local-mcp' ]; then
+    add_local_mcp
+    return
+  fi
+  if [ "$name" = 'model' ]; then
+    add_model
+    return
+  fi
+  [ -n "$name" ] && [ -n "$(capability_rows "$name")" ] ||
+    fail "choose one of: team https local-mcp $(capability_names | paste -sd' ' -)"
+  [ -f "$env_file" ] || fail "no .env in $install_dir. Run install.sh first."
+  if [ "$name" = 'sign-in' ] && is_served_over_https && [ "$(https_name_kind "$(read_setting ALFERA_PUBLIC_HOST)")" = 'shared' ]; then
+    fail own_domain_needed "sign-in through WorkOS needs a domain of your own, and this install is at $(team_address). First run: ./alfera add https your.name"
+  fi
+  ask_for_the_settings_of "$name"
+  [ -n "$chosen_settings" ] || { printf 'Nothing changed.\n'; return; }
+  write_chosen_settings "$chosen_settings"
+  [ "$name" != 'sign-in' ] || finish_sign_in
+  compose up -d
+  [ "$name" != 'apps' ] || load_app_catalogue
+  local missing
+  missing="$(missing_settings "$name" | paste -sd' ' -)"
+  if [ -z "$missing" ]; then
+    printf '%s is set up.\n' "$name"
+  else
+    printf '%s still needs: %s\n' "$name" "$missing"
+  fi
+}
+
+write_secret_file() {
+  [ ! -f "$1" ] || chmod 0644 "$1"
+  if [ -n "$2" ]; then printf '%s\n' "$2" >"$1"; else : >"$1"; fi
+  chmod 0444 "$1"
+}
+
+keep_key_of_env_file_as_fallback() {
+  local key="$1" fallbacks
+  [ -n "$key" ] && [ "$key" != "$(cat "$master_key_file")" ] || return 0
+  fallbacks="$(cat "$master_key_fallbacks_file")"
+  case ",$fallbacks," in
+    *",$key,"*) ;;
+    *) write_secret_file "$master_key_fallbacks_file" "${fallbacks:+$fallbacks,}$key" ;;
+  esac
+}
+
+write_setup_token_hash() {
+  printf '%s' "$1" | grep -Eqx '[0-9a-f]{64}' ||
+    fail setup_token_not_usable 'ALFERA_SETUP_TOKEN_SHA256 is not 64 small hex characters.'
+  write_secret_file "$setup_token_hash_file" "$1"
+}
+
+make_secret_files() {
+  local key_in_env_file fallbacks_in_env_file
+  key_in_env_file="$(read_setting COWORKER_CREDENTIAL_ENCRYPTION_KEY)"
+  fallbacks_in_env_file="$(read_setting COWORKER_CREDENTIAL_ENCRYPTION_KEY_FALLBACKS)"
+  mkdir -p "$secrets_dir"
+  chmod 0700 "$secrets_dir"
+  [ -s "$master_key_file" ] || write_secret_file "$master_key_file" "${key_in_env_file:-$(openssl rand -hex 32)}"
+  [ -f "$master_key_fallbacks_file" ] || write_secret_file "$master_key_fallbacks_file" "$fallbacks_in_env_file"
+  [ -f "$setup_token_hash_file" ] || write_secret_file "$setup_token_hash_file" ''
+  keep_key_of_env_file_as_fallback "$key_in_env_file"
+  [ -z "${ALFERA_SETUP_TOKEN_SHA256:-}" ] || write_setup_token_hash "$ALFERA_SETUP_TOKEN_SHA256"
+  [ -z "$key_in_env_file" ] || write_setting COWORKER_CREDENTIAL_ENCRYPTION_KEY ''
+  [ -z "$fallbacks_in_env_file" ] || write_setting COWORKER_CREDENTIAL_ENCRYPTION_KEY_FALLBACKS ''
+}
+
+database_user() {
+  local user
+  user="$(read_setting POSTGRES_USER)"
+  printf '%s' "${user:-coworker}"
+}
+
+database_name() {
+  local name
+  name="$(read_setting POSTGRES_DB)"
+  printf '%s' "${name:-coworker}"
+}
+
+backup_file=''
+
+make_backup() {
+  local file
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  mkdir -p "$backups_dir"
+  chmod 0700 "$backups_dir"
+  file="$backups_dir/alfera-$(date -u +%Y%m%d-%H%M%S)-$$.dump"
+  if ! (set -o noclobber && compose exec -T postgres pg_dump -U "$(database_user)" -d "$(database_name)" -Fc >"$file"); then
+    rm -f "$file"
+    fail backup_failed 'the database could not be copied. Check that Alfera runs with: ./alfera status'
+  fi
+  chmod 0600 "$file"
+  backup_file="$file"
+}
+
+backup_install() {
+  run_step backup make_backup
+  printf 'The database is saved in %s\n' "$backup_file"
+  printf 'Model keys and app connections in it are locked with the master key, and the master key is not in the backup.\n'
+  printf 'Keep a copy of %s away from this server. Without it, a restore keeps chats and memory, and you enter each key again.\n' "$master_key_file"
+}
+
+restore_backup() {
+  compose stop api worker app &&
+    compose exec -T postgres dropdb -U "$(database_user)" --force --if-exists "$(database_name)" &&
+    compose exec -T postgres createdb -U "$(database_user)" "$(database_name)" &&
+    compose exec -T postgres pg_restore -U "$(database_user)" -d "$(database_name)" --no-owner <"$1"
+}
+
+dashboard_is_healthy() {
+  local status
+  status="$(curl -s -o /dev/null -m 5 -w '%{http_code}' "$(app_address)/sign-in" || true)"
+  [ "$status" = '401' ] || { [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; }
+}
+
+worker_is_up() {
+  compose ps --status running --services 2>/dev/null | grep -qx worker
+}
+
+install_answers() {
+  local attempt=0
+  while [ "$attempt" -lt 90 ]; do
+    if curl -fsS -o /dev/null -m 5 "$(api_address)/health" 2>/dev/null && dashboard_is_healthy && worker_is_up; then
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    sleep 2
+  done
+  return 1
+}
+
+roll_back_to() {
+  local version="$1" failed_version="$2"
+  current_step='roll_back'
+  printf 'Version %s did not start well. Going back to version %s and to the database of %s.\n' "$failed_version" "$version" "$backup_file"
+  write_setting PRODUCT_VERSION "$version"
+  restore_backup "$backup_file" &&
+    compose up -d && install_answers ||
+    fail update_failed "version $failed_version did not start, and going back to $version did not work either. The database before the update is in $backup_file. Read why with: ./alfera logs"
+  fail update_rolled_back "version $failed_version did not start, so the install is back on version $version with the data it had before the update."
+}
+
+update_from_a_clone() {
+  printf 'This install builds from the clone. Pulling the source and building.\n'
+  (cd "$install_dir/.." && git pull --ff-only)
+  compose build api
+  compose build app
+  compose up -d
+}
+
+update_install() {
+  local previous wanted
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  make_secret_files
+  if builds_from_a_clone; then
+    update_from_a_clone
+    return
+  fi
+  previous="$(read_setting PRODUCT_VERSION)"
+  wanted="${1:-$previous}"
+  run_step backup make_backup
+  current_step='images'
+  write_setting PRODUCT_VERSION "$wanted"
+  if ! compose pull --quiet; then
+    write_setting PRODUCT_VERSION "$previous"
+    fail version_not_published "the images of version $wanted did not download, so nothing changed. Check the version and the network."
+  fi
+  current_step='start'
+  compose up -d && install_answers || roll_back_to "$previous" "$wanted"
+  current_step='update'
+  report_progress done version "$wanted"
+  printf 'Alfera runs version %s. The database before the update is in %s\n' "$wanted" "$backup_file"
+}
+
+rotate_master_key() {
+  local old_key fallbacks
+  [ -f "$env_file" ] || fail not_installed "no .env in $install_dir. Run install.sh first."
+  make_secret_files
+  old_key="$(cat "$master_key_file")"
+  fallbacks="$(cat "$master_key_fallbacks_file")"
+  write_secret_file "$master_key_fallbacks_file" "$old_key${fallbacks:+,$fallbacks}"
+  write_secret_file "$master_key_file" "$(openssl rand -hex 32)"
+  compose restart api worker
+  printf 'A new master key is in %s. New values are locked with it.\n' "$master_key_file"
+  printf 'The old key is kept in %s, so the values locked with it still open.\n' "$master_key_fallbacks_file"
+  printf 'Keep a copy of both files away from this server.\n'
+}
+
+print_usage() {
+  cat <<'USAGE'
+Runs and checks a self-hosted install. It lives next to docker-compose.yml and .env.
+
+  ./alfera status           what is running, and which capabilities are set up
+  ./alfera doctor           find what is wrong, and say how to fix it
+  ./alfera add <capability> set up one outside service, then restart what reads it
+  ./alfera add team         open the install to other machines, so you can invite your team;
+                            it takes the address other machines use, and no localhost address
+  ./alfera add local-mcp    let an owner or admin add MCP servers on this machine or network;
+                            it asks for a yes, and `add local-mcp --yes` gives it from a script
+  ./alfera team link        a fresh sign-in link for the owner (a new browser, a lost device)
+                            `team link 10` makes it last ten minutes instead of sixty
+  ./alfera add https [name] serve it on port 443 with a certificate it gets by itself; with
+                            no name, the name is made from this machine's public address
+  ./alfera start | stop | restart | logs [service]
+  ./alfera update [version] save the database, pull that version, and go back to the version
+                            before when the new one does not start
+  ./alfera backup           save the database in backups/
+  ./alfera rotate-key       a new master key; the old one stays as a fallback
+  ./alfera help             this list
+
+It names settings and never prints a secret.
+`add team` and `team link` print a one-time sign-in link, because handing over that link is
+what they are for.
+
+For a program: `add team <address>`, `add https [name]` and `team link` take --progress.
+Stdout then holds one JSON line per step and nothing else, and the words for a person go to
+stderr. Only `team link` puts a sign-in link in such a line.
+USAGE
+  printf '\nCapabilities:\n'
+  printf '%s\n' "$capability_summaries" | awk -F'|' '{ printf "  %-10s %s\n", $1, $2 }'
+}
+
+trap tidy_up_at_the_end EXIT
+
+# `https-name` and `https-settings` are for install.sh: it asks for the name before it writes
+# anything, and writes the settings before the first build.
+case "${1:-}" in
+  status) show_status ;;
+  doctor) run_doctor ;;
+  add) add_capability "${2:-}" "${3:-}" ;;
+  team) run_team_command "${2:-}" "${3:-}" ;;
+  https-name) choose_https_name "${2:-}" && printf '%s\n' "$https_name" ;;
+  https-name-kind) https_name_kind "${2:-}" ;;
+  shared-name-words) printf '%s\n' "$shared_name_words" ;;
+  https-settings) write_https_settings "${2:?give the name}" ;;
+  start) make_secret_files && compose up -d ;;
+  stop) compose stop ;;
+  restart) make_secret_files && compose up -d --force-recreate ;;
+  logs) shift; compose logs -f --tail 200 "$@" ;;
+  update) update_install "${2:-}" ;;
+  backup) backup_install ;;
+  rotate-key) rotate_master_key ;;
+  secret-files) make_secret_files ;;
+  public-address) public_address ;;
+  # The two below are for install.sh, which asks for the model before there is a .env. The
+  # second one reads the key from the environment, so it is on no command line.
+  ask-model) ask_for_a_model ;;
+  own-model-problem) own_model_problem "${2:-}" "${3:-}" "${OPENAI_COMPATIBLE_API_KEY:-}" ;;
+  '' | help | -h | --help) print_usage ;;
+  *) fail "\"$1\" is not a command of this helper: run ./alfera help to see the ones it has." ;;
+esac

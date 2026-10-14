@@ -1,0 +1,86 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "You hear about the outage from the queue, not from Twitter.",
+  "summary_text": "Raise the third report of the same thing as one incident.",
+  "icon": "🚨",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "One incident, not three tickets",
+    "Updates on the same thread",
+    "How many customers, and which",
+    "Silence when nothing is clustering"
+  ],
+  "what_it_does": [
+    "Groups reports of the same thing rather than counting tickets",
+    "Raises once, then updates the same thread",
+    "Names how many customers and which accounts",
+    "Stays silent when nothing is clustering"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the queue",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "raise one incident in a channel",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "zendesk",
+      "requirement_label": "Zendesk",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The queue it watches."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where an incident gets raised."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "channel",
+      "label": "Where an incident is raised",
+      "input_type": "channel"
+    },
+    {
+      "input_key": "cluster_size",
+      "label": "How many reports make a cluster",
+      "input_type": "text"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "*/30 8-20 * * *",
+      "read_timezone_from": "ask_the_installer",
+      "label": "through the working day",
+      "note": "Every half hour through your working day"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for a check at any time"
+    }
+  ]
+}

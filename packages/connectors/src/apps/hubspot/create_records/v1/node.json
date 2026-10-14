@@ -1,0 +1,357 @@
+{
+  "node_key": "hubspot-create_records-1",
+  "display_name": "Create HubSpot Records",
+  "description": "Create HubSpot CRM records of one object type from a list of property maps. Any number of records; HubSpot's 100-per-call limit is handled for you. Each input gets a result at its own index. HubSpot does not report which input failed inside a partly failed batch, so every record in that batch is reported as failed and the records it did create are listed in unmapped_records.",
+  "implementation": "execute",
+  "required_scopes": [
+    "crm.objects.contacts.write",
+    "crm.objects.companies.write",
+    "crm.objects.deals.write"
+  ],
+  "endpoints": [
+    {
+      "purpose": "batch_create",
+      "method": "POST",
+      "path": "/crm/v3/objects/{object_type}/batch/create",
+      "batch_size": 100
+    }
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$|^\\d+-\\d+$",
+        "description": "contacts, companies, deals, tickets, or a custom object type id like 2-1234567"
+      },
+      "records": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          "required": ["properties"]
+        },
+        "description": "One entry per record to create. Any length; batching is handled for you."
+      }
+    },
+    "required": ["object_type", "records"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "record": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "updated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["id", "properties", "created_at", "updated_at", "archived"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["index", "ok", "record"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "const": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": ["index", "ok", "error"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "created_count": {
+        "type": "integer"
+      },
+      "failed_count": {
+        "type": "integer"
+      },
+      "unmapped_records": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "created_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "archived": {
+              "type": "boolean"
+            }
+          },
+          "required": ["id", "properties", "created_at", "updated_at", "archived"],
+          "additionalProperties": false
+        },
+        "description": "Records HubSpot created inside a batch that partly failed. HubSpot does not say which input each one came from, so they are listed here instead of in results."
+      }
+    },
+    "required": ["results", "created_count", "failed_count", "unmapped_records"],
+    "additionalProperties": false
+  },
+  "response_schemas": {
+    "batch_create": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "updatedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "archived": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "numErrors": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "category": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "message": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "quirks": [
+    "More than 100 records is cut into 100-record calls and fanned out under the app rate limits. One chunk failing never loses another chunk results.",
+    "When a whole chunk succeeds, HubSpot returns one result per input in input order, so results map back positionally.",
+    "When a chunk partly fails, HubSpot answers 207 with only the successes in \"results\" and errors that name the offending property but NOT the input position. There is no way to say which input produced which created record.",
+    "So a partly failed chunk reports every one of its inputs as failed, and the records HubSpot did create are handed back in \"unmapped_records\". Nothing is lost and nothing is claimed that HubSpot did not say.",
+    "Upgrade path: send a caller-supplied idempotency property on each record and re-read the chunk by that property after a 207."
+  ]
+}

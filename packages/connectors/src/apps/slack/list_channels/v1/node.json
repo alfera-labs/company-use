@@ -1,0 +1,96 @@
+{
+  "node_key": "slack-list_channels-1",
+  "display_name": "List Slack Channels",
+  "description": "List the public channels of a Slack workspace, one page at a time. Pass the returned next_cursor back as `cursor` to read the next page; a null next_cursor means the last page.",
+  "implementation": "execute",
+  "required_scopes": ["channels:read"],
+  "requests": {
+    "conversations_list": {
+      "method": "GET",
+      "path": "/conversations.list",
+      "query": { "types": "public_channel" },
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "conversations.list. Lenient on purpose: Slack returns about thirty fields per channel and keeps adding more.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "error": { "type": "string" },
+          "warning": { "type": "string" },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "is_private": { "type": "boolean" },
+                "num_members": { "type": "number" }
+              }
+            }
+          },
+          "response_metadata": {
+            "type": "object",
+            "properties": { "next_cursor": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "quirks": [
+    "Slack answers HTTP 200 with {ok:false, error} for its own failures, so execute.ts turns ok=false into the connector error contract before it maps anything.",
+    "types is pinned to public_channel: channels:read grants nothing else. Private channels, group DMs, and DMs need groups:read / mpim:read / im:read, which is a scope change and therefore a v2.",
+    "The last page carries an EMPTY next_cursor, not a missing one. Passing the empty string back returns page one forever, so the node reports it as null.",
+    "exclude_archived defaults to true here. Slack's own default is false, which buries live channels under years of dead ones.",
+    "num_members is omitted on some channel types rather than sent as 0."
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor returned by the previous page. Omit to start at the first page."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000,
+        "description": "How many channels to return in this page."
+      },
+      "exclude_archived": {
+        "type": "boolean",
+        "description": "Leave archived channels out of the page. Defaults to true."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["channels", "next_cursor"],
+    "properties": {
+      "channels": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name", "is_private", "num_members"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": ["string", "null"] },
+            "is_private": { "type": "boolean" },
+            "num_members": { "type": ["number", "null"] }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Pass this back as `cursor` for the next page. Null means this was the last page."
+      }
+    }
+  }
+}

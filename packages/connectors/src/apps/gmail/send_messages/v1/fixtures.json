@@ -1,0 +1,23 @@
+{
+  "_source": "Shapes taken from the Gmail v1 discovery document (gmail.googleapis.com/$discovery/rest?version=v1): users.messages.send answers with a Message carrying id, threadId, and labelIds. The error body is Google's standard REST error envelope. Ids and addresses are invented.",
+  "sent_message_first": {
+    "id": "18f4b2d0c3e51101",
+    "threadId": "18f4b2d0c3e51101",
+    "labelIds": ["SENT"]
+  },
+  "sent_message_second": {
+    "id": "18f4b2d0c3e51102",
+    "threadId": "18f4b2d0c3e51102",
+    "labelIds": ["SENT"]
+  },
+  "send_recipient_rejected": {
+    "error": {
+      "code": 400,
+      "message": "Invalid To header",
+      "errors": [
+        { "message": "Invalid To header", "domain": "global", "reason": "invalidArgument" }
+      ],
+      "status": "INVALID_ARGUMENT"
+    }
+  }
+}

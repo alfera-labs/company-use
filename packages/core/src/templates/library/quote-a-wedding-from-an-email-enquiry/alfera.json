@@ -1,0 +1,98 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A draft quote waiting for you within the hour, priced off your own rate card.",
+  "summary_text": "Price an enquiry off your rate card and leave a draft quote.",
+  "icon": "💍",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "events",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "wedding-planners",
+      "is_primary": false
+    },
+    {
+      "facet_kind": "topic",
+      "facet_key": "featured",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Date, headcount, and must-haves pulled out",
+    "Prices from your rate card",
+    "A clear no when the date is gone",
+    "A draft — you check the number and send"
+  ],
+  "what_it_does": [
+    "Pulls date, headcount and the must-haves out of prose",
+    "Prices against your rate card, never a guess",
+    "Says the date is gone when the date is gone, before pricing anything",
+    "Leaves it as a draft — you check the number and send it"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the enquiry and the rate card",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "check the date against your diary",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "leave a draft quote",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The enquiries it reads and where the draft is left."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The rate card and the availability calendar."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "rate_card",
+      "label": "Your rate card",
+      "input_type": "document"
+    },
+    {
+      "input_key": "mailbox",
+      "label": "The enquiry mailbox",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "gmail-new_email_received",
+        "app_key": "gmail",
+        "listener_config": {}
+      },
+      "label": "when an enquiry lands",
+      "note": "Only the mailbox you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Point it at an enquiry whenever you like"
+    }
+  ]
+}

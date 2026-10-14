@@ -1,0 +1,90 @@
+{
+  "display_information": {
+    "name": "Alfera",
+    "description": "Alfera, your coworker in Slack.",
+    "background_color": "#111111"
+  },
+  "features": {
+    "app_home": {
+      "home_tab_enabled": true,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": false
+    },
+    "bot_user": {
+      "display_name": "Alfera",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/alfera",
+        "url": "https://YOUR-API-PUBLIC-URL/v1/channels/slack/events",
+        "description": "Talk to Alfera",
+        "usage_hint": "ask a question or send a task",
+        "should_escape": false
+      }
+    ]
+  },
+  "oauth_config": {
+    "redirect_urls": ["https://YOUR-API-PUBLIC-URL/v1/connections/oauth/callback"],
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "assistant:write",
+        "channels:history",
+        "channels:join",
+        "channels:manage",
+        "channels:read",
+        "chat:write",
+        "chat:write.customize",
+        "chat:write.public",
+        "commands",
+        "emoji:read",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "groups:write",
+        "im:history",
+        "im:read",
+        "im:write",
+        "links:read",
+        "links:write",
+        "mpim:history",
+        "mpim:read",
+        "mpim:write",
+        "pins:read",
+        "pins:write",
+        "reactions:read",
+        "reactions:write",
+        "team:read",
+        "usergroups:read",
+        "users.profile:read",
+        "users:read",
+        "users:read.email"
+      ]
+    },
+    "pkce_enabled": false
+  },
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://YOUR-API-PUBLIC-URL/v1/channels/slack/events",
+      "bot_events": [
+        "app_mention",
+        "app_uninstalled",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://YOUR-API-PUBLIC-URL/v1/channels/slack/interactivity",
+      "message_menu_options_url": "https://YOUR-API-PUBLIC-URL/v1/channels/slack/interactivity"
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false,
+    "is_mcp_enabled": false
+  }
+}

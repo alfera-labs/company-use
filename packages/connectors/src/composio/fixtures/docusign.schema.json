@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["envelopes"],
+  "properties": {
+    "envelopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["envelopeId", "statusChangedDateTime"],
+        "properties": {
+          "envelopeId": { "type": "string" },
+          "emailSubject": { "type": "string" },
+          "status": { "type": "string" },
+          "sender": { "type": "object" },
+          "statusChangedDateTime": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "next_start_position": { "type": ["string", "null"] }
+  }
+}

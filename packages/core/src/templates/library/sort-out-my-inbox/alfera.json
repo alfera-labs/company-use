@@ -1,0 +1,76 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "An inbox already dealt with by the time you sit down, and a short list of what genuinely needs you.",
+  "summary_text": "Answer what it can, archive the noise, and leave you what needs a person.",
+  "icon": "📥",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "founders",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Replies sent where the answer was obvious",
+    "Newsletters and receipts archived",
+    "One line per thing that needs you",
+    "The hardest thing first"
+  ],
+  "what_it_does": [
+    "Reads everything that arrived since it last ran",
+    "Answers the messages where being wrong is embarrassing, not expensive",
+    "Archives the newsletters and receipts without telling you",
+    "Hands back one line per thing that needs you"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read your mail",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "reply to people already on a thread",
+      "risk": "reaches_outside"
+    },
+    {
+      "capability": "archive messages",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The inbox it reads and replies from."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "mailbox",
+      "label": "The mailbox it reads",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "30 7 * * *",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it whenever the inbox has piled up"
+    }
+  ],
+  "caveat_text": "It replies to people. Start it on a weekend, read what it sent, and only then let it run on a weekday."
+}

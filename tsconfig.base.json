@@ -1,0 +1,105 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@agent-core": ["packages/agent-core/src/index.ts"],
+      "@agent-core/coding": ["packages/agent-core/src/coding/index.ts"],
+      "@agent-core/engines": ["packages/agent-core/src/engines/index.ts"],
+      "@agent-core/engines/*": [
+        "packages/agent-core/src/engines/*/index.ts",
+        "packages/agent-core/src/engines/*.ts"
+      ],
+      "@agent-core/engines/pi": ["packages/agent-core/src/engines/pi/index.ts"],
+      "@agent-core/engines/pi/*": ["packages/agent-core/src/engines/pi/*.ts"],
+      "@agent-core/environment": ["packages/agent-core/src/environment/index.ts"],
+      "@agent-core/events": ["packages/agent-core/src/events/index.ts"],
+      "@agent-core/harness": ["packages/agent-core/src/harness/index.ts"],
+      "@agent-core/harness/*": ["packages/agent-core/src/harness/*.ts"],
+      "@agent-core/messages": ["packages/agent-core/src/messages/index.ts"],
+      "@agent-core/llm_gateway/models_dev_snapshot.json": [
+        "packages/agent-core/src/llm_gateway/models_dev_snapshot.json"
+      ],
+      "@agent-core/models": ["packages/agent-core/src/models/index.ts"],
+      "@agent-core/runs": ["packages/agent-core/src/runs/index.ts"],
+      "@agent-core/tools": ["packages/agent-core/src/tools/index.ts"],
+      "@agent-core/*": ["packages/agent-core/src/*.ts", "packages/agent-core/src/*/index.ts"],
+      "@api/services/models/model_ratings.json": [
+        "apps/api/src/services/models/model_ratings.json"
+      ],
+      "@api/*": ["apps/api/src/*.ts", "apps/api/src/*/index.ts"],
+      "@connectors": ["packages/connectors/src/index.ts"],
+      "@connectors/*": [
+        "packages/connectors/src/*.ts",
+        "packages/connectors/src/*/index.ts",
+        "packages/connectors/src/*"
+      ],
+      "@coworker/config": ["packages/config/src/env.ts"],
+      "@coworker/config/constants": ["packages/config/src/constants.ts"],
+      "@coworker/config/credit_pricing": ["packages/config/src/credit_pricing.ts"],
+      "@coworker/config/env": ["packages/config/src/env.ts"],
+      "@coworker/config/public_env": ["packages/config/src/public_env.ts"],
+      "@coworker/connectors": ["packages/connectors/src/index.ts"],
+      "@coworker/core": ["packages/core/src/index.ts"],
+      "@coworker/core/auth": ["packages/core/src/auth.ts"],
+      "@coworker/core/db": ["packages/core/src/db/index.ts"],
+      "@coworker/core/db/*": ["packages/core/src/db/*.ts", "packages/core/src/db/*/index.ts"],
+      "@coworker/core/db/schema": ["packages/core/src/db/schema/index.ts"],
+      "@coworker/core/db/schema/common": ["packages/core/src/db/schema/common.ts"],
+      "@coworker/core/db/schema/core": ["packages/core/src/db/schema/core.ts"],
+      "@coworker/core/db/schema/json_column_types": [
+        "packages/core/src/db/schema/json_column_types.ts"
+      ],
+      "@coworker/core/db/schema/source_actors": ["packages/core/src/db/schema/source_actors.ts"],
+      "@coworker/core/db/schema/policies": ["packages/core/src/db/schema/policies.ts"],
+      "@coworker/core/db/__tests__/*": ["packages/core/src/db/__tests__/*.ts"],
+      "@coworker/core/access/*": ["packages/core/src/access/*.ts"],
+      "@coworker/core/db/schema/projects": ["packages/core/src/db/schema/projects.ts"],
+      "@coworker/core/credentials/*": ["packages/core/src/credentials/*.ts"],
+      "@coworker/core/integrations/*": ["packages/core/src/integrations/*.ts"],
+      "@coworker/core/services/*": ["packages/core/src/services/*.ts"],
+      "@coworker/core/templates": ["packages/core/src/templates/index.ts"],
+      "@coworker/core/templates/*": [
+        "packages/core/src/templates/*.ts",
+        "packages/core/src/templates/*/index.ts"
+      ],
+      "@coworker/evals/*": ["packages/evals/src/*.ts"],
+      "@coworker/jobs": ["packages/jobs/src/index.ts"],
+      "@coworker/jobs/*": ["packages/jobs/src/*.ts"],
+      "@coworker/memory": ["packages/memory/src/index.ts"],
+      "@coworker/memory/*": ["packages/memory/src/*.ts", "packages/memory/src/*/index.ts"],
+      "@coworker/runtime-platform": ["packages/runtime-platform/src/index.ts"],
+      "@shared/*": ["packages/shared/src/*.ts", "packages/shared/src/*/index.ts"],
+      "@runtime-platform": ["packages/runtime-platform/src/index.ts"],
+      "@runtime-platform/*": ["packages/runtime-platform/src/*.ts"],
+      "@runtime-platform/channels/*": ["packages/runtime-platform/src/channels/*.ts"],
+      "@runtime-platform/connections/*": ["packages/runtime-platform/src/connections/*.ts"],
+      "@runtime-platform/orchestrator/*": ["packages/runtime-platform/src/orchestrator/*.ts"],
+      "@runtime-platform/session_harness/*": ["packages/runtime-platform/src/session_harness/*.ts"],
+      "@runtime-platform/tools/*": ["packages/runtime-platform/src/tools/*.ts"],
+      "@runtime-platform/tools/definitions/*": [
+        "packages/runtime-platform/src/tools/definitions/*.ts"
+      ],
+      "@scripts/*": ["scripts/*.ts"],
+      "@worker/*": ["apps/worker/src/*.ts"],
+      "@coworker/shared": ["packages/shared/src/index.ts"],
+      "@coworker/shared/secure_strings_equal": [
+        "packages/shared/src/secure_strings_equal.server.ts"
+      ],
+      "@coworker/ui/components/*": ["packages/ui/src/components/*.tsx"],
+      "@coworker/ui/lib/*": ["packages/ui/src/lib/*.ts"],
+      "@coworker/ui/hooks/*": ["packages/ui/src/hooks/*.ts"]
+    }
+  }
+}

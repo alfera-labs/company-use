@@ -1,0 +1,50 @@
+{
+  "_note": "Shapes taken from the GitHub REST documentation for POST /repos/{owner}/{repo}/issues (API version 2022-11-28). The 201 body is the created issue; the 422 body is what GitHub answers when a field is refused.",
+  "created_issue": {
+    "id": 1,
+    "node_id": "MDU6SXNzdWUx",
+    "url": "https://api.github.com/repos/octocat/Hello-World/issues/1347",
+    "repository_url": "https://api.github.com/repos/octocat/Hello-World",
+    "html_url": "https://github.com/octocat/Hello-World/issues/1347",
+    "number": 1347,
+    "state": "open",
+    "title": "Found a bug",
+    "body": "I'm having a problem with this.",
+    "user": { "login": "octocat", "id": 1, "type": "User", "site_admin": false },
+    "labels": [
+      {
+        "id": 208045946,
+        "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+        "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+        "name": "bug",
+        "description": "Something isn't working",
+        "color": "f29513",
+        "default": true
+      }
+    ],
+    "assignee": null,
+    "assignees": [],
+    "milestone": null,
+    "locked": false,
+    "active_lock_reason": null,
+    "comments": 0,
+    "closed_at": null,
+    "created_at": "2011-04-22T13:33:48Z",
+    "updated_at": "2011-04-22T13:33:48Z",
+    "author_association": "OWNER",
+    "state_reason": null
+  },
+  "validation_failed": {
+    "message": "Validation Failed",
+    "errors": [
+      {
+        "resource": "Issue",
+        "code": "custom",
+        "field": "labels",
+        "message": "Labels are only accessible with push access."
+      }
+    ],
+    "documentation_url": "https://docs.github.com/rest/issues/issues#create-an-issue",
+    "status": "422"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A queue where the top of the list is genuinely the top of the list.",
+  "summary_text": "Sort new tickets by what leaving them will cost.",
+  "icon": "🎫",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    },
+    {
+      "facet_kind": "topic",
+      "facet_key": "featured",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "A queue sorted by the cost of waiting",
+    "The third report of the same thing, named",
+    "“Broken” separated from “confused”",
+    "Anything urgent raised immediately"
+  ],
+  "what_it_does": [
+    "Sorts by what leaving it costs, not by when it arrived",
+    "Spots the third report of the same thing and says so",
+    "Separates \"broken\" from \"confused\" — they need different people",
+    "Raises anything that cannot wait immediately, not in the summary"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read incoming tickets",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "tag and prioritise them",
+      "risk": "changes_data"
+    },
+    {
+      "capability": "raise the urgent ones in a channel",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "zendesk",
+      "requirement_label": "Zendesk",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The queue it reads and tags."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the ones that cannot wait get raised."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "queue",
+      "label": "Which queue it reads",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where urgent ones are raised",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "zendesk-ticket_created",
+        "app_key": "zendesk",
+        "listener_config": {}
+      },
+      "label": "when a ticket arrives",
+      "note": "Only the queues you choose"
+    },
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 8 * * 1-5",
+      "read_timezone_from": "ask_the_installer",
+      "label": "every weekday morning",
+      "note": "A sweep for anything the event missed"
+    }
+  ]
+}

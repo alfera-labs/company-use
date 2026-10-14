@@ -1,0 +1,10 @@
+task_id: smoke_001_example_domain
+suite: smoke
+goal: Open the example.com homepage and confirm you are on it.
+start_url: https://example.com
+max_steps: 6
+graders:
+  - grader_type: url_matches
+    pattern: "example\\.com"
+  - grader_type: page_contains
+    text: Example Domain

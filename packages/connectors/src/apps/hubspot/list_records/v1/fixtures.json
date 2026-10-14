@@ -1,0 +1,81 @@
+{
+  "batch_read_contacts": {
+    "completedAt": "2026-09-02T10:14:31.884Z",
+    "startedAt": "2026-09-02T10:14:31.702Z",
+    "status": "COMPLETE",
+    "results": [
+      {
+        "id": "51201",
+        "properties": {
+          "createdate": "2026-03-02T14:10:22.023Z",
+          "email": "maria.rossi@example.com",
+          "hs_object_id": "51201",
+          "lastmodifieddate": "2026-08-11T09:41:03.881Z"
+        },
+        "createdAt": "2026-03-02T14:10:22.023Z",
+        "updatedAt": "2026-08-11T09:41:03.881Z",
+        "archived": false
+      },
+      {
+        "id": "51202",
+        "properties": {
+          "createdate": "2026-04-19T08:02:44.117Z",
+          "email": "j.okafor@example.com",
+          "hs_object_id": "51202",
+          "lastmodifieddate": "2026-08-30T16:22:10.004Z"
+        },
+        "createdAt": "2026-04-19T08:02:44.117Z",
+        "updatedAt": "2026-08-30T16:22:10.004Z",
+        "archived": false
+      }
+    ]
+  },
+  "batch_read_partly_missing": {
+    "completedAt": "2026-09-02T10:16:02.441Z",
+    "startedAt": "2026-09-02T10:16:02.310Z",
+    "status": "COMPLETE",
+    "numErrors": 1,
+    "results": [
+      {
+        "id": "51201",
+        "properties": {
+          "createdate": "2026-03-02T14:10:22.023Z",
+          "hs_object_id": "51201",
+          "lastmodifieddate": "2026-08-11T09:41:03.881Z"
+        },
+        "createdAt": "2026-03-02T14:10:22.023Z",
+        "updatedAt": "2026-08-11T09:41:03.881Z",
+        "archived": false
+      }
+    ],
+    "errors": [
+      {
+        "status": "error",
+        "category": "OBJECT_NOT_FOUND",
+        "message": "Could not get some CONTACT objects, they may be deleted or not exist. Check that ids are valid.",
+        "context": { "ids": ["99999999"] }
+      }
+    ]
+  },
+  "list_contacts_page_one": {
+    "results": [
+      {
+        "id": "51201",
+        "properties": {
+          "createdate": "2026-03-02T14:10:22.023Z",
+          "hs_object_id": "51201",
+          "lastmodifieddate": "2026-08-11T09:41:03.881Z"
+        },
+        "createdAt": "2026-03-02T14:10:22.023Z",
+        "updatedAt": "2026-08-11T09:41:03.881Z",
+        "archived": false
+      }
+    ],
+    "paging": {
+      "next": {
+        "after": "51202",
+        "link": "https://api.hubapi.com/crm/v3/objects/contacts?after=51202"
+      }
+    }
+  }
+}

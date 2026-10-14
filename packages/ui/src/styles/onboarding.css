@@ -1,0 +1,988 @@
+/*
+ * Onboarding shell — the sign-in page's material, held light on purpose.
+ *
+ * The wizard is the second screen a person ever sees, so it wears exactly what /sign-in wears:
+ * warm paper, ink type, one orange phrase per title, 62px rounded-full controls, ink-gradient
+ * primaries. Those values are hardcoded here rather than read from the app theme for the same
+ * reason the sign-in page hardcodes them — this flow is light-mode-fixed and must not flip
+ * palette halfway through a signup.
+ *
+ * Two surfaces share this sheet: the onboarding wizard and the workspace-invitation page.
+ */
+
+.ob-root {
+  --ob-paper: #fafaf8;
+  --ob-ink: #131110;
+  --ob-secondary: #7a736c;
+  --ob-faint: #a8a29b;
+  --ob-hairline: #e9e5e0;
+  --ob-hairline-input: #e2ded9;
+  --ob-rule: #f0edea;
+  /* One step under the paper, so a panel reads as set into the page rather than floating on it. */
+  --ob-sunken: #f2f0ec;
+  --ob-orange: #f74e00;
+  /* The material of a field, a card and a list, and of the one primary button. */
+  --ob-raised: #fff;
+  --ob-hairline-hover: #d6d0c9;
+  --ob-btn-fill: linear-gradient(to bottom, #2a231e, #0d0b0a);
+  --ob-btn-ink: #fdfcfb;
+  --ob-alert-ink: #8f3300;
+  --ob-pill-shadow: 0 1px 2px rgb(19 17 16 / 0.05), 0 4px 12px -4px rgb(19 17 16 / 0.06);
+  --ob-pill-shadow-hover: 0 2px 4px rgb(19 17 16 / 0.06), 0 8px 18px -6px rgb(19 17 16 / 0.1);
+  --ob-btn-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09), 0 2px 5px rgb(19 17 16 / 0.22),
+    0 12px 26px -10px rgb(19 17 16 / 0.45);
+  --ob-input-shadow: inset 0 1px 2px rgb(19 17 16 / 0.04), 0 1px 2px rgb(19 17 16 / 0.04);
+
+  /* Shadcn components inside the wizard (the channel checkbox, the tool selects) resolve the app
+     theme, which follows the OS. This flow is light-fixed, so the surface ladder they read through
+     is pinned here too — otherwise dark-mode users get black controls on light paper. */
+  --surface-sunken: #efeeec;
+  --surface-chrome: #f6f5f4;
+  --surface-page: var(--ob-paper);
+  --surface-raised: #fffefd;
+  --foreground: var(--ob-ink);
+  --muted-foreground: var(--ob-secondary);
+  --border: var(--ob-hairline);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background-color: var(--ob-paper);
+  color: var(--ob-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* An install that signs its people in itself has no light sign-in page in front of the wizard:
+   the page before it and the app after it follow the theme, so there the wizard follows it too,
+   on the surfaces of the app's dark theme (globals.css). The hosted flow never sets the
+   attribute (the onboarding route sets it, around the wizard) and stays light. A logo plate stays white in both: logos are drawn for white. */
+.dark [data-wizard-follows-theme] .ob-root {
+  --ob-paper: oklch(0.246 0.011 285);
+  --ob-ink: oklch(0.97 0.003 285);
+  --ob-secondary: oklch(0.73 0.012 286);
+  --ob-faint: oklch(0.6 0.012 286);
+  --ob-hairline: rgb(255 255 255 / 0.12);
+  --ob-hairline-input: rgb(255 255 255 / 0.16);
+  --ob-hairline-hover: rgb(255 255 255 / 0.26);
+  --ob-rule: rgb(255 255 255 / 0.08);
+  --ob-sunken: oklch(0.212 0.012 285);
+  --ob-raised: oklch(0.283 0.011 282);
+  --ob-btn-fill: linear-gradient(to bottom, #fdfcfb, #e6e2dd);
+  --ob-btn-ink: #131110;
+  --ob-alert-ink: oklch(0.82 0.13 50);
+  --ob-pill-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+  --ob-pill-shadow-hover: 0 2px 4px rgb(0 0 0 / 0.35), 0 8px 18px -6px rgb(0 0 0 / 0.5);
+  --ob-btn-shadow: 0 2px 5px rgb(0 0 0 / 0.35), 0 12px 26px -10px rgb(0 0 0 / 0.6);
+  --ob-input-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
+
+  --surface-sunken: var(--ob-sunken);
+  --surface-chrome: oklch(0.195 0.014 284);
+  --surface-raised: var(--ob-raised);
+}
+
+/* ---------- top bar ---------- */
+/* Three columns, not two: the invitation page centres a middle slot in this same bar. */
+.ob-topbar {
+  display: grid;
+  /* minmax(0, 1fr), never a bare 1fr: a bare one floors at min-content, so a long workspace name
+     beside "Log out" cannot shrink, widens the bar past the viewport, and clips the last control
+     off the right edge with no way to scroll to it. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  height: 64px;
+  padding-inline: clamp(16px, 4vw, 32px);
+  flex: none;
+}
+.ob-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+}
+.ob-brand__logo {
+  width: auto;
+  height: 28px;
+  color: var(--ob-ink);
+}
+.ob-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 20px);
+  justify-self: end;
+}
+
+/* ---------- stage ---------- */
+/* `margin: auto` rather than `justify-content: center`: a centred flex container pushes content
+   taller than the viewport past the top edge, where it can never be scrolled back. */
+.ob-stage {
+  margin: auto;
+  width: 100%;
+  max-width: 520px;
+  padding: 40px 24px 72px;
+  display: flex;
+  flex-direction: column;
+}
+.ob-step {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.ob-step--center {
+  text-align: center;
+  align-items: center;
+}
+
+@keyframes ob-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ob-animate {
+  animation: ob-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* The one step that leaves on its own, without a click. Unmounting it the frame the next step
+   mounts reads as a flash, so it dims out first and the next step rises into the space. */
+@keyframes ob-fade {
+  to {
+    opacity: 0;
+  }
+}
+.ob-leave {
+  animation: ob-fade 200ms ease both;
+}
+
+/* ---------- type ---------- */
+.ob-head {
+  display: flex;
+  flex-direction: column;
+}
+.ob-step--center .ob-head {
+  align-items: center;
+}
+/* A label, not a badge. The tinted pill with a dot in it is the single most copied element on
+   the AI-landing-page internet; the same words set as a quiet tracked label read as considered
+   instead of as a template. */
+.ob-eyebrow {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ob-faint);
+}
+.ob-step--center .ob-eyebrow {
+  align-self: center;
+}
+.ob-title {
+  margin: 0;
+  font-size: 33px;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+.ob-accent {
+  color: var(--ob-orange);
+}
+.ob-subtitle {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ob-secondary);
+  text-wrap: pretty;
+}
+.ob-fine {
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ob-faint);
+  text-align: center;
+}
+
+/* ---------- controls ---------- */
+.ob-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  margin-top: 40px;
+}
+.ob-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 62px;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--ob-btn-fill);
+  color: var(--ob-btn-ink);
+  box-shadow: var(--ob-btn-shadow);
+  transition: transform 150ms ease;
+}
+.ob-btn:hover {
+  transform: translateY(-1px);
+}
+.ob-btn:disabled,
+.ob-btn[aria-busy="true"] {
+  cursor: default;
+  opacity: 0.7;
+  transform: none;
+}
+.ob-btn[aria-busy="true"] {
+  pointer-events: none;
+}
+.ob-quiet {
+  align-self: center;
+  margin-top: 18px;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--ob-secondary);
+  transition: color 120ms ease;
+}
+.ob-quiet:hover {
+  color: var(--ob-ink);
+}
+/* A borderless text button gets no affordance from the browser default outline on paper. */
+.ob-quiet:focus-visible,
+.ob-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--ob-btn-shadow),
+    0 0 0 3px rgb(247 78 0 / 0.2);
+}
+.ob-quiet:focus-visible {
+  box-shadow: 0 0 0 3px rgb(247 78 0 / 0.2);
+  color: var(--ob-ink);
+}
+.ob-quiet:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+/* The wizard's own log-out escape hatch: quieter still, and never full width. */
+.ob-logout {
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+}
+
+/* The one rounded-full text field, with the ink submit button parked inside its right edge. */
+.ob-field {
+  position: relative;
+  width: 100%;
+  margin-top: 40px;
+}
+.ob-field input {
+  height: 62px;
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--ob-hairline-input);
+  background-color: var(--ob-raised);
+  padding: 0 72px 0 28px;
+  font: inherit;
+  font-size: 16.5px;
+  color: var(--ob-ink);
+  box-shadow: var(--ob-input-shadow);
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.ob-field input::placeholder {
+  color: var(--ob-faint);
+}
+.ob-field input:hover {
+  border-color: var(--ob-hairline-hover);
+}
+.ob-field input:focus {
+  border-color: var(--ob-orange);
+  box-shadow:
+    var(--ob-input-shadow),
+    0 0 0 3px rgb(247 78 0 / 0.15);
+}
+.ob-field__go {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--ob-btn-fill);
+  color: var(--ob-btn-ink);
+  box-shadow: var(--ob-btn-shadow);
+  display: grid;
+  place-items: center;
+  transition: transform 150ms ease;
+}
+.ob-field__go:hover {
+  transform: translateY(-1px);
+}
+.ob-field__go:disabled {
+  cursor: default;
+  opacity: 0.6;
+  transform: none;
+}
+
+/* The product's one "running" signal, used on the scan screen and on the trial card. */
+@keyframes ob-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(247 78 0 / 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgb(247 78 0 / 0);
+  }
+}
+.ob-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background-color: var(--ob-orange);
+  animation: ob-pulse 2s ease-in-out infinite;
+  flex: none;
+}
+
+/* ---------- scan step ---------- */
+.ob-scan-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--ob-secondary);
+}
+.ob-scanlog {
+  margin-top: 30px;
+}
+.ob-scanlog__line {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 13px 2px;
+  font-size: 15px;
+  color: var(--ob-faint);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 350ms ease,
+    transform 350ms ease,
+    color 350ms ease;
+}
+.ob-scanlog__line + .ob-scanlog__line {
+  border-top: 1px solid var(--ob-rule);
+}
+.ob-scanlog__line[data-state="running"],
+.ob-scanlog__line[data-state="done"] {
+  opacity: 1;
+  transform: none;
+}
+.ob-scanlog__line[data-state="done"] {
+  color: var(--ob-ink);
+}
+.ob-scanlog__state {
+  flex: none;
+  width: 14px;
+  display: inline-flex;
+  justify-content: center;
+  transform: translateY(-1px);
+  color: var(--ob-orange);
+}
+
+/* The line being worked reads as working because the words themselves are lit, left to right —
+   the same signal the chat uses while the model is mid-answer. A pulsing dot next to static text
+   is the stock "AI is thinking" badge; light moving through the sentence is the work itself. */
+@keyframes ob-scan-sweep {
+  to {
+    background-position: -200% 0;
+  }
+}
+.ob-scanlog__text {
+  min-width: 0;
+}
+.ob-scanlog__line[data-state="running"] .ob-scanlog__text {
+  background-image: linear-gradient(
+    90deg,
+    var(--ob-faint) 42%,
+    var(--ob-ink) 50%,
+    var(--ob-faint) 58%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: ob-scan-sweep 1.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ob-scanlog__line[data-state="running"] .ob-scanlog__text {
+    animation: none;
+    background-image: none;
+    color: var(--ob-secondary);
+  }
+}
+
+/* ---------- reveal step ---------- */
+/* One job on stage, playing as a run: the trigger fires, a light travels down the line and each
+   step lights up. The other jobs wait as quiet rows and take the stage on a click. No cards. */
+.ob-stage:has(.ob-run) {
+  max-width: 580px;
+}
+/* The column is centred, so a taller offer moves everything. Each part that moves has its own
+   name, so it slides to its new place in a swap and never cross-fades with itself. */
+.ob-stage:has(.ob-run) .ob-title {
+  view-transition-name: ob-reveal-title;
+}
+.ob-stage:has(.ob-run) .ob-subtitle {
+  view-transition-name: ob-reveal-subtitle;
+}
+.ob-run {
+  margin-top: 34px;
+}
+.ob-run__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.ob-run__say {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+.ob-run__when {
+  color: var(--ob-orange);
+}
+.ob-run__line {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 18px;
+}
+.ob-run__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: start;
+  font-size: 16px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+/* The rail between two steps, and the light that runs down it. */
+.ob-run__step:not(:last-child)::before,
+.ob-run__light {
+  content: "";
+  position: absolute;
+  left: 10.5px;
+  top: 25px;
+  bottom: -16px;
+  width: 1px;
+  background: var(--ob-hairline);
+}
+.ob-run__light {
+  left: 10px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--ob-orange);
+  transform-origin: top;
+}
+.ob-run__node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+}
+.ob-run__icon {
+  width: 15px;
+  height: 15px;
+}
+.ob-run__node i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.ob-run__trigger {
+  color: var(--ob-orange);
+}
+.ob-run__ripple {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--ob-orange);
+}
+.ob-run__connect {
+  margin: 20px 0 0 36px;
+  font-size: 13px;
+  color: var(--ob-faint);
+}
+.ob-reveal__actions {
+  view-transition-name: ob-reveal-actions;
+}
+/* Focus lands here after a swap so a keyboard or screen reader user hears the new offer. It is
+   not a control, so it shows no ring. */
+.ob-reveal__stage:focus {
+  outline: none;
+}
+/* A swap never draws two offers in one place. An offer is named by which offer it is, on the
+   stage and in its row, so the one that leaves the stage and the row that leaves the list are
+   only on the old side: they fade out where they stand. The new ones are only on the new side
+   and fade in after that, where they belong. A part on both sides (the title, the button, a
+   row that stays) only slides. The class is on the root only while that swap runs, so no other
+   page transition inherits this. */
+.ob-morphing::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ob-morphing::view-transition-old(*):only-child {
+  animation-duration: 140ms;
+}
+.ob-morphing::view-transition-new(*):only-child {
+  animation-delay: 140ms;
+  animation-duration: 240ms;
+}
+/* A short window (a laptop with the dock and the browser bars) must still show the button. */
+@media (max-height: 780px) {
+  .ob-stage:has(.ob-run) {
+    padding-top: 16px;
+    padding-bottom: 24px;
+  }
+  .ob-run {
+    margin-top: 24px;
+  }
+  .ob-waiting {
+    margin-top: 20px;
+  }
+  .ob-waiting__row {
+    padding-block: 11px;
+  }
+  .ob-reveal__actions {
+    margin-top: 24px;
+  }
+}
+@media (max-width: 480px) {
+  .ob-run__head {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+/* A real app logo on a white plate. */
+.ob-apps {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding-top: 2px;
+}
+.ob-plate {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px var(--ob-hairline),
+    0 1px 2px rgb(19 17 16 / 0.05),
+    0 6px 14px -6px rgb(19 17 16 / 0.12);
+  overflow: hidden;
+}
+.ob-plate img {
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.ob-plate img[data-shown="true"] {
+  opacity: 1;
+}
+.ob-waiting {
+  margin-top: 30px;
+  border-top: 1px solid var(--ob-rule);
+  view-transition-name: ob-reveal-waiting;
+}
+.ob-waiting__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 16px;
+  align-items: center;
+  column-gap: 14px;
+  width: 100%;
+  padding: 16px 0;
+  font: inherit;
+  text-align: left;
+  color: var(--ob-secondary);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--ob-rule);
+  cursor: pointer;
+  transition: color 160ms ease-out;
+}
+.ob-waiting__row:hover {
+  color: var(--ob-ink);
+}
+.ob-waiting__say {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.ob-waiting__row .ob-apps {
+  padding: 0;
+}
+.ob-waiting__row .ob-plate {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+.ob-waiting__chevron {
+  grid-column: 3;
+  width: 16px;
+  height: 16px;
+  color: var(--ob-faint);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms ease-out;
+}
+.ob-waiting__row:hover .ob-waiting__chevron {
+  grid-column: 3;
+  color: var(--ob-ink);
+  transform: translateX(3px);
+}
+.ob-waiting__row:active .ob-waiting__chevron {
+  grid-column: 3;
+  transform: translateX(6px);
+}
+.ob-waiting__row:focus-visible {
+  outline: none;
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px rgb(247 78 0 / 0.2);
+}
+
+/* ---------- free-trial step ---------- */
+/* The trial rendered as an ink card: the same near-black material as the primary button below
+   it, one pulsing dot, no sheen. The slight tilt is what makes it an object, not a rectangle. */
+
+/* The one thing that can go wrong on the card screen and still leave a next move. */
+.ob-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 14px 18px;
+  border: 1px solid rgb(247 78 0 / 0.3);
+  border-radius: 18px;
+  background-color: rgb(247 78 0 / 0.07);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ob-alert-ink);
+  text-align: left;
+}
+.ob-alert svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* ---------- channel picker + tools grid (post-Slack steps) ---------- */
+/* The tools grid needs more room than one column of prose, and the stage is what caps the width. */
+.ob-stage:has(.ob-step--wide) {
+  max-width: 860px;
+}
+
+.ob-search {
+  position: relative;
+  width: 100%;
+  margin-top: 28px;
+}
+.ob-search svg {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ob-faint);
+  pointer-events: none;
+}
+.ob-search input {
+  width: 100%;
+  height: 52px;
+  padding: 0 18px 0 46px;
+  border: 1px solid var(--ob-hairline-input);
+  border-radius: 999px;
+  background-color: var(--ob-raised);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ob-ink);
+  box-shadow: var(--ob-input-shadow);
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.ob-search input::placeholder {
+  color: var(--ob-faint);
+}
+.ob-search input:focus {
+  border-color: var(--ob-orange);
+  box-shadow:
+    var(--ob-input-shadow),
+    0 0 0 3px rgb(247 78 0 / 0.15);
+}
+
+.ob-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 22px;
+  border: 1px solid var(--ob-hairline);
+  border-radius: 24px;
+  background-color: var(--ob-raised);
+  box-shadow: var(--ob-pill-shadow);
+  text-align: left;
+}
+
+.ob-list {
+  width: 100%;
+  margin-top: 16px;
+  border: 1px solid var(--ob-hairline);
+  border-radius: 24px;
+  background-color: var(--ob-raised);
+  box-shadow: var(--ob-pill-shadow);
+  overflow: hidden;
+}
+.ob-list__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ob-secondary);
+  border-bottom: 1px solid var(--ob-rule);
+}
+.ob-list__scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.ob-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  font: inherit;
+  text-align: left;
+  color: var(--ob-ink);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.ob-row + .ob-row {
+  border-top: 1px solid var(--ob-rule);
+}
+.ob-row:hover {
+  background-color: var(--ob-paper);
+}
+.ob-row__hash {
+  color: var(--ob-faint);
+  font-size: 16px;
+  text-align: center;
+}
+.ob-row__name {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ob-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ob-secondary);
+}
+.ob-list__more {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  border-top: 1px solid var(--ob-rule);
+}
+/* Outside a list (the tools grid), the same row is a plain centred control. */
+.ob-tool-grid + .ob-list__more {
+  border-top: none;
+}
+
+/* A quiet inline "go back one view" control, above the head it returns to. */
+.ob-back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ob-secondary);
+  transition: color 120ms ease;
+}
+.ob-back:hover {
+  color: var(--ob-ink);
+}
+.ob-back:focus-visible {
+  outline: none;
+  color: var(--ob-ink);
+  box-shadow: 0 0 0 3px rgb(247 78 0 / 0.2);
+}
+
+/* The reassurance under a picker: one line of fine print with an icon, read left. */
+.ob-hint {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-align: left;
+  color: var(--ob-faint);
+}
+.ob-hint svg {
+  flex: none;
+  margin-top: 3px; /* optically centre the 16px icon on the first line of text */
+}
+
+/* small uppercase section label ("Popular") above the grid */
+.ob-tools-label {
+  margin: 28px 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ob-faint);
+}
+.ob-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .ob-tool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 420px) {
+  .ob-tool-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* one uniform chip: [icon] name [state]. The state slot is always reserved so every chip
+   is the same shape whether or not it shows a spinner/check. */
+.ob-tool {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--ob-hairline);
+  border-radius: 14px;
+  background-color: var(--ob-raised);
+  font: inherit;
+  text-align: left;
+  color: var(--ob-ink);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+.ob-tool:hover:not(:disabled) {
+  border-color: var(--ob-hairline-input);
+  box-shadow: var(--ob-pill-shadow);
+}
+.ob-tool:disabled {
+  cursor: default;
+}
+.ob-tool[data-connected="true"] {
+  border-color: rgb(247 78 0 / 0.4);
+}
+/* "browse more" tile: full-width row below the grid, dashed to read as an entry point */
+.ob-tool--more {
+  width: 100%;
+  margin-top: 8px;
+  border-style: dashed;
+}
+.ob-tool__mark {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ob-secondary);
+  overflow: hidden;
+}
+.ob-tool__name {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ob-tool__state {
+  color: var(--ob-faint);
+}
+.ob-tool[data-connected="true"] .ob-tool__state {
+  color: var(--ob-orange);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-animate,
+  .ob-leave {
+    animation: none;
+  }
+  .ob-live,
+  .ob-scanlog__line {
+    transition: none;
+  }
+}

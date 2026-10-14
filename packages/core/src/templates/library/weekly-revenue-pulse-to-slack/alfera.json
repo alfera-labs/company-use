@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Everyone starts the week looking at the same four numbers.",
+  "summary_text": "Post the four numbers that matter in the channel every Monday.",
+  "icon": "📈",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "founders",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Four numbers and last week's change",
+    "The one thing that moved, named",
+    "“Nothing much moved” when that is true",
+    "No chart nobody asked for"
+  ],
+  "what_it_does": [
+    "Four numbers, the change on last week, and nothing else",
+    "Names the one thing that moved and why",
+    "Says \"nothing much moved\" when nothing much moved",
+    "Never posts a chart nobody asked for"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read your billing data",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "post in one channel",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "stripe",
+      "requirement_label": "Stripe",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the numbers come from."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The channel it posts in."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "numbers",
+      "label": "Which four numbers",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "The channel it posts in",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 * * MON",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for the numbers any day"
+    }
+  ]
+}

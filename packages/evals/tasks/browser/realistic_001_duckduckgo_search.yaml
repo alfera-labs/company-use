@@ -1,0 +1,12 @@
+task_id: realistic_001_duckduckgo_search
+suite: realistic
+goal: >-
+  Search DuckDuckGo's HTML endpoint for "agent browser" by filling the search box
+  and submitting it, then confirm the results page loaded.
+start_url: https://html.duckduckgo.com/html/
+max_steps: 12
+graders:
+  - grader_type: url_matches
+    pattern: "duckduckgo\\.com"
+  - grader_type: page_contains
+    text: agent

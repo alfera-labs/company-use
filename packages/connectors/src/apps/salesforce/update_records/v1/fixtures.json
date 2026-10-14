@@ -1,0 +1,27 @@
+{
+  "update_records_mixed_outcome": [
+    {
+      "id": "001RM000003oCprYAE",
+      "success": true,
+      "errors": []
+    },
+    {
+      "id": "001RM000003oCptYAE",
+      "success": false,
+      "errors": [
+        {
+          "statusCode": "MALFORMED_ID",
+          "message": "Account ID: id value of incorrect type: 001xx000003DGb2999",
+          "fields": ["Id"]
+        }
+      ]
+    }
+  ],
+  "update_records_all_succeeded": [
+    {
+      "id": "001RM000003oCprYAE",
+      "success": true,
+      "errors": []
+    }
+  ]
+}

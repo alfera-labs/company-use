@@ -1,0 +1,260 @@
+{
+  "app_key": "slack",
+  "display_name": "Slack",
+  "base_url": "https://slack.com/api",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://slack.com/oauth/v2/authorize",
+    "token_url": "https://slack.com/api/oauth.v2.access",
+    "scopes": ["chat:write", "channels:read", "channels:history", "channels:join", "users:read"],
+    "scope_separator": "comma"
+  },
+  "scope_notes": [
+    "OAuth v2 bot token grant. v1 is retired.",
+    "chat:write posts messages, channels:read lists public channels, channels:history reads them.",
+    "channels:join lets the bot join a public channel it was never invited to. Without it every unjoined channel answers not_in_channel and syncs nothing.",
+    "users:read resolves the user ids that conversations.history returns."
+  ],
+  "sync": {
+    "prompt": "Choose which Slack channels to sync",
+    "file_fetch": { "hosts": ["files.slack.com", "*.slack.com"] },
+    "dimensions": [
+      {
+        "key": "channels",
+        "label": "Channels",
+        "note": "No new node: slack-list_channels-1 already lists exactly what a person picks from, and option_mapping turns its channels into scope options. The name goes in without a leading #, because the four value-expression operators cannot join two strings; `kind: channel` is what draws the # in the picker. num_members is a number and an option's sublabel is text, so the member count waits for either a formatting operator or a sublabel the runtime renders.",
+        "shape": "flat",
+        "browse_node": "slack-list_channels-1",
+        "option_mapping": {
+          "id": {
+            "$": "item.id"
+          },
+          "label": {
+            "$default": [
+              {
+                "$": "item.name"
+              },
+              {
+                "$": "item.id"
+              }
+            ]
+          },
+          "kind": "channel",
+          "selectable": true
+        },
+        "allow_select_all": true
+      }
+    ],
+    "objects": {
+      "channel_day": {
+        "list_node": "slack-list_messages-1",
+        "scoped_by": {
+          "channels": "channels[].channel_id"
+        },
+        "list_input": {
+          "limit": 100
+        },
+        "page": {
+          "cursor_param": "channels[].cursor",
+          "items": {
+            "$": "response.channels.0.records"
+          },
+          "next_cursor": {
+            "$": "response.channels.0.next_cursor"
+          },
+          "error": {
+            "$": "response.channels.0.error_code"
+          }
+        },
+        "strategy": "append_log",
+        "cursor": {
+          "field": {
+            "$": "item.page_ts"
+          },
+          "param": "oldest"
+        },
+        "edit_window_days": 14,
+        "identity": {
+          "$": "item.record_id"
+        },
+        "title": {
+          "$": "item.document_title"
+        },
+        "content": {
+          "$": "item.line"
+        },
+        "source_url": {
+          "$": "item.document_url"
+        },
+        "container": {
+          "id": {
+            "$": "scope.id"
+          },
+          "path": {
+            "$": "scope.label"
+          }
+        },
+        "files": {
+          "$": "item.files"
+        },
+        "bucket": {
+          "by": "key",
+          "key": {
+            "$": "item.document_key"
+          }
+        },
+        "label": "Channel days",
+        "when": {
+          "$": "item.is_day_record"
+        },
+        "item_kind": "slack_channel_day",
+        "metadata": {
+          "channel_id": {
+            "$": "item.channel_id"
+          },
+          "channel_name": {
+            "$": "scope.label"
+          },
+          "day": {
+            "$": "item.day"
+          },
+          "last_time": {
+            "$": "item.time"
+          },
+          "author": {
+            "$": "item.author_name"
+          },
+          "reply_authors": {
+            "$": "item.thread_participants"
+          },
+          "threads": {
+            "$": "item.thread_keys"
+          },
+          "posted_time": {
+            "$": "item.time"
+          }
+        },
+        "note": "One document per channel per day, holding the messages that are not part of a thread plus a one-line stub for every thread that started that day. message_count is the engine's own record_count, participants is the engine's own participants, and threads is an array so a reader counts them with its length. first_time and thread_count are NOT stored: the bucket merge keeps the last value per key, which is right for last_time and wrong for a first or a sum, and the day's first clock time is already the document's first line. posted_time is the record's own time: merged into the day it is the newest line's time, and read off a single record it is when a file carried by that line was posted."
+      },
+      "thread": {
+        "list_node": "slack-list_messages-1",
+        "scoped_by": {
+          "channels": "channels[].channel_id"
+        },
+        "list_input": {
+          "limit": 100
+        },
+        "page": {
+          "cursor_param": "channels[].cursor",
+          "items": {
+            "$": "response.channels.0.records"
+          },
+          "next_cursor": {
+            "$": "response.channels.0.next_cursor"
+          },
+          "error": {
+            "$": "response.channels.0.error_code"
+          }
+        },
+        "strategy": "append_log",
+        "cursor": {
+          "field": {
+            "$": "item.page_ts"
+          },
+          "param": "oldest"
+        },
+        "edit_window_days": 14,
+        "identity": {
+          "$": "item.record_id"
+        },
+        "title": {
+          "$": "item.document_title"
+        },
+        "content": {
+          "$": "item.line"
+        },
+        "source_url": {
+          "$": "item.document_url"
+        },
+        "container": {
+          "id": {
+            "$": "scope.id"
+          },
+          "path": {
+            "$": "scope.label"
+          }
+        },
+        "files": {
+          "$": "item.files"
+        },
+        "bucket": {
+          "by": "key",
+          "key": {
+            "$": "item.document_key"
+          }
+        },
+        "label": "Threads",
+        "when": {
+          "$": "item.is_thread_record"
+        },
+        "item_kind": "slack_thread",
+        "metadata": {
+          "channel_id": {
+            "$": "item.channel_id"
+          },
+          "channel_name": {
+            "$": "scope.label"
+          },
+          "thread_ts": {
+            "$": "item.thread_ts"
+          },
+          "started_time": {
+            "$": "item.started_time"
+          },
+          "last_reply_time": {
+            "$": "item.last_reply_time"
+          },
+          "reply_count": {
+            "$": "item.reply_count"
+          },
+          "started_by": {
+            "$": "item.started_by"
+          },
+          "file_count": {
+            "$": "item.thread_file_count"
+          },
+          "author": {
+            "$": "item.author_name"
+          },
+          "reply_authors": {
+            "$": "item.thread_participants"
+          },
+          "posted_time": {
+            "$": "item.time"
+          }
+        },
+        "relationships": {
+          "in_container": {
+            "$": "item.day_document_key"
+          }
+        },
+        "note": "A thread is its own document, root and every reply, however many days it spans. That is what stops a thread growing tomorrow from rewriting yesterday's channel day. The node emits every line with its own document_key, so the two Slack objects read ONE list node and each takes its own records through `when`; is_thread_record is a field because the four operators cannot say 'not'. Every thread fact (reply_count, started_by, last_reply_time, file_count) is stamped identically on every line, because the bucket merge keeps the LAST value per key and only a constant survives that honestly. `in_container` rather than a new 'started_in' kind: the four link kinds the schema allows already name this edge, and a fifth needs a migration. The page is 100 messages, not 200, because the node reads the replies of every thread root on the page and the page size is the only bound on that."
+      }
+    }
+  },
+  "rate_limits": {
+    "rpm": 50,
+    "concurrency": 4,
+    "burst": 5
+  },
+  "rate_limit_notes": [
+    "Slack limits per METHOD, in tiers, not per app.",
+    "Tier 1 ~1/min, Tier 2 ~20/min (conversations.list), Tier 3 ~50/min (conversations.history, conversations.replies, conversations.info, users.list).",
+    "chat.postMessage is the special tier: about 1 message per second PER CHANNEL.",
+    "rate_limits is one bucket per app, and it is set to Tier 3 — 50 a minute — because every call a SYNC makes is Tier 3. At 20 a minute one busy channel page cost five minutes and a background crawl was killed before it finished.",
+    "The one Tier 2 method these nodes touch is conversations.list, which the picker calls a handful of times when a person opens it, never in a loop. Slack answers 429 with Retry-After and the framework pauses this connection's bucket for exactly that long, so overshooting a slower tier costs latency and never costs correctness.",
+    "burst lets a small batch through, which is the shape almost every call has.",
+    "The per-channel second is NOT enforced here — one app-wide bucket cannot express a per-channel rule. slack-send_messages-1 owns it by sending one channel's messages in order.",
+    "One bucket for every method. Per-node limits are the upgrade path the day a node needs Tier 4 throughput."
+  ]
+}

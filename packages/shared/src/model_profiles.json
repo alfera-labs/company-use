@@ -1,0 +1,20 @@
+{
+  "comment": [
+    "Named model selections outside one language-model call.",
+    "Customer and browser defaults resolve from environment at their composition roots."
+  ],
+  "model_profiles": {
+    "customer_agent": {
+      "model_proxy_when_env_is_unset": "openai_direct",
+      "model_name_when_env_is_unset": "gpt-6-luna",
+      "reasoning_level": "high"
+    },
+    "browser_agent": {
+      "read_model_proxy_from_env": "COWORKER_BROWSER_MODEL_PROXY",
+      "model_proxy_when_env_is_unset": "anthropic_direct",
+      "read_model_name_from_env": "COWORKER_BROWSER_MODEL_NAME",
+      "model_name_when_env_is_unset": "claude-sonnet-5",
+      "reasoning_level": "high"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["files"],
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "lastModifiedDateTime"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "mimeType": { "type": "string" },
+          "size": { "type": "integer" },
+          "webUrl": { "type": "string" },
+          "lastModifiedDateTime": { "type": "string", "format": "date-time" },
+          "deleted": { "type": "boolean" }
+        }
+      }
+    },
+    "next_skip_token": { "type": ["string", "null"] }
+  }
+}

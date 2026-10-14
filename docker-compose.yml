@@ -1,0 +1,21 @@
+services:
+  postgres:
+    # pgvector-enabled Postgres 17 (memory_facts.fact_embedding is a vector column).
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: coworker
+      POSTGRES_PASSWORD: coworker
+      POSTGRES_DB: coworker
+    ports:
+      # Loopback only: the dev password is public in the repo, and a bare port publishes to every interface.
+      - "127.0.0.1:${DB_PORT:-55432}:5432"
+    volumes:
+      - coworker_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coworker -d coworker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  coworker_postgres:

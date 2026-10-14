@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["Invoices"],
+  "properties": {
+    "Invoices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["InvoiceID", "UpdatedDateUTC"],
+        "properties": {
+          "InvoiceID": { "type": "string" },
+          "InvoiceNumber": { "type": "string" },
+          "Reference": { "type": ["string", "null"] },
+          "Total": { "type": "number" },
+          "CurrencyCode": { "type": "string" },
+          "Status": { "type": "string" },
+          "Contact": { "type": "object" },
+          "UpdatedDateUTC": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "next_page": { "type": ["integer", "null"] }
+  }
+}

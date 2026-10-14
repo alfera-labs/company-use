@@ -1,0 +1,11 @@
+task_id: ctx_003_persisted_summary_boundary_holds
+prompt: "Use the persisted summary and its boundary without generating a new summary."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: persisted_summary_boundary
+  - grader_type: db_assertion
+    assertion: context_snapshot_exists
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

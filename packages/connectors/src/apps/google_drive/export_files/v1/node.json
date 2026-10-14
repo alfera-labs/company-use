@@ -1,0 +1,120 @@
+{
+  "node_key": "google_drive-export_files-1",
+  "display_name": "Export Drive Files",
+  "description": "Export a batch of Google-native files (Docs, Sheets, Slides) as text, one call. Give each file the target `mime_type`: text/markdown or text/plain for a Doc, text/csv for a Sheet (first tab only), text/plain for a Slides deck. Only Google-native files export; a PDF or an uploaded .docx fails with a per-file error. Google caps an export at 10 MB of source content. The result keeps the input order and reports each file separately, so one failure never discards the files that did export.",
+  "required_scopes": ["https://www.googleapis.com/auth/drive.readonly"],
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "files": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "file_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mime_type": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["file_id", "mime_type"]
+        },
+        "description": "The files to export, at most 100 per call. Each needs a file_id and a target mime_type."
+      }
+    },
+    "required": ["files"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "files": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "file_id": {
+                  "type": "string"
+                },
+                "mime_type": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": ["ok", "file_id", "mime_type", "text"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "type": "boolean",
+                  "const": false
+                },
+                "file_id": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["code", "message", "retryable"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["ok", "file_id", "error"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "required": ["files"],
+    "additionalProperties": false
+  },
+  "requests": {
+    "files_export": {
+      "method": "GET",
+      "path": "files/{file_id}/export",
+      "query": {
+        "mimeType": "file.mime_type"
+      },
+      "per_item": true,
+      "response_format": "text",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "files.export answers with the exported document itself, not JSON. The request asks for response_format text, so the ingress is the string.",
+        "type": "string"
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "Drive has no batch export endpoint, so the plural contract runs through the runtime fan_out as bounded concurrent singles under the app rate limits.",
+    "batch_ceiling": "100 exports already cost 20,000 of the connection's 325,000 quota units a minute, so the input caps there and a caller pages instead.",
+    "known_gap_text_ingress": "runtime/http_request.ts parses every provider answer with response.json(), and files.export answers with the raw exported text. A real Doc export therefore fails ingress as invalid_provider_response for that one file. The fix is one field, response_format: 'json' | 'text' on ConnectorNodeRequest, read by parse_response. This node already ingresses a bare string and needs no change when that field lands."
+  }
+}

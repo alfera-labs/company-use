@@ -1,0 +1,79 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "One import file you can run without creating four hundred duplicates.",
+  "summary_text": "De-duplicate an exported list and match it to what you already have.",
+  "icon": "🧹",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Matched on domain first, never email alone",
+    "One row per company",
+    "An “existing record” column",
+    "The undecided rows in their own tab"
+  ],
+  "what_it_does": [
+    "Matches on domain first, name second, never on email alone",
+    "Collapses the same company written five ways into one row",
+    "Leaves an \"existing record\" column so nothing overwrites blindly",
+    "Puts the rows it could not decide about in their own tab"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the sheet and the existing records",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "write a cleaned import sheet back",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The list it cleans."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "hubspot",
+      "requirement_label": "HubSpot",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "What it matches against."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "sheet",
+      "label": "The sheet to clean",
+      "input_type": "document"
+    },
+    {
+      "input_key": "duplicate_rule",
+      "label": "What counts as a duplicate",
+      "input_type": "text"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "you_ask",
+      "note": "Run it on any export you have"
+    }
+  ]
+}

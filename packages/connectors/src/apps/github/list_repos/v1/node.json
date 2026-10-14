@@ -1,0 +1,93 @@
+{
+  "node_key": "github-list_repos-1",
+  "display_name": "List GitHub Repositories",
+  "description": "List the repositories the connected account can reach, most recently updated first, as the options a person picks from. Each option's id is the owner/repo full name, which is what github-list_issues-1 and github-list_pull_requests-1 take. Pass the returned next_cursor back as `cursor` for the next page; a null next_cursor means the last page. This is the browse node behind the github sync picker, so its output is the scope-option shape.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": ["repo"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. Repositories are a flat list, so there is nothing to open."
+      },
+      "query": {
+        "type": "string",
+        "description": "Ignored. /user/repos takes no text filter; see quirks.no_text_filter."
+      },
+      "cursor": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$",
+        "description": "The next_cursor from the previous page. It is a page number. Omit for the first page."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "description": "Repositories per page, 1 to 100. GitHub serves at most 100."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "sublabel", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": { "type": ["string", "null"] }
+    }
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Validates the installation response envelope. GET /user/repos uses the repositories array schema below directly.",
+    "type": "object",
+    "required": ["repositories"],
+    "properties": {
+      "total_count": { "type": ["integer", "null"] },
+      "repositories": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "full_name": { "type": "string" },
+            "name": { "type": ["string", "null"] },
+            "private": { "type": ["boolean", "null"] },
+            "description": { "type": ["string", "null"] },
+            "updated_at": { "type": ["string", "null"] },
+            "archived": { "type": ["boolean", "null"] }
+          },
+          "required": ["full_name"]
+        }
+      }
+    }
+  },
+  "quirks": {
+    "endpoint": "GET /user/repos; GET /installation/repositories for installation tokens",
+    "why_execute": "The sublabel joins two facts into one line and the cursor is arithmetic on a page number. Neither is expressible in the four value-expression operators.",
+    "auth_model": "OAuth returns a user token, so the node first reads GET /user/repos. Existing installation tokens receive 403 there. Only that authorization failure selects GET /installation/repositories, which returns an envelope. Invalid credentials and rate limits retain their errors.",
+    "id_is_the_full_name": "The option id is owner/repo, not GitHub's numeric id, because every other node in this app addresses a repository that way and a crawler reading sync_scope must be able to use the id it stored without a lookup.",
+    "pagination": "GitHub answers with a `Link` header carrying rel=\"next\", which a node cannot read: send_request hands back the parsed body and nothing else. So the cursor is the page number, and a page as long as the one requested is the signal that another page exists. A last page that happens to be exactly full costs one extra empty request.",
+    "no_text_filter": "Neither repository endpoint has a text filter. Filtering one page hides matches on other pages, so the node ignores query.",
+    "sort": "User repositories use sort=updated. The installation endpoint takes no sort parameter, so existing installation connections keep GitHub's order."
+  }
+}

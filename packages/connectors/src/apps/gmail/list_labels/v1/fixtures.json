@@ -1,0 +1,59 @@
+{
+  "_source": "doc-derived, not recorded: shaped from the Gmail v1 discovery document's users.labels.list response (https://gmail.googleapis.com/$discovery/rest?version=v1) and the Label resource it returns — id, name, type, and the two visibility fields this node ignores. No real mailbox, no tokens.",
+  "labels_list": {
+    "labels": [
+      {
+        "id": "INBOX",
+        "name": "INBOX",
+        "messageListVisibility": "hide",
+        "labelListVisibility": "labelShow",
+        "type": "system"
+      },
+      {
+        "id": "SENT",
+        "name": "SENT",
+        "type": "system"
+      },
+      {
+        "id": "CHAT",
+        "name": "CHAT",
+        "type": "system"
+      },
+      {
+        "id": "CATEGORY_PROMOTIONS",
+        "name": "CATEGORY_PROMOTIONS",
+        "type": "system"
+      },
+      {
+        "id": "Label_17",
+        "name": "Customers/Acme",
+        "messageListVisibility": "show",
+        "labelListVisibility": "labelShow",
+        "type": "user"
+      },
+      {
+        "id": "Label_23",
+        "name": "Invoices",
+        "type": "user"
+      }
+    ]
+  },
+  "labels_list_sparse": {
+    "labels": [
+      {
+        "id": "Label_31",
+        "name": "Board"
+      },
+      {
+        "id": "Label_32"
+      }
+    ]
+  },
+  "labels_list_forbidden": {
+    "error": {
+      "code": 403,
+      "message": "Request had insufficient authentication scopes.",
+      "status": "PERMISSION_DENIED"
+    }
+  }
+}

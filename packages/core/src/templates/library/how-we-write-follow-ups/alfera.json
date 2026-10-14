@@ -1,0 +1,77 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Follow-ups that sound like you wrote them, in every task that writes one.",
+  "summary_text": "Make every follow-up match your team's structure, length, and sign-off.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "topic",
+      "facet_key": "featured",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Opens with something they actually said",
+    "Makes one clear ask",
+    "Gives the ask a date",
+    "Marks the third chase as the last one"
+  ],
+  "guidance": [
+    {
+      "label": "Opening",
+      "value": "Reference something they actually said"
+    },
+    {
+      "label": "Ask",
+      "value": "One clear request, never two"
+    },
+    {
+      "label": "Timing",
+      "value": "Use a specific date"
+    },
+    {
+      "label": "Length",
+      "value": "Skip the recap paragraph"
+    }
+  ],
+  "used_when_text": "Used whenever it writes a follow-up",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill when drafting a follow-up",
+      "risk": "reads_data"
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "sign_off",
+      "label": "Sign off as",
+      "input_type": "text",
+      "example_answer": "Sam Sample"
+    },
+    {
+      "input_key": "length",
+      "label": "Length",
+      "input_type": "text",
+      "example_answer": "No more than 5 sentences"
+    },
+    {
+      "input_key": "subject",
+      "label": "Subject line",
+      "input_type": "text",
+      "example_answer": "Reply in the existing thread"
+    },
+    {
+      "input_key": "never_say",
+      "label": "Never say",
+      "input_type": "text",
+      "example_answer": "Just circling back"
+    }
+  ],
+  "starts_when": []
+}

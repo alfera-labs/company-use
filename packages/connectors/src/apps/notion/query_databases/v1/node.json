@@ -1,0 +1,212 @@
+{
+  "node_key": "notion-query_databases-1",
+  "display_name": "Query Notion Databases",
+  "description": "Read rows from one or more Notion tables. Each query names the table by data_source_id (what notion-search_pages-1 returns for a \"data_source\" result) or by database_id, and may carry a Notion filter, sorts, and a cursor. Notion has no batch query endpoint, so the queries run as bounded concurrent single requests under the connection limit of about three per second: one round trip per query, so keep the batch small. Each query answers on its own — one failure returns an error for that query and rows for the rest. Every row keeps its raw Notion properties alongside the extracted title, and its own next_cursor; send that cursor back on the same table to read the next page.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": [],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "queries": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 25,
+        "description": "The tables to read, one provider call each.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "data_source_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The table to read. Preferred: it costs one request instead of two."
+            },
+            "database_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The database holding the table, when the data source id is unknown. Its first data source is read."
+            },
+            "filter": {
+              "type": "object",
+              "description": "A Notion filter object, forwarded untouched. See Notion's filter reference."
+            },
+            "sorts": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "description": "Notion sort objects, forwarded untouched."
+            },
+            "cursor": {
+              "type": "string",
+              "description": "The cursor this table returned last time. Paging is per table, because each table is its own provider call with its own pages."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        }
+      }
+    },
+    "required": ["queries"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer"
+            },
+            "data_source_id": {
+              "type": ["string", "null"],
+              "description": "The table that actually answered, so a caller that passed a database_id sees which data source was read."
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": ["string", "null"]
+                  },
+                  "last_edited_time": {
+                    "type": ["string", "null"]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "The row's raw Notion property values, unflattened."
+                  }
+                },
+                "required": ["id", "title", "url", "last_edited_time", "properties"]
+              }
+            },
+            "next_cursor": {
+              "type": ["string", "null"]
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["code", "message", "retryable"]
+            }
+          },
+          "required": ["index", "data_source_id", "ok", "rows", "next_cursor", "has_more", "error"]
+        }
+      }
+    },
+    "required": ["results"]
+  },
+  "response_schemas": {
+    "query": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on POST /v1/data_sources/{data_source_id}/query. Property values stay open: Notion's property union grows every year and a stale copy would reject rows Notion serves.",
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": ["string", "null"]
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": ["string", "null"]
+              },
+              "last_edited_time": {
+                "type": ["string", "null"]
+              },
+              "properties": {
+                "type": ["object", "null"],
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": ["string", "null"]
+                    },
+                    "title": {}
+                  }
+                }
+              }
+            },
+            "required": ["id"]
+          }
+        },
+        "next_cursor": {
+          "type": ["string", "null"]
+        },
+        "has_more": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "required": ["results"]
+    },
+    "database": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on GET /v1/databases/{database_id}, used only to turn a database_id into the data source to read.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data_sources": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["id"]
+          }
+        }
+      },
+      "required": ["id"]
+    }
+  },
+  "quirks": {
+    "endpoint": "POST /v1/data_sources/{data_source_id}/query, and GET /v1/databases/{database_id} first when the caller gave a database_id.",
+    "why_execute": "Notion has no batch query endpoint, so the plural contract runs as a fan-out with per-item results and a cursor per table. A query given a database_id also needs a lookup call before it. A declarative http mapping expresses neither.",
+    "data_source_split": "Since API version 2025-09-03 a database is a container of one or more data sources, and POST /v1/databases/{id}/query is gone. This node calls POST /v1/data_sources/{id}/query.",
+    "first_data_source_wins": "A database_id with several data sources has no single right answer, so the first one is read. The answer names the data_source_id it used, so the choice is never silent.",
+    "filter_grammar": "Notion's filter and sort grammars are deep recursive unions that grow with every property type. They are forwarded untouched rather than remodelled, so a stale copy cannot reject a filter Notion accepts.",
+    "truncated_property_arrays": "Notion truncates paginated property arrays (title, rich_text, people, relation) to 25 items inside a row. Read the rest with the page property endpoint.",
+    "result_cap": "One query walks at most 10,000 rows through its cursors."
+  }
+}

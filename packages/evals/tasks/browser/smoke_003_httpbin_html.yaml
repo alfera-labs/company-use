@@ -1,0 +1,8 @@
+task_id: smoke_003_httpbin_html
+suite: smoke
+goal: Open the httpbin HTML page and read the classic-literature excerpt on it.
+start_url: https://httpbin.org/html
+max_steps: 6
+graders:
+  - grader_type: page_contains
+    text: Herman Melville

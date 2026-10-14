@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+// A stand-in for ssh, for `npm run check-setup`. It is first on the PATH of that run, so the
+// app starts this file where it would start the ssh of the Mac. It connects to nothing. It
+// writes down how it was called, then answers the way the scenario of the run says.
+//   ALFERA_STAND_IN_SCENARIO   the name of a record in scenarios.cjs
+//   ALFERA_STAND_IN_RECORD     a file that gets one JSON line per call: arguments and stdin
+//   ALFERA_STAND_IN_ADDRESS    the address the "installed server" reports
+//   ALFERA_STAND_IN_NO_WAITS   set, it answers at once, for a test that looks at no screen
+const fs = require('node:fs');
+const { scenarios } = require('./scenarios.cjs');
+
+const answers_at_once = Boolean(process.env.ALFERA_STAND_IN_NO_WAITS);
+const milliseconds_between_pieces = answers_at_once ? 0 : 60;
+// Long enough for the screen to show that it is waiting, and for the check to see it.
+const milliseconds_before_the_answer = answers_at_once ? 0 : 400;
+const record_file = process.env.ALFERA_STAND_IN_RECORD;
+const called_with = process.argv.slice(2);
+const remote_command = called_with.at(-1) ?? '';
+const kinds_by_words = { 'alfera-server-check': 'check', 'install.sh': 'install', 'team link': 'sign_in_link' };
+const kind = Object.entries(kinds_by_words).find(([words]) => remote_command.includes(words))?.[1] ?? 'unknown';
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function read_stdin() {
+  let text = '';
+  for await (const piece of process.stdin) text += piece;
+  return text;
+}
+
+function count_earlier_calls_of_this_kind() {
+  if (!fs.existsSync(record_file)) return 0;
+  const calls = fs.readFileSync(record_file, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+  return calls.filter((call) => call.kind === kind).length;
+}
+
+async function answer() {
+  const stdin = await read_stdin();
+  const earlier = count_earlier_calls_of_this_kind();
+  fs.appendFileSync(record_file, `${JSON.stringify({ kind, called_with, stdin })}\n`);
+  const answers = scenarios[process.env.ALFERA_STAND_IN_SCENARIO]?.[kind];
+  if (!answers) {
+    process.stderr.write(`the stand-in has no answer for a call of the kind ${kind}\n`);
+    process.exit(2);
+  }
+  const chosen = answers[Math.min(earlier, answers.length - 1)];
+  const fill_in = (text) =>
+    text.replaceAll('{address}', process.env.ALFERA_STAND_IN_ADDRESS).replaceAll('{key}', stdin.trim());
+  await wait(milliseconds_before_the_answer);
+  process.stderr.write(`${fill_in(chosen.log ?? '')}\n`);
+  for (const text of chosen.output) {
+    // Each line goes out in two pieces, the way a slow network cuts it.
+    const whole = `${fill_in(text)}\n`;
+    process.stdout.write(whole.slice(0, 9));
+    await wait(milliseconds_between_pieces);
+    process.stdout.write(whole.slice(9));
+    await wait(milliseconds_between_pieces);
+  }
+  process.exitCode = chosen.exit_code;
+}
+
+answer();

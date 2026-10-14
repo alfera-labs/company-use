@@ -1,0 +1,126 @@
+{
+  "node_key": "github-create_issues-1",
+  "display_name": "Create GitHub Issues",
+  "description": "Create one or more issues on GitHub repositories. Every issue reports its own outcome: the created issue on success, an error on failure. One failed item never blocks the others.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": ["repo"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "issues": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "description": "The issues to create, one provider call each.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string", "minLength": 1 },
+            "repo": { "type": "string", "minLength": 1 },
+            "title": { "type": "string", "minLength": 1 },
+            "body": { "type": "string" },
+            "labels": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Applying labels needs push access to the repository. Without it GitHub refuses the whole create, and that item comes back as an error."
+            }
+          },
+          "required": ["owner", "repo", "title"]
+        }
+      }
+    },
+    "required": ["issues"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": { "type": "integer" },
+            "owner": { "type": "string" },
+            "repo": { "type": "string" },
+            "ok": { "type": "boolean" },
+            "issue": {
+              "type": ["object", "null"],
+              "properties": {
+                "number": { "type": "integer" },
+                "title": { "type": "string" },
+                "state": { "type": "string" },
+                "html_url": { "type": "string" },
+                "body": { "type": ["string", "null"] },
+                "labels": { "type": "array", "items": { "type": "string" } },
+                "author": { "type": ["string", "null"] },
+                "created_time": { "type": "string" },
+                "last_updated_time": { "type": "string" }
+              },
+              "required": [
+                "number",
+                "title",
+                "state",
+                "html_url",
+                "body",
+                "labels",
+                "author",
+                "created_time",
+                "last_updated_time"
+              ]
+            },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" },
+                "retryable": { "type": "boolean" }
+              },
+              "required": ["code", "message", "retryable"]
+            }
+          },
+          "required": ["index", "owner", "repo", "ok", "issue", "error"]
+        }
+      }
+    },
+    "required": ["results"]
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Lenient ingress on the 201 body of POST /repos/{owner}/{repo}/issues: the created issue.",
+    "type": "object",
+    "properties": {
+      "number": { "type": "number" },
+      "title": { "type": "string" },
+      "state": { "type": "string" },
+      "html_url": { "type": "string" },
+      "body": { "type": ["string", "null"] },
+      "labels": {
+        "type": ["array", "null"],
+        "items": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "object", "properties": { "name": { "type": ["string", "null"] } } }
+          ]
+        }
+      },
+      "user": {
+        "type": ["object", "null"],
+        "properties": { "login": { "type": "string" } },
+        "required": ["login"]
+      },
+      "created_at": { "type": "string" },
+      "updated_at": { "type": "string" }
+    },
+    "required": ["number", "title", "state", "html_url", "created_at", "updated_at"]
+  },
+  "quirks": {
+    "endpoint": "POST /repos/{owner}/{repo}/issues",
+    "why_execute": "GitHub creates one issue per request, so the plural contract runs as a bounded fan-out with one outcome per item. A declarative http mapping cannot express that.",
+    "not_atomic": "A batch of unrelated issues that half succeeds is a real outcome the caller must see, item by item, not a rollback nobody can perform.",
+    "omitted_fields": "The node sends only the fields the caller set, so GitHub's own defaults apply to the rest.",
+    "rate_limit": "GitHub caps content-creating requests at 80 per minute and 500 per hour, which is why the batch is capped and the app's concurrency is 4."
+  }
+}

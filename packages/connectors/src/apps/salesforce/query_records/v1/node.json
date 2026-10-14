@@ -1,0 +1,113 @@
+{
+  "node_key": "salesforce-query_records-1",
+  "display_name": "Query Salesforce Records",
+  "description": "Run one SOQL query against Salesforce and return a page of records. Pass `soql` such as \"SELECT Id, Name FROM Account WHERE CreatedDate = LAST_N_DAYS:30\". When `done` is false, call again with `next_cursor` as `cursor` to read the next page; the query text is ignored on those calls.",
+  "implementation": "execute",
+  "required_scopes": ["api"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "soql": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The SOQL statement to run, for example \"SELECT Id, Name FROM Account LIMIT 50\"."
+      },
+      "cursor": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The `next_cursor` from a previous call. Reads the next page and ignores `soql`."
+      }
+    },
+    "required": ["soql"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "records": {
+        "type": "array",
+        "description": "The page of records, untouched, including Salesforce's own `attributes` block.",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Pass back as `cursor` to read the next page. Null when the query is finished."
+      },
+      "done": {
+        "type": "boolean",
+        "description": "False while more pages remain."
+      },
+      "total_size": {
+        "type": ["number", "null"],
+        "description": "How many records the whole query matches, not just this page."
+      }
+    },
+    "required": ["records", "next_cursor", "done", "total_size"],
+    "additionalProperties": false
+  },
+  "requests": {
+    "query_page": {
+      "method": "GET",
+      "path": "/services/data/v61.0/query and /services/data/v61.0/query/{locator}",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "totalSize": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nextRecordsUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["done"],
+        "additionalProperties": {}
+      }
+    }
+  },
+  "quirks": {
+    "why_execute_and_not_http": "Two reasons a declarative http mapping cannot cover: the call host is per connection (see salesforce_api.ts), and the path changes shape between the first page (/query?q=) and the next ones (/query/{locator}).",
+    "cursor_is_a_locator_not_a_url": "Salesforce returns nextRecordsUrl as a full path. The node keeps only the trailing locator, checks it against ^[A-Za-z0-9_-]+$, and rebuilds the path itself, so a cursor coming from a model cannot point the node at another endpoint on the org.",
+    "endpoint": "GET /services/data/v61.0/query and /services/data/v61.0/query/{locator}",
+    "page_size": "Salesforce decides the page size (2000 records for most objects, fewer for wide rows). There is no page-size parameter on this endpoint; use LIMIT in the SOQL to cap the whole result."
+  }
+}

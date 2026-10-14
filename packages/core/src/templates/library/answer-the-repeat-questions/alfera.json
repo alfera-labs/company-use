@@ -1,0 +1,80 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "The queue only contains things that actually needed a person.",
+  "summary_text": "Answer the questions you have already settled, and leave the rest alone.",
+  "icon": "💬",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "A reply on the questions you have settled",
+    "Your own wording, from past replies",
+    "Anything about money left for a person",
+    "A queue that only holds real work"
+  ],
+  "what_it_does": [
+    "Only answers questions this workspace has already settled an answer to",
+    "Writes it in your words, from your past replies",
+    "Leaves anything about money, data or apology to a person",
+    "Says \"a colleague will pick this up\" rather than guessing"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the ticket and past answers",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "reply to the customer",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "zendesk",
+      "requirement_label": "Zendesk",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The tickets it reads and replies to."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "queue",
+      "label": "The queue it answers from",
+      "input_type": "list"
+    },
+    {
+      "input_key": "allowed",
+      "label": "Which questions it may answer",
+      "input_type": "text"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "zendesk-ticket_created",
+        "app_key": "zendesk",
+        "listener_config": {}
+      },
+      "label": "when a ticket arrives",
+      "note": "Only the queues you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it on a backlog whenever you like"
+    }
+  ]
+}

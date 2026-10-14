@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "notion",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "NOTION_SEARCH_NOTION_PAGE": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "NOTION_QUERY_DATABASE": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

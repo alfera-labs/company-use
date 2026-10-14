@@ -1,0 +1,169 @@
+task_id: fullstack_001_nextjs_api_landing
+prompt: "Build a Next.js app with a landing page and a health API route."
+workspace_provider: docker
+runner:
+  runner_type: scripted_actions
+  actions:
+    - action_type: write_file
+      path: repo/package.json
+      content: |
+        {
+          "name": "fullstack-eval-app",
+          "version": "0.1.0",
+          "private": true,
+          "type": "module",
+          "scripts": {
+            "dev": "next dev --hostname 0.0.0.0",
+            "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+            "start": "next start --hostname 0.0.0.0"
+          },
+          "dependencies": {
+            "next": "^16.2.6",
+            "react": "^19.2.3",
+            "react-dom": "^19.2.3"
+          }
+        }
+    - action_type: write_file
+      path: repo/next.config.mjs
+      content: |
+        /** @type {import('next').NextConfig} */
+        const nextConfig = {};
+
+        export default nextConfig;
+    - action_type: write_file
+      path: repo/app/layout.jsx
+      content: |
+        import "./globals.css";
+
+        export const metadata = {
+          title: "Acme Operations",
+          description: "Fullstack eval fixture"
+        };
+
+        export default function RootLayout({ children }) {
+          return (
+            <html lang="en">
+              <body>{children}</body>
+            </html>
+          );
+        }
+    - action_type: write_file
+      path: repo/app/page.jsx
+      content: |
+        export default function Home() {
+          return (
+            <main>
+              <section className="hero">
+                <p className="eyebrow">Live operating system</p>
+                <h1>Acme Operations</h1>
+                <p className="lede">
+                  Track customers, revenue work, and support queues from one fullstack workspace.
+                </p>
+              </section>
+              <section className="metrics" aria-label="operating metrics">
+                <div><strong>42</strong><span>accounts</span></div>
+                <div><strong>7</strong><span>open escalations</span></div>
+                <div><strong>98%</strong><span>SLA health</span></div>
+              </section>
+            </main>
+          );
+        }
+    - action_type: write_file
+      path: repo/app/api/health/route.js
+      content: |
+        export async function GET() {
+          return Response.json({ ok: true, service: "acme-operations" });
+        }
+    - action_type: write_file
+      path: repo/app/globals.css
+      content: |
+        :root {
+          color: #14213d;
+          background: #f7f5ef;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+          margin: 0;
+        }
+
+        main {
+          min-height: 100vh;
+          padding: 56px;
+        }
+
+        .hero {
+          max-width: 780px;
+        }
+
+        .eyebrow {
+          color: #006d77;
+          font-size: 14px;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        h1 {
+          margin: 0;
+          font-size: 64px;
+          line-height: 1;
+        }
+
+        .lede {
+          color: #3d405b;
+          font-size: 22px;
+          line-height: 1.5;
+        }
+
+        .metrics {
+          display: grid;
+          gap: 16px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-top: 48px;
+          max-width: 780px;
+        }
+
+        .metrics div {
+          border: 1px solid #d7d0c0;
+          border-radius: 8px;
+          padding: 18px;
+        }
+
+        .metrics strong,
+        .metrics span {
+          display: block;
+        }
+graders:
+  - grader_type: file_exists
+    path: repo/app/page.jsx
+  - grader_type: file_contains
+    path: repo/app/api/health/route.js
+    text: "acme-operations"
+  - grader_type: command_succeeds
+    command:
+      command: npm
+      args: ["install"]
+      cwd: repo
+      timeout_ms: 120000
+  - grader_type: command_succeeds
+    command:
+      command: npm
+      args: ["run", "build"]
+      cwd: repo
+      timeout_ms: 120000
+  - grader_type: http_server_checks
+    server:
+      command: npm
+      args: ["run", "dev", "--", "--port", "${PORT}"]
+      cwd: repo
+      timeout_ms: 5000
+    ready_timeout_ms: 45000
+    request_timeout_ms: 5000
+    checks:
+      - url: "http://127.0.0.1:${PORT}/"
+        status: 200
+        contains: "Acme Operations"
+      - url: "http://127.0.0.1:${PORT}/api/health"
+        status: 200
+        contains: "acme-operations"
+  - grader_type: run_ended_clean

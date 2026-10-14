@@ -1,0 +1,60 @@
+export type RuntimeEnvironmentPreview = Record<string, unknown> & {
+  port: number;
+  preview_url?: string;
+  url?: string;
+  public_url?: string;
+  app_url?: string;
+  preview_name?: string;
+  app_name?: string;
+  name?: string;
+  subdomain_seed?: string;
+  process_id?: number | null;
+  command?: string;
+  launch_command?: string;
+  launch_args?: string[];
+  cwd?: string;
+  ready_path?: string;
+  started_time?: string;
+};
+
+export type RuntimeEnvironmentExplicitPreview = Record<string, unknown> & {
+  preview_url?: string;
+  url?: string;
+  public_url?: string;
+  app_url?: string;
+  preview_name?: string;
+  app_name?: string;
+  label?: string;
+  name?: string;
+  port?: number;
+};
+
+export type RuntimeEnvironmentData = Record<string, unknown> & {
+  browser_started?: boolean;
+  runtime_environment_id?: string;
+  provider_environment_id?: string;
+  provider_preview_host?: string;
+  project_description?: string;
+  app_description?: string;
+  workspace_mount_key?: string;
+  subdomain_seed?: string;
+  preview_subdomain?: string;
+  sandbox_subdomain?: string;
+  project_slug?: string;
+  app_slug?: string;
+  project_name?: string;
+  app_name?: string;
+  volume_id?: string;
+  volume_provider?: 'archil';
+  volume_root_path?: string;
+  agent_workspace_path?: string;
+  workspace_layout_version?: number;
+  description?: string;
+  active_preview?: RuntimeEnvironmentPreview | null;
+  active_preview_ports?: number[];
+  active_previews?: Record<string, RuntimeEnvironmentPreview>;
+  sandbox_url_previews?: Array<string | RuntimeEnvironmentExplicitPreview>;
+  url_previews?: Array<string | RuntimeEnvironmentExplicitPreview>;
+  preview_urls?: Array<string | RuntimeEnvironmentExplicitPreview>;
+  previews?: Array<string | RuntimeEnvironmentExplicitPreview>;
+};

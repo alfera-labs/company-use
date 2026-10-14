@@ -1,0 +1,382 @@
+{
+  "conversations_history_page_one": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "text": "I find you punny and would like to smell your nose letter",
+        "ts": "1512085950.000216"
+      },
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "text": "What, you want to smell my shoes better?",
+        "ts": "1512104434.000490",
+        "thread_ts": "1512104434.000490",
+        "reply_count": 3,
+        "reply_users_count": 2,
+        "latest_reply": "1512104724.000510"
+      },
+      {
+        "type": "message",
+        "subtype": "bot_message",
+        "bot_id": "B123ABC456",
+        "text": "Deploy finished",
+        "ts": "1512104500.000700"
+      }
+    ],
+    "has_more": true,
+    "pin_count": 0,
+    "response_metadata": {
+      "next_cursor": "bmV4dF90czoxNTEyMDg1ODYxMDAwNTQz"
+    }
+  },
+  "conversations_history_last_page": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "text": "The first message in this channel",
+        "ts": "1449252889.000100"
+      }
+    ],
+    "has_more": false,
+    "pin_count": 0,
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  },
+  "conversations_history_channel_not_found": {
+    "ok": false,
+    "error": "channel_not_found"
+  },
+  "conversations_history_not_in_channel": {
+    "ok": false,
+    "error": "not_in_channel"
+  },
+  "conversations_history_with_mentions": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "text": "<@U061F7AUR> can you look at the renewal?",
+        "ts": "1512085950.000216"
+      },
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "text": "on it, cc <@UNKNOWN0000>",
+        "ts": "1512085960.000300",
+        "thread_ts": "1512085950.000216"
+      }
+    ],
+    "has_more": false,
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  },
+  "conversations_replies_thread": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "text": "What, you want to smell my shoes better?",
+        "ts": "1512104434.000490",
+        "thread_ts": "1512104434.000490",
+        "reply_count": 3
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "text": "yes, <@U061F7AUR>",
+        "ts": "1512104724.000510",
+        "thread_ts": "1512104434.000490"
+      },
+      {
+        "type": "message",
+        "subtype": "bot_message",
+        "bot_id": "B123ABC456",
+        "bot_profile": {
+          "name": "Deploybot"
+        },
+        "text": "shipped",
+        "ts": "1512104824.000520",
+        "thread_ts": "1512104434.000490"
+      }
+    ],
+    "has_more": false
+  },
+  "conversations_join_ok": {
+    "ok": true,
+    "channel": {
+      "id": "C012AB3CD",
+      "name": "general"
+    }
+  },
+  "conversations_join_private_failure": {
+    "ok": false,
+    "error": "method_not_supported_for_channel_type"
+  },
+  "users_list_page_one": {
+    "ok": true,
+    "members": [
+      {
+        "id": "U012AB3CDE",
+        "name": "ada",
+        "real_name": "Ada Lovelace",
+        "tz": "Europe/Rome",
+        "profile": {
+          "display_name": "Ada",
+          "real_name": "Ada Lovelace"
+        }
+      },
+      {
+        "id": "U061F7AUR",
+        "name": "grace",
+        "real_name": "Grace Hopper",
+        "tz": "Europe/Rome",
+        "profile": {
+          "display_name": "",
+          "real_name": "Grace Hopper"
+        }
+      },
+      {
+        "id": "UBOT000001",
+        "name": "alfera",
+        "real_name": "Alfera",
+        "is_bot": true,
+        "tz": "America/New_York",
+        "profile": {
+          "display_name": "Alfera",
+          "real_name": "Alfera"
+        }
+      }
+    ],
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  },
+  "conversations_info_general": {
+    "ok": true,
+    "channel": {
+      "id": "C012AB3CD",
+      "name": "general",
+      "is_private": false
+    }
+  },
+  "conversations_history_rich_page": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512085950.000216",
+        "text": "I find you punny <@U061F7AUR>"
+      },
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "ts": "1512086100.000300",
+        "text": "fixed the &amp; in <https://alfera.ai/pricing|the pricing page>",
+        "edited": {
+          "user": "U061F7AUR",
+          "ts": "1512086110.000000"
+        },
+        "reactions": [
+          {
+            "name": "tada",
+            "count": 3
+          },
+          {
+            "name": "eyes",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512086200.000400",
+        "text": "",
+        "files": [
+          {
+            "id": "F0AB12CD3",
+            "name": "venue-contract.pdf",
+            "title": "venue-contract.pdf",
+            "mimetype": "application/pdf",
+            "size": 204800,
+            "url_private_download": "https://files.slack.com/files-pri/T1-F0AB12CD3/download/venue-contract.pdf",
+            "url_private": "https://files.slack.com/files-pri/T1-F0AB12CD3/venue-contract.pdf"
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "ts": "1512086300.000500",
+        "text": "see <https://alfera.ai/blog/brain>",
+        "attachments": [
+          {
+            "original_url": "https://alfera.ai/blog/brain",
+            "title": "The company brain",
+            "text": "How Alfera reads your Slack."
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512086400.000600",
+        "text": "worth reading",
+        "attachments": [
+          {
+            "is_msg_unfurl": true,
+            "author_name": "Grace Hopper",
+            "channel_name": "deals",
+            "from_url": "https://acme.slack.com/archives/C0DEALS/p1512000000000100",
+            "ts": "1512000000.000100",
+            "text": "the deal signed at 12k",
+            "message_blocks": [
+              {
+                "type": "rich_text"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "message",
+        "subtype": "channel_join",
+        "user": "U061F7AUR",
+        "ts": "1512086500.000700",
+        "text": "<@U061F7AUR> has joined the channel"
+      },
+      {
+        "type": "message",
+        "subtype": "bot_message",
+        "bot_id": "B0SLACKBOT",
+        "username": "Slackbot",
+        "ts": "1512086600.000800",
+        "text": "We are not displaying 1,204 messages because this workspace is on the free plan."
+      }
+    ],
+    "has_more": false,
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  },
+  "conversations_history_thread_page": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "ts": "1512104434.000490",
+        "thread_ts": "1512104434.000490",
+        "text": "can somebody review the renewal for <!here>?",
+        "reply_count": 2,
+        "reply_users_count": 2,
+        "latest_reply": "1512204724.000510"
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512104500.000700",
+        "text": "morning"
+      }
+    ],
+    "has_more": false,
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  },
+  "conversations_replies_two_days": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "ts": "1512104434.000490",
+        "thread_ts": "1512104434.000490",
+        "text": "can somebody review the renewal for <!here>?",
+        "reply_count": 2
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512104724.000510",
+        "thread_ts": "1512104434.000490",
+        "text": "on it"
+      },
+      {
+        "type": "message",
+        "subtype": "bot_message",
+        "bot_id": "B123ABC456",
+        "bot_profile": {
+          "name": "Deploybot"
+        },
+        "ts": "1512204724.000510",
+        "thread_ts": "1512104434.000490",
+        "text": "shipped"
+      }
+    ],
+    "has_more": false
+  },
+  "auth_test_ok": {
+    "ok": true,
+    "url": "https://acme.slack.com/",
+    "team": "Acme",
+    "team_id": "T012AB3C4",
+    "user": "alfera",
+    "user_id": "UBOT000001",
+    "bot_id": "B0BOTID01"
+  },
+  "conversations_replies_page_one": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "user": "U061F7AUR",
+        "ts": "1512104434.000490",
+        "thread_ts": "1512104434.000490",
+        "text": "can somebody review the renewal for <!here>?",
+        "reply_count": 2
+      },
+      {
+        "type": "message",
+        "user": "U012AB3CDE",
+        "ts": "1512104724.000510",
+        "thread_ts": "1512104434.000490",
+        "text": "on it"
+      }
+    ],
+    "has_more": true,
+    "response_metadata": {
+      "next_cursor": "bmV4dF90czoxNTEyMTA0NzI0MDAwNTEw"
+    }
+  },
+  "conversations_replies_page_two": {
+    "ok": true,
+    "messages": [
+      {
+        "type": "message",
+        "subtype": "bot_message",
+        "bot_id": "B123ABC456",
+        "bot_profile": {
+          "name": "Deploybot"
+        },
+        "ts": "1512204724.000510",
+        "thread_ts": "1512104434.000490",
+        "text": "shipped"
+      }
+    ],
+    "has_more": false,
+    "response_metadata": {
+      "next_cursor": ""
+    }
+  }
+}

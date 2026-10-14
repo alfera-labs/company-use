@@ -1,0 +1,70 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A sequence you would be willing to receive.",
+  "summary_text": "Draft a focused outbound sequence from your lead sheet.",
+  "icon": "✉️",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "The thing the segment actually shares",
+    "Three emails that earn the next one",
+    "One ask per email, with a date",
+    "A refusal when the segment shares nothing"
+  ],
+  "what_it_does": [
+    "Finds the thing the segment actually shares, not the thing you hoped it shares",
+    "Three emails, each of which earns the next one",
+    "One ask per email, always with a date",
+    "Refuses to write the sequence when the segment has nothing in common"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the segment",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "write the drafts into a doc",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The segment it reads."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "segment",
+      "label": "The segment sheet",
+      "input_type": "document"
+    },
+    {
+      "input_key": "drafts",
+      "label": "Where the drafts are written",
+      "input_type": "document"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "you_ask",
+      "note": "Run it on any segment you choose"
+    }
+  ]
+}

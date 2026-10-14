@@ -1,0 +1,13 @@
+task_id: realistic_002_httpbin_form_submit
+suite: realistic
+goal: >-
+  On the httpbin form page, fill the customer name with "Ada Lovelace", choose
+  the medium pizza size, and submit the order. Confirm the response echoes the
+  submitted name.
+start_url: https://httpbin.org/forms/post
+max_steps: 16
+graders:
+  - grader_type: url_matches
+    pattern: "httpbin\\.org/post"
+  - grader_type: page_contains
+    text: Ada Lovelace

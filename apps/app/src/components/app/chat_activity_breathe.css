@@ -1,0 +1,119 @@
+/*
+ * The one "this is alive right now" animation in the activity timeline: the staged tool row's
+ * glyph, a running group head's glyph, and the work dock's pip all breathe on the same clock
+ * instead of each carrying their own ad hoc pulse. A plain CSS keyframe (not a JS-driven one)
+ * so it renders identically from the server and never needs a mount effect to start.
+ */
+@keyframes chat-activity-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+.chat-activity-breathe {
+  animation: chat-activity-breathe 1.7s ease-in-out infinite;
+}
+
+/* The connection bar's "live" signing-in step dot: a small heartbeat instead of a plain pulse. */
+@keyframes chat-connection-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.55);
+    opacity: 0.45;
+  }
+}
+
+.chat-connection-pulse {
+  animation: chat-connection-pulse 2.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/*
+ * The work dock's "alive" mark: three brand dots that pulse one after another, like a typing
+ * indicator. The dots carry the motion so the label beside them can stay still and readable.
+ */
+@keyframes chat-working-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+.chat-working-dot {
+  animation: chat-working-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes chat-research-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes chat-research-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-research-spinner {
+  animation: chat-research-spin 900ms linear infinite;
+}
+
+.chat-research-fade,
+.chat-research-source-fade {
+  animation: chat-research-fade 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/*
+ * Reduced motion keeps every one of these marks, it only stops them moving: a still pip, a still
+ * glyph and a still bar all still say "this is the live one" through position and contrast.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .chat-activity-breathe,
+  .chat-activity-sweep,
+  .chat-connection-pulse,
+  .chat-research-fade,
+  .chat-research-source-fade,
+  .chat-research-spinner,
+  .chat-working-dot {
+    animation: none;
+  }
+
+  /* Still dots read as three, not one: graded opacity keeps the mark legible without motion. */
+  .chat-working-dot:nth-child(1) {
+    opacity: 0.35;
+  }
+
+  .chat-working-dot:nth-child(2) {
+    opacity: 0.6;
+  }
+
+  .chat-working-dot:nth-child(3) {
+    opacity: 1;
+  }
+
+  .chat-activity-sweep {
+    background-image: none;
+    background-color: var(--color-muted-foreground);
+  }
+}

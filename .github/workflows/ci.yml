@@ -1,0 +1,145 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: 1
+
+# Every job runs the gates directly, not through the package scripts: CI needs no env file and
+# no secret to check formatting, types, the build, or the tests. The env schemas in
+# packages/config default to safe local values.
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2 # turbo affected/turbo-ignore compares against the parent commit
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0, reads packageManager: bun@1.x from package.json
+        with:
+          bun-version-file: package.json
+      # tsc and vite are Node tools: `bun run` starts them through their `node` shebang.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-typecheck-${{ hashFiles('bun.lock', 'turbo.json', '**/package.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-typecheck-${{ hashFiles('bun.lock', 'turbo.json', '**/package.json') }}-
+            ${{ runner.os }}-turbo-typecheck-
+      - run: bun install --frozen-lockfile
+      - run: bun x biome check .
+      - run: bun run lint:boundaries
+      # The self-host helper has no dependency: docker and curl are stand-ins in the test.
+      - run: bash deploy/test_alfera.sh
+      - run: bash deploy/test_install.sh
+      # A standard runner has less memory than one type check of the app wants by default,
+      # so two programs run at a time and each may use a 4 GB heap.
+      - run: bun x turbo typecheck --concurrency=2
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0, reads packageManager: bun@1.x from package.json
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-build-${{ hashFiles('bun.lock', 'turbo.json', '**/package.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-build-${{ hashFiles('bun.lock', 'turbo.json', '**/package.json') }}-
+            ${{ runner.os }}-turbo-build-
+      - run: bun install --frozen-lockfile
+      - run: bun x turbo build
+        env:
+          NODE_ENV: production
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COWORKER_WORKSPACE_BASE_PATH: /tmp/coworker-workspaces
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    name: test (${{ matrix.shard }}/6)
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0, reads packageManager: bun@1.x from package.json
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      # The folder-mask tests enter a user namespace (unshare -rm). Ubuntu 24.04 blocks
+      # that for unprivileged processes unless this switch is off.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      # Vitest spreads every test file across the shards. PGlite-backed tests restore a
+      # migrated snapshot per test (packages/core/src/db/__tests__/test_database.ts), so no
+      # shard needs a database service.
+      # vitest runs on the Bun runtime. `bun x vitest` would start it on Node, so call the entry file.
+      - run: bun --no-env-file node_modules/vitest/vitest.mjs run --shard=${{ matrix.shard }}/6
+      - name: Test the repository scripts and the app build scripts
+        if: matrix.shard == 1
+        run: bun run test:repo-scripts && bun run test:app-build-scripts && bun run test:script-imports
+
+  # PGlite has one embedded connection, so it cannot prove locking behavior. The real Postgres
+  # race tests run here so the test shards never start an unused service.
+  test-postgres-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://coworker:coworker@localhost:5432/coworker
+      COWORKER_REQUIRE_POSTGRES_TESTS: true
+    services:
+      postgres:
+        # Matches docker-compose.yml: migrations create a vector column, so plain postgres:17 fails.
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: coworker
+          POSTGRES_PASSWORD: coworker
+          POSTGRES_DB: coworker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U coworker -d coworker"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0, reads packageManager: bun@1.x from package.json
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      # The service container starts empty and the sequence-lock test talks to it directly.
+      # CI already has DATABASE_URL, so call the migration runner itself.
+      - run: bun --no-env-file scripts/migrate.ts
+      - run: bun --no-env-file node_modules/vitest/vitest.mjs run packages/core/src/db/__tests__/run_event_sequence_lock.test.ts packages/core/src/db/__tests__/run_writes_connection_use.test.ts packages/runtime-platform/src/orchestrator/__tests__/e2b_write_ownership.test.ts packages/runtime-platform/src/connections/__tests__/mcp_token_refresh_connection_use.test.ts apps/worker/src/__tests__/queue_worker_postgres_race.test.ts apps/worker/src/__tests__/minute_tick.test.ts

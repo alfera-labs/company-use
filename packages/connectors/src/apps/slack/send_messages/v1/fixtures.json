@@ -1,0 +1,48 @@
+{
+  "post_message_ok": {
+    "ok": true,
+    "channel": "C012AB3CD",
+    "ts": "1503435956.000247",
+    "message": {
+      "user": "U023BECGF",
+      "type": "message",
+      "text": "Here's a message for you",
+      "ts": "1503435956.000247",
+      "bot_id": "B123ABC456",
+      "app_id": "A123ABC456"
+    }
+  },
+  "post_message_thread_reply_ok": {
+    "ok": true,
+    "channel": "C012AB3CD",
+    "ts": "1503435957.000300",
+    "message": {
+      "user": "U023BECGF",
+      "type": "message",
+      "text": "Replying in the thread",
+      "ts": "1503435957.000300",
+      "thread_ts": "1503435956.000247",
+      "bot_id": "B123ABC456"
+    }
+  },
+  "post_message_second_channel_ok": {
+    "ok": true,
+    "channel": "C061EG9T2",
+    "ts": "1503435958.000411",
+    "message": {
+      "user": "U023BECGF",
+      "type": "message",
+      "text": "A message for the other channel",
+      "ts": "1503435958.000411",
+      "bot_id": "B123ABC456"
+    }
+  },
+  "post_message_channel_not_found": {
+    "ok": false,
+    "error": "channel_not_found"
+  },
+  "post_message_invalid_auth": {
+    "ok": false,
+    "error": "invalid_auth"
+  }
+}

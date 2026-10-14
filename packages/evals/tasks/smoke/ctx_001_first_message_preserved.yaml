@@ -1,0 +1,11 @@
+task_id: ctx_001_first_message_preserved
+prompt: "Seed a long session and preserve the first unsummarized user message."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: first_user_packet
+  - grader_type: db_assertion
+    assertion: context_snapshot_exists
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

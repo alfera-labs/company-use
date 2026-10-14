@@ -1,0 +1,9 @@
+task_id: sandbox_001_volume_ready
+prompt: "Open a workspace runtime and verify the expected volume layout."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: volume_ready
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

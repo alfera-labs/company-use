@@ -1,0 +1,89 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A month end where the receipts are already in and already coded.",
+  "summary_text": "Turn a photo or a PDF receipt into a coded expense entry.",
+  "icon": "🧮",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "bookkeepers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Total, tax, and date read off the image",
+    "Coded the way you code that supplier",
+    "Anything unreadable left for a person",
+    "No guessed VAT treatment"
+  ],
+  "what_it_does": [
+    "Reads the total, the tax and the date off the image itself",
+    "Codes it the way this workspace has coded that supplier before",
+    "Leaves anything it cannot read for a person, with the image attached",
+    "Never guesses a VAT treatment it cannot see on the receipt"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the receipt image or PDF",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "create a coded expense entry",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "dext",
+      "requirement_label": "Dext",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where receipts land."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "xero",
+      "requirement_label": "Xero",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the entry is created."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "inbox",
+      "label": "Where receipts arrive",
+      "input_type": "mail"
+    },
+    {
+      "input_key": "coding",
+      "label": "Your coding rules",
+      "input_type": "text"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "gmail-new_attachment",
+        "app_key": "gmail",
+        "listener_config": {}
+      },
+      "label": "when a receipt arrives",
+      "note": "Only the inbox you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Send it a backlog whenever you like"
+    }
+  ]
+}

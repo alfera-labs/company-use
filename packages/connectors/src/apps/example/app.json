@@ -1,0 +1,28 @@
+{
+  "app_key": "example",
+  "display_name": "Example",
+  "note": "The framework's own test app. `hidden` keeps it out of the seeded catalog, and base_url points at the reserved `.invalid` TLD so a test that forgets to stub fetch fails with a DNS error instead of calling somebody's real API.",
+  "base_url": "https://example.invalid/api",
+  "rate_limits": { "rpm": 600, "concurrency": 2, "burst": 2 },
+  "auth": { "kind": "none" },
+  "sync": {
+    "prompt": "Choose which example items to sync",
+    "dimensions": [
+      {
+        "key": "items",
+        "label": "Items",
+        "note": "The framework's own picker: an ORDINARY list node serving as a browser. `browse_input` gives echo_items the argument it requires, and `option_mapping` turns its {id, text} items into scope options. Nothing about echo_items was changed to make it browsable.",
+        "shape": "flat",
+        "browse_node": "example-echo_items-1",
+        "browse_input": { "items": ["first", "second"] },
+        "option_mapping": {
+          "id": { "$": "item.id" },
+          "label": { "$": "item.text" },
+          "kind": "document"
+        },
+        "allow_select_all": true
+      }
+    ]
+  },
+  "hidden": true
+}

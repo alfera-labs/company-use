@@ -1,0 +1,74 @@
+{
+  "conversations_list_page_one": {
+    "ok": true,
+    "channels": [
+      {
+        "id": "C012AB3CD",
+        "name": "general",
+        "is_channel": true,
+        "is_group": false,
+        "is_im": false,
+        "created": 1449252889,
+        "creator": "U012A3CDE",
+        "is_archived": false,
+        "is_general": true,
+        "is_private": false,
+        "is_shared": false,
+        "name_normalized": "general",
+        "topic": {
+          "value": "Company-wide announcements and work-based matters",
+          "creator": "",
+          "last_set": 0
+        },
+        "purpose": {
+          "value": "This channel is for team-wide communication and announcements.",
+          "creator": "",
+          "last_set": 0
+        },
+        "num_members": 4
+      },
+      {
+        "id": "C061EG9T2",
+        "name": "random",
+        "is_channel": true,
+        "is_group": false,
+        "is_im": false,
+        "created": 1449252889,
+        "creator": "U061F7AUR",
+        "is_archived": false,
+        "is_general": false,
+        "is_private": false,
+        "is_shared": false,
+        "name_normalized": "random",
+        "topic": { "value": "Non-work banter", "creator": "", "last_set": 0 },
+        "purpose": {
+          "value": "A place for non-work-related flimflam.",
+          "creator": "",
+          "last_set": 0
+        },
+        "num_members": 4
+      }
+    ],
+    "response_metadata": { "next_cursor": "dGVhbTpDMDYxRkE1UEI=" }
+  },
+  "conversations_list_last_page": {
+    "ok": true,
+    "channels": [
+      {
+        "id": "C07QWERTY",
+        "name": "design-partners",
+        "is_channel": true,
+        "is_archived": false,
+        "is_private": false,
+        "name_normalized": "design-partners"
+      }
+    ],
+    "response_metadata": { "next_cursor": "" }
+  },
+  "conversations_list_missing_scope": {
+    "ok": false,
+    "error": "missing_scope",
+    "needed": "channels:read",
+    "provided": "chat:write,users:read"
+  }
+}

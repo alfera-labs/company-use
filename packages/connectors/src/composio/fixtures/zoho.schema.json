@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "zoho",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "ZOHO_LIST_MODULES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "ZOHO_GET_ZOHO_RECORDS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

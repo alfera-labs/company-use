@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Alfera</title>
+<style>
+  /* The colours of the Alfera web app, so a tab that cannot load does not flash another colour.
+     This page is told the name of the server and never the address: an address can be a secret. */
+  :root { --page:#fbfaf9; --text:#1c1a17; --quiet:#6e6a64; --line:#e3e1dc; --brand:#f74e00; --brand-pressed:#d24000; --on-brand:#fffdf9; }
+  @media (prefers-color-scheme:dark) { :root { --page:#202026; --text:#f5f5f7; --quiet:#adadb5; --line:rgba(255,255,255,.1); } }
+  html { background:var(--page); }
+  body { margin:0; height:100vh; display:grid; place-items:center; background:var(--page); color:var(--text); font:17px/1.5 "Inter Variable", Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing:antialiased; cursor:default; user-select:none; }
+  main { width:100%; max-width:520px; padding:0 36px 72px; }
+  h1 { font:400 38px/1.1 Georgia, "Times New Roman", serif; letter-spacing:-.018em; margin:0 0 12px; }
+  p { margin:0 0 6px; color:var(--quiet); overflow-wrap:anywhere; }
+  #next { margin-bottom:28px; font-size:15px; }
+  button { font-family:inherit; font-size:15px; font-weight:600; line-height:1.4; border-radius:10px; padding:11px 20px; border:1px solid var(--brand); background:var(--brand); color:var(--on-brand); transition:background .15s ease, opacity .15s ease; }
+  button:not(:disabled):hover { background:var(--brand-pressed); }
+  button:disabled { opacity:.55; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Alfera cannot be reached.</h1>
+  <p id="detail"></p>
+  <p id="next"></p>
+  <button id="retry" type="button">Try again</button>
+</main>
+<script>
+  const asked = new URLSearchParams(location.search);
+  const host = asked.get('host') || 'your Alfera server';
+  const detail_by_kind = {
+    no_answer: `No answer from ${host}. Check your connection.`,
+    server_error: `${host} answered with an error. The server may be starting.`,
+  };
+  const next = document.getElementById('next');
+  const retry = document.getElementById('retry');
+  let seconds_left = Number(asked.get('seconds')) || 5;
+  document.getElementById('detail').textContent = detail_by_kind[asked.get('kind')] ?? detail_by_kind.no_answer;
+
+  // The app knows the address this page stands in for, and loads it again when asked.
+  function try_again() {
+    clearInterval(countdown);
+    retry.disabled = true;
+    next.textContent = 'Trying again now.';
+    document.dispatchEvent(new Event('alfera:try_again'));
+  }
+
+  function show_seconds_left() {
+    next.textContent = `Alfera tries again in ${seconds_left} ${seconds_left === 1 ? 'second' : 'seconds'}.`;
+  }
+
+  const countdown = setInterval(() => {
+    seconds_left -= 1;
+    if (seconds_left <= 0) try_again();
+    else show_seconds_left();
+  }, 1000);
+  show_seconds_left();
+  retry.addEventListener('click', try_again);
+</script>
+</body>
+</html>

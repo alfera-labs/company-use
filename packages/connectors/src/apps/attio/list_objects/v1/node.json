@@ -1,0 +1,121 @@
+{
+  "node_key": "attio-list_objects-1",
+  "display_name": "List Attio Objects",
+  "description": "List the objects a workspace defines — companies, people, deals, and every custom object — as the options a person picks from. Each option's id is the object's api_slug, which is what attio-list_records-1, attio-create_records-1 and attio-update_records-1 take as `object`. Attio returns every object in one answer, so there is no cursor. This is the browse node behind the attio sync picker, so its output is the scope-option shape.",
+  "implementation": "http",
+  "required_scopes": ["object_configuration:read"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. Objects are a flat list, so there is nothing to open."
+      },
+      "query": {
+        "type": "string",
+        "description": "Ignored. GET /v2/objects takes no filter; see quirks."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Ignored. Attio returns every object in one answer."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "description": "Ignored. GET /v2/objects takes no page size."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Always null. Attio lists every object in one answer."
+      }
+    }
+  },
+  "http": {
+    "method": "GET",
+    "path": "/v2/objects",
+    "response_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on GET /v2/objects, from Attio's published OpenAPI document. Attio marks api_slug, singular_noun and plural_noun nullable, so the mapping below never assumes one is there.",
+      "type": "object",
+      "required": ["data"],
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "object",
+                "required": ["object_id"],
+                "properties": {
+                  "workspace_id": { "type": "string" },
+                  "object_id": { "type": "string" }
+                }
+              },
+              "api_slug": { "type": ["string", "null"] },
+              "singular_noun": { "type": ["string", "null"] },
+              "plural_noun": { "type": ["string", "null"] },
+              "created_at": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "to_output": {
+      "options": {
+        "$map": {
+          "from": { "$": "response.data" },
+          "to": {
+            "id": { "$default": [{ "$": "item.api_slug" }, { "$": "item.id.object_id" }] },
+            "label": {
+              "$default": [
+                { "$": "item.plural_noun" },
+                { "$": "item.singular_noun" },
+                { "$": "item.api_slug" },
+                { "$": "item.id.object_id" }
+              ]
+            },
+            "kind": "object",
+            "selectable": true
+          }
+        }
+      },
+      "next_cursor": null
+    }
+  },
+  "quirks": [
+    "No code: the whole call is a declarative http mapping. GET /v2/objects takes no parameter and answers with every object, so there is nothing to build and nothing to page.",
+    "The option id is the api_slug, not the object_id, because that is what every other Attio node takes as `object` and what a crawler must be able to use straight out of sync_scope. Attio marks api_slug nullable, so the mapping falls back to the object_id, which the other nodes also accept.",
+    "The label prefers plural_noun — People, Companies — because a picker lists many of a thing. singular_noun, the slug and the id follow it, so a row always reads as something.",
+    "No sublabel: the api_slug is already the id the picker shows, and a null one would be a null where the option shape wants text.",
+    "The four value-expression operators cannot filter, so `query` is accepted and ignored. A workspace has tens of objects, not thousands, so the picker can filter what it already fetched."
+  ]
+}

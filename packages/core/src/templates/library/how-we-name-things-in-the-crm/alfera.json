@@ -1,0 +1,66 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A CRM you can search and trust.",
+  "summary_text": "Stop the same company existing four times, and keep search working.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "operations-managers",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Keeps one record per company, matched on root domain",
+    "Names deals so they sort usefully",
+    "Writes the name a person would search for",
+    "Puts legal suffixes in a field, not the name"
+  ],
+  "guidance": [
+    {
+      "label": "A company",
+      "value": "One record per root domain"
+    },
+    {
+      "label": "A deal",
+      "value": "Named so a sorted list reads in order"
+    },
+    {
+      "label": "Abbreviations",
+      "value": "Never in something people search"
+    },
+    {
+      "label": "Legal suffix",
+      "value": "A field, never part of the name"
+    }
+  ],
+  "used_when_text": "Used whenever it creates or renames a record",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before creating or renaming a record",
+      "risk": "reads_data"
+    }
+  ],
+  "requires": [],
+  "asks_you_for": [
+    {
+      "input_key": "deal_pattern",
+      "label": "Your deal name pattern",
+      "input_type": "text",
+      "example_answer": "Globex – Platform – Q3"
+    },
+    {
+      "input_key": "house_style",
+      "label": "How you write company names",
+      "input_type": "text",
+      "example_answer": "Trading name, no Ltd"
+    }
+  ],
+  "starts_when": []
+}

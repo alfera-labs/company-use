@@ -1,0 +1,36 @@
+{
+  "_source": "users.messages.batchModify has no response schema in the Gmail v1 discovery document (gmail.googleapis.com/$discovery/rest?version=v1), which is how Google spells 'HTTP 204, empty body'. There is no success body to record, so this file records the request the node sends and the error envelopes it can get back.",
+  "batch_modify_request": {
+    "ids": ["18f3a1c9b2d40011", "18f3a1c9b2d40022"],
+    "addLabelIds": ["STARRED"],
+    "removeLabelIds": ["UNREAD"]
+  },
+  "batch_modify_success": {
+    "status": 204,
+    "body": ""
+  },
+  "batch_modify_unknown_label": {
+    "error": {
+      "code": 400,
+      "message": "Invalid label: Label_999",
+      "errors": [
+        { "message": "Invalid label: Label_999", "domain": "global", "reason": "invalidArgument" }
+      ],
+      "status": "INVALID_ARGUMENT"
+    }
+  },
+  "batch_modify_insufficient_scope": {
+    "error": {
+      "code": 403,
+      "message": "Request had insufficient authentication scopes.",
+      "errors": [
+        {
+          "message": "Insufficient Permission",
+          "domain": "global",
+          "reason": "insufficientPermissions"
+        }
+      ],
+      "status": "PERMISSION_DENIED"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_source": "Doc-derived, not recorded: Granola's public API needs a Business-plan grn_ key that this repo does not hold. Every field, id pattern and value comes from the published OpenAPI document for GET /v1/folders — the ListFoldersOutput and Folder schemas and their own examples: https://docs.granola.ai/api-reference/openapi.json. Re-record against a real key when one exists.",
+  "folders_page_one": {
+    "folders": [
+      {
+        "id": "fol_00000000000001",
+        "object": "folder",
+        "name": "Top secret recipes",
+        "parent_folder_id": null
+      },
+      {
+        "id": "fol_00000000000002",
+        "object": "folder",
+        "name": "Customer calls",
+        "parent_folder_id": "fol_00000000000001"
+      }
+    ],
+    "hasMore": true,
+    "cursor": "eyJjcmVkZW50aWFsfQ=="
+  },
+  "folders_last_page": {
+    "folders": [
+      {
+        "id": "fol_00000000000003",
+        "object": "folder",
+        "name": null,
+        "parent_folder_id": null
+      }
+    ],
+    "hasMore": false,
+    "cursor": null
+  },
+  "folders_unauthorized": {
+    "error": { "code": "UNAUTHORIZED", "message": "Invalid API key" }
+  }
+}

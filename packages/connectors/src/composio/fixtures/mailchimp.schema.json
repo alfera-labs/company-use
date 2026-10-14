@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["campaigns"],
+  "properties": {
+    "campaigns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "send_time", "settings"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string" },
+          "emails_sent": { "type": "integer" },
+          "archive_url": { "type": "string" },
+          "send_time": { "type": "string", "format": "date-time" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "subject_line": { "type": "string" },
+              "preview_text": { "type": ["string", "null"] },
+              "title": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "next_offset": { "type": ["integer", "null"] }
+  }
+}

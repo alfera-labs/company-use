@@ -1,0 +1,84 @@
+{
+  "alert-dialog.tsx": [
+    "bg-scrim",
+    "ease-out-expo",
+    "ease-out-quart",
+    "shadow-overlay",
+    "z-overlay"
+  ],
+  "badge.tsx": [
+    "bg-brand-wash",
+    "bg-caution-wash",
+    "bg-danger-wash",
+    "bg-hover",
+    "bg-positive-wash",
+    "bg-primary-hover",
+    "bg-raised",
+    "ease-out-quart",
+    "text-brand-ink",
+    "text-caution-ink",
+    "text-danger-ink",
+    "text-positive-ink"
+  ],
+  "button.tsx": [
+    "bg-hover",
+    "bg-primary-hover",
+    "bg-raised",
+    "border-primary-hover",
+    "ease-out-quart",
+    "shadow-raised",
+    "text-brand-ink"
+  ],
+  "card.tsx": ["panel"],
+  "checkbox.tsx": ["bg-raised", "ease-out-quart", "shadow-raised"],
+  "combobox.tsx": [
+    "bg-hover",
+    "ease-out-quart",
+    "ring-strong",
+    "row-interactive",
+    "shadow-float",
+    "t-dropdown",
+    "z-dropdown"
+  ],
+  "command-palette.tsx": [
+    "bg-scrim",
+    "ease-out-quart",
+    "row-interactive",
+    "shadow-overlay",
+    "z-overlay"
+  ],
+  "dialog.tsx": ["bg-scrim", "ease-out-expo", "ease-out-quart", "shadow-overlay", "z-overlay"],
+  "dropdown-menu.tsx": [
+    "bg-danger-wash",
+    "bg-hover",
+    "ring-strong",
+    "row-interactive",
+    "shadow-float",
+    "t-dropdown",
+    "text-danger-ink",
+    "z-dropdown"
+  ],
+  "input.tsx": ["field"],
+  "popover.tsx": ["shadow-float", "t-dropdown", "z-dropdown"],
+  "preview-card.tsx": ["shadow-float", "t-dropdown", "z-dropdown"],
+  "radio-group.tsx": ["bg-raised", "ease-out-quart", "shadow-raised"],
+  "segmented-control.tsx": ["bg-raised", "bg-sunken", "ease-out-quart"],
+  "select.tsx": [
+    "bg-hover",
+    "field",
+    "ring-strong",
+    "row-interactive",
+    "shadow-float",
+    "t-dropdown",
+    "z-dropdown"
+  ],
+  "settings-card.tsx": ["panel"],
+  "sheet.tsx": ["bg-scrim", "panel", "shadow-overlay", "z-overlay"],
+  "sidebar.tsx": ["bg-hover", "ease-out-quart", "row-interactive"],
+  "skeleton.tsx": ["bg-sunken"],
+  "tabs.tsx": ["bg-raised", "bg-sunken", "ease-out-expo", "ease-out-quart"],
+  "templates-catalog.tsx": ["bg-hover", "bg-sunken", "field", "ring-strong", "shadow-float"],
+  "templates-search-form.tsx": ["field"],
+  "textarea.tsx": ["field"],
+  "tooltip.tsx": ["z-dropdown"]
+}

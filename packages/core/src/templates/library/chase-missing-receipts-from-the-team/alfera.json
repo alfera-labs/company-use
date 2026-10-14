@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A card statement where every line has a receipt behind it.",
+  "summary_text": "Chase the card lines with nothing attached, person by person.",
+  "icon": "📎",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "bookkeepers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "One message per person, not per line",
+    "A fortnight grouped into one ask",
+    "One escalation at 30 days",
+    "Silence in a week with nothing missing"
+  ],
+  "what_it_does": [
+    "Messages the person who spent it, never the whole channel",
+    "Groups a fortnight of missing receipts into one message",
+    "Escalates to a named human at 30 days, once",
+    "Goes quiet the week everything is in"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read card transactions",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "message each person their own list",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "xero",
+      "requirement_label": "Xero",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Which transactions have nothing attached."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where each person gets their own list."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "cards",
+      "label": "Which cards to watch",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where each person is messaged",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 10 * * THU",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it before you close the month"
+    }
+  ]
+}

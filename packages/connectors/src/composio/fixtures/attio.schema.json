@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "attio",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "ATTIO_LIST_OBJECTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "ATTIO_QUERY_RECORDS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

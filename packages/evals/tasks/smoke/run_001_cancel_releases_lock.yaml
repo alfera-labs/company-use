@@ -1,0 +1,8 @@
+task_id: run_001_cancel_releases_lock
+prompt: "Cancel a running eval and verify the session lock is released."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: lock_released
+  - grader_type: db_assertion
+    assertion: latency_fields_present

@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "asana",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "ASANA_GET_MULTIPLE_PROJECTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "ASANA_GET_TASKS_FROM_A_PROJECT": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

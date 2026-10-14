@@ -1,0 +1,27 @@
+# Serves a self-hosted install over https, on ports 80 and 443. It is off until
+# COMPOSE_PROFILES=https is in .env: `./deploy/install.sh --https` and `./alfera add https`
+# write that line. Caddy gets the certificate for ALFERA_PUBLIC_HOST by itself and renews it.
+#
+# CADDY_GLOBAL_OPTIONS in .env is one line of Caddy global options. It is empty as a rule.
+#   email you@example.com   also lets Caddy ask a second certificate authority when the first refuses
+#   local_certs             Caddy signs the certificate itself, for a name no authority can reach
+{
+	{$CADDY_GLOBAL_OPTIONS}
+}
+
+{$ALFERA_PUBLIC_HOST} {
+	# A browser that has been here once comes back over https only, for a year.
+	header Strict-Transport-Security "max-age=31536000"
+
+	# The API answers under /v1, and /health says it is up. Every other address is the dashboard.
+	@api path /v1/* /health
+	handle @api {
+		# Only the dashboard and the helper on this machine hold the proxy secret, and neither
+		# comes in through here. So a request from outside never carries it to the API.
+		request_header -X-Coworker-Api-Secret
+		reverse_proxy api:3001
+	}
+	handle {
+		reverse_proxy app:3000
+	}
+}

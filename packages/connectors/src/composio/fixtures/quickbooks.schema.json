@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["invoices"],
+  "properties": {
+    "invoices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["Id", "MetaData"],
+        "properties": {
+          "Id": { "type": "string" },
+          "DocNumber": { "type": "string" },
+          "PrivateNote": { "type": ["string", "null"] },
+          "TotalAmt": { "type": "number" },
+          "Balance": { "type": "number" },
+          "CustomerRef": { "type": "object" },
+          "MetaData": {
+            "type": "object",
+            "required": ["LastUpdatedTime"],
+            "properties": { "LastUpdatedTime": { "type": "string", "format": "date-time" } }
+          }
+        }
+      }
+    },
+    "next_start_position": { "type": ["integer", "null"] }
+  }
+}

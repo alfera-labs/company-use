@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "hubspot",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "HUBSPOT_RETRIEVE_ALL_OBJECT_SCHEMAS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "HUBSPOT_READ_APAGE_OF_OBJECTS_BY_TYPE": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,743 @@
+{
+  "node_key": "slack-list_messages-1",
+  "display_name": "List Slack Messages",
+  "description": "Read recent messages from a batch of Slack channels, one page per channel, and return them as the LINES of the documents a channel really has. A channel is a day of chat plus the threads hanging off it, so every record says which document its line belongs to: day:{channel}:{YYYY-MM-DD} in the workspace timezone, or thread:{channel}:{ts} for a thread and every reply. Each line carries its clock time, the author's name, resolved mentions, files, reactions, link previews and quoted messages, and a thread root also leaves a one-line stub in the day it started. Each channel carries its own cursor: pass a channel back with the next_cursor it returned to read its next page. A channel that fails reports its own error and never blocks the others.",
+  "implementation": "execute",
+  "required_scopes": ["channels:history", "channels:read", "channels:join", "users:read"],
+  "requests": {
+    "conversations_history": {
+      "method": "GET",
+      "path": "/conversations.history",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "conversations.history. Lenient on purpose: a message carries many more fields, and subtypes carry different ones.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/message"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "response_metadata": {
+            "type": "object",
+            "properties": {
+              "next_cursor": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "$defs": {
+          "message": {
+            "type": "object",
+            "required": ["ts"],
+            "properties": {
+              "ts": {
+                "type": "string"
+              },
+              "user": {
+                "type": "string"
+              },
+              "bot_id": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "bot_profile": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text": {
+                "type": "string"
+              },
+              "subtype": {
+                "type": "string"
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "thread_ts": {
+                "type": "string"
+              },
+              "reply_count": {
+                "type": "number"
+              },
+              "latest_reply": {
+                "type": "string"
+              },
+              "edited": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "string"
+                  },
+                  "ts": {
+                    "type": "string"
+                  }
+                }
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "mimetype": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "number"
+                    },
+                    "url_private": {
+                      "type": "string"
+                    },
+                    "url_private_download": {
+                      "type": "string"
+                    },
+                    "permalink": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "is_msg_unfurl": {
+                      "type": "boolean"
+                    },
+                    "author_name": {
+                      "type": "string"
+                    },
+                    "author_subname": {
+                      "type": "string"
+                    },
+                    "from_url": {
+                      "type": "string"
+                    },
+                    "original_url": {
+                      "type": "string"
+                    },
+                    "channel_name": {
+                      "type": "string"
+                    },
+                    "channel_id": {
+                      "type": "string"
+                    },
+                    "ts": {
+                      "type": ["string", "number"]
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "fallback": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "title_link": {
+                      "type": "string"
+                    },
+                    "message_blocks": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "conversations_replies": {
+      "method": "GET",
+      "path": "/conversations.replies",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "conversations.replies. The parent message is the first entry, so the node drops it. A reply carries everything a top-level message carries.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["ts"]
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "response_metadata": {
+            "type": "object",
+            "properties": {
+              "next_cursor": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "conversations_info": {
+      "method": "GET",
+      "path": "/conversations.info",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "conversations.info. Only the name is read: it titles the day and thread documents.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "conversations_join": {
+      "method": "POST",
+      "path": "/conversations.join",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "conversations.join. Only the envelope is read: the node re-reads the history itself.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "users_list": {
+      "method": "GET",
+      "path": "/users.list",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "users.list. Lenient on purpose: a member carries a large profile and only the names and the timezone are read.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "real_name": {
+                  "type": "string"
+                },
+                "tz": {
+                  "type": "string"
+                },
+                "deleted": {
+                  "type": "boolean"
+                },
+                "is_bot": {
+                  "type": "boolean"
+                },
+                "profile": {
+                  "type": "object",
+                  "properties": {
+                    "display_name": {
+                      "type": "string"
+                    },
+                    "real_name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "response_metadata": {
+            "type": "object",
+            "properties": {
+              "next_cursor": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "auth_test": {
+      "method": "POST",
+      "path": "/auth.test",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "auth.test. Only `url` is read: it is the workspace's own host, and every permalink is built from it.",
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "quirks": [
+    "Slack answers HTTP 200 with {ok:false, error} for its own failures. execute.ts turns ok=false into the connector error contract and puts it on that channel's own row, so a refused channel is never reported as a channel with no messages.",
+    "conversations.history reads ONE channel and pages it with ONE cursor. Slack has no batch endpoint for it, so the plural contract fans out across channels.",
+    "A single next_cursor for a batch of channels would be a lie: channel A's third page and channel B's first page are different positions. So every channel carries its own cursor in, and gets its own records, its own next_cursor, and its own error back out.",
+    "The last page carries an EMPTY next_cursor, not a missing one, so the node reports it as null.",
+    "A message has a user OR a bot_id, never both, and a join notice can have neither. A bot is not in the user directory, so it carries its own name on the message as bot_profile.name or username.",
+    "Slack stores a message as an id soup: the author is a user id in another table and every mention is <@U0EXAMPLE02>. The node reads users.list ONCE per call, caps the directory at 2000 people, and resolves <@U…>, <!here>, <!channel>, <!subteam^…|@x>, <#C…|name> and <url|label> in one pass. An id the directory does not hold stays as it is. A users.list the token may not read is logged and the raw ids stay in the text: a missing directory must not lose the messages.",
+    "Slack has NO workspace-timezone endpoint: team.info answers a name, a domain and an icon. Every human member of users.list carries a tz, so the node takes the one most of them share and cuts the day buckets on it. The `timezone` input overrides that vote for a workspace spread across the world.",
+    "A thread lives behind a second call. The node reads conversations.replies for EVERY thread root on the page, at most 500 replies deep, and emits the replies as lines of the THREAD's own document, not indented under a day. A thread that grows tomorrow therefore stops rewriting yesterday. There is no cap on threads per page: a cap looks like a bound and is really a silent loss, because the extra roots were stored without their replies while the sync watermark moved past them. The page size is the bound.",
+    "A thread root leaves a one-line stub in the day it started, so a person reading Tuesday still sees which conversations began that day and where they went.",
+    "A reply broadcast to the channel appears twice — inside its thread and at top level. The top-level copy is dropped when its parent is on the same page, because it is already a line of the thread document.",
+    "A forwarded or quoted message arrives as an attachment carrying the ORIGINAL author's name. Rendering it as text produces 'Name: Name: text' and attributes the quote to the wrong person, so it is a field (forwarded_from) and a clearly marked continuation line instead.",
+    "A file post carries no text at all: the picture IS the message. Rendering only `text` stores a blank line, so files become their own continuation lines and their ids travel on the record for the sync engine to download.",
+    "Join and leave notices, tombstones, ephemeral messages and Slack's own 'we are not displaying some messages' notice are dropped: they are furniture, not conversation.",
+    "conversations.history answers not_in_channel for a public channel the bot never joined. The node joins that channel once and asks again. A private channel cannot be joined at all, and its error says the fix: /invite @Alfera.",
+    "A Slack permalink is deterministic — https://{team}.slack.com/archives/{channel}/p{ts without the dot}, plus ?thread_ts=&cid= for a reply — so the node BUILDS it instead of calling chat.getPermalink once per message. One call per page of 50 threads became zero. The workspace host comes from auth.test, which needs no scope at all; team.info would need team:read and every existing connection would have to be re-authorized to keep its links.",
+    "A thread whose replies cannot be read fails the whole channel row, retryable. Storing half a thread while the watermark moves past it is a document that is quietly wrong forever; refusing the page makes the next crawl read it again."
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["channels"],
+    "properties": {
+      "channels": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["channel_id"],
+          "properties": {
+            "channel_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cursor": {
+              "type": "string",
+              "description": "The next_cursor this node returned for this same channel. Omit to start at the newest message."
+            }
+          }
+        }
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000,
+        "description": "How many messages to read per channel. Applies to every channel in the batch."
+      },
+      "oldest": {
+        "type": "string",
+        "description": "Only messages at or after this ts. Applies to every channel in the batch."
+      },
+      "latest": {
+        "type": "string",
+        "description": "Only messages at or before this ts. Applies to every channel in the batch."
+      },
+      "timezone": {
+        "type": "string",
+        "description": "An IANA timezone the clock times and day buckets are printed in, such as Europe/Rome. Omitted, the node takes the timezone most members of the workspace share, and UTC when nobody names one."
+      },
+      "team_domain": {
+        "type": "string",
+        "description": "The workspace subdomain in acme.slack.com. Omitted, the node reads it once from auth.test. Every permalink is built from it, so there is no per-message link call."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["channels", "timezone"],
+    "properties": {
+      "timezone": {
+        "type": "string",
+        "description": "The IANA timezone every time in this answer is printed in."
+      },
+      "channels": {
+        "type": "array",
+        "description": "One row per requested channel, in the caller's order.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "channel_id",
+            "channel_name",
+            "ok",
+            "records",
+            "next_cursor",
+            "has_more",
+            "error_code",
+            "error_message"
+          ],
+          "properties": {
+            "channel_id": {
+              "type": "string"
+            },
+            "channel_name": {
+              "type": "string",
+              "description": "The channel's name without the #. Falls back to the id when conversations.info refuses."
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "records": {
+              "type": "array",
+              "description": "One record per LINE of a document. Group them by document_key and join their lines oldest first.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "record_id",
+                  "ts",
+                  "page_ts",
+                  "time",
+                  "day",
+                  "document_key",
+                  "day_document_key",
+                  "document_title",
+                  "document_url",
+                  "permalink",
+                  "is_thread_record",
+                  "is_day_record",
+                  "line",
+                  "channel_id",
+                  "user_id",
+                  "bot_id",
+                  "author_name",
+                  "text",
+                  "subtype",
+                  "is_edited",
+                  "files",
+                  "file_names",
+                  "reactions",
+                  "unfurls",
+                  "forwarded_from",
+                  "thread_ts",
+                  "reply_count",
+                  "started_by",
+                  "started_time",
+                  "last_reply_time",
+                  "thread_participants",
+                  "thread_file_count",
+                  "thread_keys",
+                  "replies_truncated"
+                ],
+                "properties": {
+                  "record_id": {
+                    "type": "string",
+                    "description": "Unique within the channel, and sorted the way the document reads: {document_key}#{ts}."
+                  },
+                  "ts": {
+                    "type": "string",
+                    "description": "This line's own Slack ts."
+                  },
+                  "page_ts": {
+                    "type": "string",
+                    "description": "The history-page message this line came from. A sync watermark walks THIS, never a reply's ts."
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "ISO 8601 with the workspace's own offset."
+                  },
+                  "day": {
+                    "type": "string",
+                    "description": "YYYY-MM-DD in the workspace timezone."
+                  },
+                  "document_key": {
+                    "type": "string",
+                    "description": "day:{channel}:{YYYY-MM-DD} or thread:{channel}:{thread_ts}."
+                  },
+                  "day_document_key": {
+                    "type": "string",
+                    "description": "The day key of this line's own date, always."
+                  },
+                  "document_title": {
+                    "type": "string"
+                  },
+                  "document_url": {
+                    "type": ["string", "null"]
+                  },
+                  "permalink": {
+                    "type": ["string", "null"],
+                    "description": "This line's own Slack link, built from the workspace host. Null when auth.test refused."
+                  },
+                  "is_thread_record": {
+                    "type": "boolean"
+                  },
+                  "is_day_record": {
+                    "type": "boolean"
+                  },
+                  "line": {
+                    "type": "string",
+                    "description": "The rendered block: [HH:MM] Author: text, plus one indented continuation line per file, link preview or quote."
+                  },
+                  "channel_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": ["string", "null"]
+                  },
+                  "bot_id": {
+                    "type": ["string", "null"]
+                  },
+                  "author_name": {
+                    "type": ["string", "null"]
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Slack's own text, ids and all."
+                  },
+                  "subtype": {
+                    "type": ["string", "null"]
+                  },
+                  "is_edited": {
+                    "type": "boolean"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["id", "name", "mime_type", "byte_size", "download_url"],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "mime_type": {
+                          "type": "string"
+                        },
+                        "byte_size": {
+                          "type": ["number", "null"]
+                        },
+                        "download_url": {
+                          "type": ["string", "null"]
+                        }
+                      }
+                    }
+                  },
+                  "file_names": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["name", "count"],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "unfurls": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["url", "title"],
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": ["string", "null"]
+                        }
+                      }
+                    }
+                  },
+                  "forwarded_from": {
+                    "description": "The quoted message, never rendered as if this poster said it.",
+                    "type": ["object", "null"],
+                    "additionalProperties": false,
+                    "required": ["author", "channel", "time", "text"],
+                    "properties": {
+                      "author": {
+                        "type": ["string", "null"]
+                      },
+                      "channel": {
+                        "type": ["string", "null"]
+                      },
+                      "time": {
+                        "type": ["string", "null"]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "thread_ts": {
+                    "type": ["string", "null"]
+                  },
+                  "reply_count": {
+                    "type": ["number", "null"]
+                  },
+                  "started_by": {
+                    "type": ["string", "null"]
+                  },
+                  "started_time": {
+                    "type": ["string", "null"]
+                  },
+                  "last_reply_time": {
+                    "type": ["string", "null"]
+                  },
+                  "thread_participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "thread_file_count": {
+                    "type": ["number", "null"]
+                  },
+                  "thread_keys": {
+                    "type": "array",
+                    "description": "On a day's stub line only: the thread document that line points at.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "replies_truncated": {
+                    "type": "boolean",
+                    "description": "True on every line of a thread the reply cap cut short. The document says so on its last line too."
+                  }
+                }
+              }
+            },
+            "next_cursor": {
+              "type": ["string", "null"],
+              "description": "Pass this channel back with this cursor to read its next page. Null means the last page."
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "error_code": {
+              "type": ["string", "null"]
+            },
+            "error_message": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

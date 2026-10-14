@@ -1,0 +1,47 @@
+{
+  "toolkit_slug": "salesforce",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "SALESFORCE_LIST_ACCOUNTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "SALESFORCE_LIST_CONTACTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "SALESFORCE_LIST_LEADS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "SALESFORCE_LIST_OPPORTUNITIES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "You open the renewal conversation knowing what they will raise.",
+  "summary_text": "See what they bought, used, and complained about a month before the date.",
+  "icon": "🔔",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "account-managers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "What they asked for and never got",
+    "The ticket count, and the worst one",
+    "A flag when the account went quiet",
+    "One page, or it does not get read"
+  ],
+  "what_it_does": [
+    "Lists what they asked for and never got, first",
+    "Counts the tickets and names the worst one",
+    "Flags the quiet accounts, which are the risky ones",
+    "Fits on one page or it does not get read"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the account, its tickets and its threads",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "email you the brief",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "hubspot",
+      "requirement_label": "HubSpot",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The account and the renewal date."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "zendesk",
+      "requirement_label": "Zendesk",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "What went wrong during the term."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "lead_time",
+      "label": "How far ahead to look",
+      "input_type": "text"
+    },
+    {
+      "input_key": "recipient",
+      "label": "Where the brief goes",
+      "input_type": "mail"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 8 * * MON",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Every renewal 30 days out, at your time"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for one account at any time"
+    }
+  ]
+}

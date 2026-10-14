@@ -1,0 +1,12 @@
+task_id: smoke_004_wikipedia_article
+suite: smoke
+goal: >-
+  Open the Wikipedia article on the Firefox web browser and confirm the page
+  heading is present in the accessibility snapshot.
+start_url: https://en.wikipedia.org/wiki/Firefox
+max_steps: 6
+graders:
+  - grader_type: url_matches
+    pattern: "wikipedia\\.org/wiki/Firefox"
+  - grader_type: snapshot_contains
+    text: Firefox

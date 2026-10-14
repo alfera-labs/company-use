@@ -1,0 +1,11 @@
+task_id: ctx_004_no_hidden_context_compaction
+prompt: "Prove the context compiler did not hide a post-snapshot compaction step."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: no_hidden_context_compaction
+  - grader_type: db_assertion
+    assertion: context_snapshot_exists
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

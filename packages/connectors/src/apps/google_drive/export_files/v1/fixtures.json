@@ -1,0 +1,34 @@
+{
+  "_comment": "doc-derived: files.export answers with the exported bytes themselves, not with a JSON envelope, so the success fixtures below are the exported text. The error fixtures use Google's documented JSON error envelope. Content is invented; no real Drive content and no tokens.",
+  "handbook_markdown_export": "# Employee Handbook\n\n## Time off\n\nAsk your manager, then file the request in the tool. We do not track a maximum.\n\n## Expenses\n\nSpend the company's money as if it were your own.\n",
+  "pricing_csv_export": "Plan,Seats,Monthly price\nStarter,5,290\nTeam,25,990\nScale,100,2900\n",
+  "offsite_deck_text_export": "Offsite 2026\n\nDay one: where the product is\nDay two: what we cut\n",
+  "export_not_a_native_file": {
+    "error": {
+      "code": 403,
+      "message": "Export only supports Docs Editors files.",
+      "errors": [
+        {
+          "domain": "global",
+          "reason": "fileNotExportable",
+          "message": "Export only supports Docs Editors files."
+        }
+      ]
+    }
+  },
+  "export_file_not_found": {
+    "error": {
+      "code": 404,
+      "message": "File not found: 1zZzZ_missing.",
+      "errors": [
+        {
+          "domain": "global",
+          "reason": "notFound",
+          "message": "File not found: 1zZzZ_missing.",
+          "location": "fileId",
+          "locationType": "parameter"
+        }
+      ]
+    }
+  }
+}

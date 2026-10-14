@@ -1,0 +1,152 @@
+{
+  "node_key": "gmail-send_messages-1",
+  "display_name": "Send Gmail Messages",
+  "description": "Send a batch of plain-text emails from the connected Gmail account. Each message needs at least one \"to\" address, a subject, and a body. Every message reports its own outcome: results[i].ok tells you whether message i went out, with the new message id when it did and the reason when it did not.",
+  "implementation": "execute",
+  "required_scopes": ["https://www.googleapis.com/auth/gmail.send"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "messages": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/header_safe_address"
+              }
+            },
+            "cc": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/header_safe_address"
+              }
+            },
+            "subject": {
+              "type": "string",
+              "maxLength": 998,
+              "pattern": "^[^\\r\\n]*$",
+              "description": "One line. A line break here would be header injection, so it is refused."
+            },
+            "body_text": {
+              "type": "string",
+              "description": "The email body, plain text."
+            }
+          },
+          "required": ["to", "subject", "body_text"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["messages"],
+    "additionalProperties": false,
+    "$defs": {
+      "header_safe_address": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 320,
+        "pattern": "^[^\\r\\n]*$",
+        "description": "An email address, optionally with a display name. A bare newline is the whole of RFC 2822 header injection - it ends the header and lets the rest of the string write its own Bcc - so the pattern refuses one."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "id": {
+                  "type": "string"
+                },
+                "thread_id": {
+                  "type": "string"
+                }
+              },
+              "required": ["ok", "index", "id", "thread_id"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "const": false
+                },
+                "index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["code", "message", "retryable"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["ok", "index", "error"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "required": ["results"],
+    "additionalProperties": false
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Lenient ingress on the Message resource users.messages.send answers with. Open on purpose: Gmail adds fields and a closed schema would turn that into an outage.",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "threadId": {
+        "type": "string"
+      },
+      "labelIds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["id", "threadId"]
+  },
+  "quirks": {
+    "no_batch_endpoint": "Gmail has no batch send - users.messages.send takes one message - so the plural contract runs through fan_out: bounded concurrent singles under the app's rate limits, one result per message, in the caller's order.",
+    "not_atomic": "Sending is deliberately not atomic. Three mails going out and one bouncing is three mails delivered, and the caller is told exactly which one failed.",
+    "raw_message": "users.messages.send takes exactly one field: raw, an RFC 2822 message in base64url. Gmail writes no headers for you, so execute.ts writes the email itself.",
+    "encoding": "The body travels as base64 with 76-character lines: RFC 2045 caps an encoded line at 76 and RFC 2822 rejects any line over 998, and base64 keeps a UTF-8 body intact where raw 8-bit text does not. A subject with an accent or an emoji travels as an RFC 2047 encoded word.",
+    "header_injection": "to, cc and subject must not contain CR or LF. The input_schema patterns refuse it and execute.ts checks again, because a header break is a trust boundary and not a formatting preference.",
+    "provider_endpoints": ["POST /users/me/messages/send"]
+  }
+}

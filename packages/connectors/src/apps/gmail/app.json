@@ -1,0 +1,147 @@
+{
+  "app_key": "gmail",
+  "availability": {
+    "status": "held",
+    "reason": "Google has not approved this app's scopes yet."
+  },
+  "display_name": "Gmail",
+  "base_url": "https://gmail.googleapis.com/gmail/v1",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
+    "token_url": "https://oauth2.googleapis.com/token",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/gmail.modify"
+    ]
+  },
+  "rate_limits": {
+    "rpm": 300,
+    "concurrency": 5,
+    "burst": 10
+  },
+  "sync": {
+    "prompt": "Choose which mail to sync",
+    "dimensions": [
+      {
+        "key": "labels",
+        "label": "Labels",
+        "shape": "flat",
+        "browse_node": "gmail-list_labels-1",
+        "allow_select_all": true
+      },
+      {
+        "key": "search",
+        "label": "Search",
+        "note": "A query dimension stores the text a person types, not a list of ids. The browse node is what shows them the mail that text matches, so every option is a preview and none is selectable.",
+        "shape": "query",
+        "placeholder": "e.g. from:foo newer_than:30d",
+        "browse_node": "gmail-list_messages-1",
+        "search_param": "query",
+        "option_mapping": {
+          "id": {
+            "$": "item.id"
+          },
+          "label": {
+            "$default": [
+              {
+                "$": "item.headers.subject"
+              },
+              "(no subject)"
+            ]
+          },
+          "sublabel": {
+            "$": "item.headers.from"
+          },
+          "preview": {
+            "$": "item.snippet"
+          },
+          "kind": "message",
+          "selectable": false
+        }
+      }
+    ],
+    "objects": {
+      "message": {
+        "label": "Email",
+        "list_node": "gmail-list_messages-1",
+        "scoped_by": {
+          "labels": "label_ids[]",
+          "search": "query"
+        },
+        "list_input": {
+          "include_bodies": true
+        },
+        "page": {
+          "cursor_param": "cursor",
+          "items": {
+            "$": "response.messages"
+          },
+          "next_cursor": {
+            "$": "response.next_cursor"
+          }
+        },
+        "strategy": "relist_diff",
+        "identity": {
+          "$": "item.id"
+        },
+        "title": {
+          "$default": [
+            {
+              "$": "item.headers.subject"
+            },
+            "(no subject)"
+          ]
+        },
+        "content": {
+          "$default": [
+            {
+              "$": "item.rendered_text"
+            },
+            {
+              "$": "item.snippet"
+            }
+          ]
+        },
+        "item_kind": "email",
+        "container": {
+          "id": {
+            "$": "scope.id"
+          },
+          "path": {
+            "$": "scope.label"
+          }
+        },
+        "note": "One recipe, both dimensions: a label sync sends the picked label id as label_ids, a search sync sends the stored text as query. relist_diff, because Gmail's list endpoint has no modified-since filter - the content hash decides what is new, so a re-list writes nothing twice. The history change feed (users.history.list), which is the cheap way to read only what moved, is deliberately out of scope for v1: it needs a stored historyId per mailbox and a fallback for an expired one. A message carrying two picked labels is filed under whichever label listed it last, so the tombstone sweep of the other label can mark it deleted for one crawl; the next sighting revives it. The stored text is rendered_text, not body_text: a raw body names neither the sender nor the date, opens with the invisible padding every marketing mail pads its preview with, and repeats the whole quoted thread once per message. It is never empty, because the header block is always written - which is the only reason an attachment-only mail such as a DMARC report is stored at all. No relationships: the obvious edge is a message to its thread, and there is no thread document for it to point at - one message per item is the v1 grain. Add a `thread` relationship the day a thread object exists. The container stays the picked label, as before.",
+        "metadata": {
+          "from": {
+            "$": "item.headers.from"
+          },
+          "to": {
+            "$": "item.to"
+          },
+          "date": {
+            "$": "item.date"
+          },
+          "labels": {
+            "$": "item.label_names"
+          },
+          "thread_id": {
+            "$": "item.thread_id"
+          },
+          "has_attachments": {
+            "$": "item.has_attachments"
+          }
+        }
+      }
+    }
+  },
+  "notes": {
+    "sync": "Two dimensions, because a mailbox is picked two ways. Labels are a flat checklist served by gmail-list_labels-1. Search is a text box holding a Gmail search query, the same syntax the Gmail search box takes; gmail-list_messages-1 runs that text and its option_mapping turns the matching mail into a preview list, so a person sees what the query catches before saving it. What gets stored is the query, never the message ids, which is why no preview option is selectable.",
+    "mcp_verdict": "Native REST, not MCP. SPEC.md allows MCP reuse only when the MCP is generic AND batch-scalable. Every Gmail MCP surface reachable from here is singular - get_message, send_message, label_message, trash_message, one id per call - which fails the batch law. So these nodes talk to gmail.googleapis.com/gmail/v1 directly.",
+    "restricted_scopes": "gmail.readonly, gmail.send and gmail.modify are RESTRICTED scopes. Google makes an app pass a yearly CASA (Cloud Application Security Assessment) Tier 2 audit before it may ask a non-test user for them. Until that audit passes this connector only works for accounts on the OAuth consent screen's test-user list, or inside a Workspace domain that installs it internally. gmail.modify is in the list because users.messages.batchModify accepts nothing weaker: gmail.readonly cannot move a label.",
+    "rate_limit_model": "Gmail meters QUOTA UNITS, not requests: 250 units per user per second as a moving average (so short bursts pass), plus 1,200,000 units per minute per project. Each method costs a different amount - messages.list 5, messages.get 5, messages.batchModify 50, messages.send 100. The framework's bucket counts requests, so one rpm number has to stand in for a unit budget and the honest choice is the conservative one. 300 rpm is 5 requests per second: 25 units/second when the traffic is list and get (the common case, 10% of the per-user budget), overshooting only on a sustained burst of sends. A burst that does overshoot comes back as 429 with Retry-After, which the http wrapper honors, so the failure mode is slower, never lost.",
+    "api_source": "Endpoints, parameters and response shapes are taken from the Gmail v1 discovery document: https://gmail.googleapis.com/$discovery/rest?version=v1"
+  }
+}

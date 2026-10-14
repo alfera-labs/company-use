@@ -1,0 +1,89 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A queue where the top three are worth the morning and everything cut says why.",
+  "summary_text": "Score every form fill against who you sell to, with the reason.",
+  "icon": "🎯",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "A score against your own book",
+    "The reason beside the score",
+    "An obvious no cut in one line",
+    "The top three in front of a person"
+  ],
+  "what_it_does": [
+    "Scores against who you sell to, not against a generic template",
+    "Writes the reason next to the score, every time",
+    "Cuts the obvious no in one line rather than parking it",
+    "Puts the top three in front of a human the same morning"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the form and enrich the company",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "score and route the lead",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "hubspot",
+      "requirement_label": "HubSpot",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the lead and its score live."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the good ones get announced."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "form",
+      "label": "Where the form arrives",
+      "input_type": "text"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where the good ones are announced",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "webhook-form_submitted",
+        "app_key": "webhook",
+        "listener_config": {}
+      },
+      "label": "when a form comes in",
+      "note": "Only the forms you point it at"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Re-score a batch whenever you like"
+    }
+  ]
+}

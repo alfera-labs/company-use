@@ -1,0 +1,77 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A pack your accountant can file from, with the questionable entries already flagged.",
+  "summary_text": "Assemble the return, reconciled, with the odd entries flagged.",
+  "icon": "🗂",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "bookkeepers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "A pack your accountant can file from",
+    "The period reconciled first",
+    "Every questionable entry flagged",
+    "Nothing re-coded to make a total work"
+  ],
+  "what_it_does": [
+    "Reconciles the period before it assembles anything",
+    "Flags every entry whose treatment is not obvious from the document",
+    "Never re-codes anything to make a total work",
+    "Hands the flagged list to a human before it finishes"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the period ledger",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "write the pack into a sheet",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "xero",
+      "requirement_label": "Xero",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The ledger the pack is built from."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "period",
+      "label": "The VAT period",
+      "input_type": "text"
+    },
+    {
+      "input_key": "pack",
+      "label": "Where the pack is written",
+      "input_type": "document"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 1 1,4,7,10 *",
+      "read_timezone_from": "ask_the_installer",
+      "label": "each quarter",
+      "note": "Every quarter, at your time"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it early to see what is missing"
+    }
+  ]
+}

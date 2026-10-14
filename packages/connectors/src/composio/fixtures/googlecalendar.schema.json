@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["events"],
+  "properties": {
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "updated"],
+        "properties": {
+          "id": { "type": "string" },
+          "summary": { "type": "string" },
+          "description": { "type": "string" },
+          "location": { "type": "string" },
+          "htmlLink": { "type": "string" },
+          "start": { "type": "object" },
+          "end": { "type": "object" },
+          "organizer": { "type": "object" },
+          "attendees": { "type": "array", "items": { "type": "object" } },
+          "updated": { "type": "string", "format": "date-time" },
+          "cancelled": { "type": "boolean" }
+        }
+      }
+    },
+    "next_page_token": { "type": ["string", "null"] }
+  }
+}

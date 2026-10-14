@@ -1,0 +1,42 @@
+{
+  "node_key": "example-collect_items-1",
+  "display_name": "Collect Items",
+  "description": "Read a batch of items by id, one provider call per item.",
+  "note": "The other half of the framework: a node whose provider has no batch endpoint, so the plural contract is executed by the runtime's fan_out inside execute.ts. Nothing ships it.",
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "item_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+    },
+    "required": ["item_ids"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": { "id": { "type": "string" }, "text": { "type": "string" } },
+          "required": ["id", "text"],
+          "additionalProperties": false
+        }
+      },
+      "failures": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": { "index": { "type": "integer" }, "message": { "type": "string" } },
+          "required": ["index", "message"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["items", "failures"],
+    "additionalProperties": false
+  }
+}

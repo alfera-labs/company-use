@@ -1,0 +1,31 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/evals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "evals": "bun --no-env-file src/cli.ts",
+    "fixtures": "bun --no-env-file src/slack_fixture_cli.ts"
+  },
+  "dependencies": {
+    "@agent-core": "workspace:*",
+    "@coworker/config": "workspace:*",
+    "@coworker/core": "workspace:*",
+    "@coworker/jobs": "workspace:*",
+    "@coworker/runtime-platform": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "@playwright/test": "^1.57.0",
+    "drizzle-orm": "^0.45.0",
+    "e2b": "^2.27.0",
+    "yaml": "^2.8.2",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

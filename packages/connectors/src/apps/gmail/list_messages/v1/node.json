@@ -1,0 +1,302 @@
+{
+  "node_key": "gmail-list_messages-1",
+  "display_name": "List Gmail Messages",
+  "description": "Read a page of Gmail messages. Pass a Gmail search query (for example \"from:ana@acme.com is:unread newer_than:7d\") and/or label ids to search, or pass message_ids to read specific messages. Each message comes back twice: as its raw parts (sender, recipient, subject, date, snippet, body_text), and as rendered_text — a short From/To/Date/Subject/Labels block over a cleaned body, with the invisible preheader padding stripped and the quoted thread named instead of repeated. Follow next_cursor for the next page.",
+  "implementation": "execute",
+  "required_scopes": ["https://www.googleapis.com/auth/gmail.readonly"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "A Gmail search query, the same syntax the Gmail search box takes."
+      },
+      "label_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Only return messages carrying every one of these label ids, for example INBOX or UNREAD."
+      },
+      "message_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Read these exact messages instead of searching. When present, query, label_ids and cursor are ignored."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous page."
+      },
+      "include_bodies": {
+        "type": "boolean",
+        "description": "Fetch the full message body as plain text. Costs more, so leave it off when the snippet is enough."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "messages": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "thread_id": {
+              "type": "string"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "date": {
+                  "type": "string"
+                },
+                "cc": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "snippet": {
+              "type": "string"
+            },
+            "body_text": {
+              "type": "string"
+            },
+            "rendered_text": {
+              "type": "string",
+              "description": "The message as a person reads it: a From/To/Date/Subject/Labels block, then the body with its invisible padding stripped and its quoted thread named rather than repeated. Present only when include_bodies is true."
+            },
+            "from_name": {
+              "type": ["string", "null"]
+            },
+            "from_address": {
+              "type": ["string", "null"]
+            },
+            "to": {
+              "type": ["string", "null"]
+            },
+            "date": {
+              "type": ["string", "null"],
+              "description": "ISO 8601 with the SENDER's own offset, read off the Date header. Falls back to internalDate in UTC."
+            },
+            "label_names": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The label ids of this message, resolved to their names through one labels.list per call."
+            },
+            "has_attachments": {
+              "type": "boolean"
+            },
+            "attachments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "mime_type", "byte_size"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "mime_type": {
+                    "type": "string"
+                  },
+                  "byte_size": {
+                    "type": ["integer", "null"]
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "id",
+            "thread_id",
+            "headers",
+            "snippet",
+            "from_name",
+            "from_address",
+            "to",
+            "date",
+            "label_names",
+            "has_attachments",
+            "attachments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"]
+      }
+    },
+    "required": ["messages", "next_cursor"],
+    "additionalProperties": false
+  },
+  "response_schemas": {
+    "description": "This node makes two provider calls, so it declares two ingresses instead of one response_schema. Both stay open on purpose: Gmail adds fields (classificationLabelValues arrived in 2025) and a closed schema would turn that into an outage.",
+    "list_messages": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "threadId": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "threadId"]
+          }
+        },
+        "nextPageToken": {
+          "type": ["string", "null"]
+        },
+        "resultSizeEstimate": {
+          "type": "integer"
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "message": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "threadId": {
+          "type": "string"
+        },
+        "snippet": {
+          "type": "string"
+        },
+        "labelIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "payload": {
+          "$ref": "#/$defs/message_part"
+        },
+        "internalDate": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "threadId"],
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$defs": {
+        "message_part": {
+          "type": "object",
+          "description": "Recursive: multipart/alternative nests text/plain and text/html, and a forwarded mail nests another whole message under that.",
+          "properties": {
+            "partId": {
+              "type": "string"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "filename": {
+              "type": "string"
+            },
+            "headers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"]
+              }
+            },
+            "body": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "integer"
+                },
+                "attachmentId": {
+                  "type": "string"
+                }
+              }
+            },
+            "parts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/message_part"
+              }
+            }
+          }
+        }
+      }
+    },
+    "labels_list": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "users.labels.list. Only id and name are read: a stored mail must say `Needs Action`, not `Label_8`.",
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["id"]
+          }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "two_round_read": "Gmail's list endpoint answers with ids and nothing else - no sender, no subject, no snippet. So every read is two rounds: one users.messages.list, then one users.messages.get per message through fan_out. That is why this is one node and not two: a model asking \"what did Ana send me\" wants the mail, not a page of opaque ids.",
+    "page_size": 25,
+    "format": "include_bodies picks the get format: full carries the whole MIME tree, metadata carries headers and snippet with no body. metadataHeaders would narrow it further but it is a repeated query parameter and the saving is a few hundred bytes, so the node asks for all headers and picks four.",
+    "repeated_label_ids": "Gmail repeats labelIds in the query string (?labelIds=INBOX&labelIds=UNREAD); a comma-joined value is read as one label id and matches nothing. ConnectorQuery holds one value per name, so execute.ts puts the repeated pair on the path. Upgrade: let ConnectorQuery take string[].",
+    "hydration_failure_is_loud": "A message that silently vanishes from the page is worse than a failed call: the model would answer from an incomplete inbox and never know. One failed get fails the whole read and names the id.",
+    "body_extraction": "text/plain wins because it is what the sender wrote. text/html is the fallback, stripped deterministically, with each link rendered as `text (url)` so the url survives — an anchor stripped to its text alone loses the only address in the mail. A part carrying a filename is an attachment and is never the body. Neither present gives an empty string, not a missing field.",
+    "provider_endpoints": [
+      "GET /users/me/messages?q&labelIds&pageToken&maxResults",
+      "GET /users/me/messages/{id}?format=full|metadata",
+      "GET /users/me/labels"
+    ],
+    "raw_body_is_not_readable_text": "A stored body carries no sender, no date and no subject: all four live in the MIME headers, so a search that found the mail could not say who wrote it or when. rendered_text puts a short header block over the body, which is why the sync recipe stores that and not body_text.",
+    "invisible_preheader_padding": "Marketing mail pads its preview line with hundreds of zero-width characters (U+200C, U+200D, U+200E, U+200F, U+FEFF) after a run of CRLFs. Stored raw that is the first thing a reader and an embedding see. render_email.ts strips them, normalises CRLF to LF and collapses runs of blank lines.",
+    "quoted_thread_is_cut": "A five-message thread stored per message is the same text five times, each copy longer. The quoted tail — lines starting with `>`, an `On ... wrote:` opener however it wrapped, and the Original/Forwarded banners — is replaced by one line saying it was omitted. A mail that is nothing BUT a quote keeps it: naming what was cut is only useful when something was left.",
+    "label_names_not_ids": "labelIds are ids (`Label_8`), and a mail that says `Label_8` tells a reader nothing. One users.labels.list per call resolves them; a refused call leaves the ids, because a missing label list must not lose the mail.",
+    "date_keeps_the_sender_offset": "`new Date(header)` knows the instant and forgets the zone, so 09:26 in Madrid reads back as 07:26Z and the answer to \"what time was this sent\" is wrong twice a year. The offset is read off the Date header text; internalDate is the fallback, in UTC, because that is all Gmail's own receive time knows.",
+    "attachments_are_named_not_downloaded": "A part carrying a filename is named on the mail — name, mime type, size — so a reader knows the invoice exists. The bytes are not fetched: that needs users.messages.attachments.get and the sync engine's file capture, which is the next step."
+  }
+}

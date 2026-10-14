@@ -1,0 +1,83 @@
+{
+  "node_key": "github-search_code-1",
+  "display_name": "Search GitHub Code",
+  "description": "Search code on GitHub with the code search syntax, e.g. \"addClass repo:jquery/jquery\" or \"org:acme filename:Dockerfile\". Returns one page of matching files and a next_cursor; send that cursor back to read the next page. GitHub serves at most 1,000 results for one query.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": ["repo", "read:org"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "minLength": 1 },
+      "cursor": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$",
+        "description": "The page cursor the previous call returned."
+      }
+    },
+    "required": ["query"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "path": { "type": "string" },
+            "sha": { "type": "string" },
+            "html_url": { "type": "string" },
+            "repository_full_name": { "type": ["string", "null"] }
+          },
+          "required": ["name", "path", "sha", "html_url", "repository_full_name"]
+        }
+      },
+      "total_count": { "type": "integer" },
+      "incomplete_results": {
+        "type": "boolean",
+        "description": "GitHub sets this when it timed out before searching every repository it wanted to."
+      },
+      "next_cursor": { "type": ["string", "null"] }
+    },
+    "required": ["items", "total_count", "incomplete_results", "next_cursor"]
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "Lenient ingress on GET /search/code.",
+    "type": "object",
+    "properties": {
+      "total_count": { "type": "number" },
+      "incomplete_results": { "type": "boolean" },
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "path": { "type": "string" },
+            "sha": { "type": "string" },
+            "html_url": { "type": "string" },
+            "repository": {
+              "type": ["object", "null"],
+              "properties": { "full_name": { "type": ["string", "null"] } }
+            }
+          },
+          "required": ["name", "path", "sha", "html_url"]
+        }
+      }
+    },
+    "required": ["total_count", "incomplete_results", "items"]
+  },
+  "quirks": {
+    "endpoint": "GET /search/code",
+    "why_execute": "The endpoint itself is a plain declarative call, but it carries its own secondary rate limit that the app record cannot express, so the node paces itself before every request. That pacing is code.",
+    "rate_limit": "Code search allows 10 requests per minute for an authenticated caller, against 30 for every other search endpoint. The node spaces its own calls at 6 seconds. See wait_for_code_search_slot in github_requests.ts.",
+    "result_cap": "GitHub serves at most 1,000 results for one query, so page 10 at 100 per page is the last page it answers. Asking for page 11 is a 422, so the node stops offering a cursor there.",
+    "authentication": "Code search refuses unauthenticated callers outright.",
+    "secondary_limit_status": "When GitHub does refuse for a secondary limit it answers 403 with a Retry-After header, not 429. The runtime's http_request reads 403 as `unauthorized` and does not retry it, so a caller sees a credential error where the true answer is \"wait\". Fixing that belongs in runtime/http_request.ts, which this connector does not own."
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Price conversations that end in a decision rather than a discount.",
+  "summary_text": "Keep pricing and discount language consistent.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Answers the objection before naming a number",
+    "Never apologises for the price",
+    "Trades scope for any discount",
+    "Says no plainly when the answer is no"
+  ],
+  "guidance": [
+    {
+      "label": "The objection",
+      "value": "Answer it before naming a number"
+    },
+    {
+      "label": "A discount",
+      "value": "Trade scope for it, never nothing"
+    },
+    {
+      "label": "Tone",
+      "value": "Never apologise for the price"
+    },
+    {
+      "label": "A no",
+      "value": "Said plainly, once"
+    }
+  ],
+  "used_when_text": "Used in proposals and replies",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before answering anything about price",
+      "risk": "reads_data"
+    }
+  ],
+  "requires": [],
+  "asks_you_for": [
+    {
+      "input_key": "opening",
+      "label": "What you say first",
+      "input_type": "text",
+      "example_answer": "What are you comparing it against?"
+    },
+    {
+      "input_key": "trade",
+      "label": "What you trade for a discount",
+      "input_type": "text",
+      "example_answer": "Scope or term, never the rate"
+    },
+    {
+      "input_key": "never_say",
+      "label": "Never say",
+      "input_type": "text",
+      "example_answer": "It's negotiable"
+    }
+  ],
+  "starts_when": []
+}

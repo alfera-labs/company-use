@@ -1,0 +1,420 @@
+{
+  "node_key": "hubspot-list_records-1",
+  "display_name": "List HubSpot Records",
+  "description": "Read HubSpot CRM records of one object type. Give ids to read exactly those records in one batch (any number; HubSpot's 100-record limit is handled for you). Omit ids to page through the whole object type with cursor and limit. The output says in \"mode\" which of the two ran, and ids HubSpot could not read come back in \"errors\" instead of failing the call.",
+  "implementation": "execute",
+  "required_scopes": [
+    "crm.objects.contacts.read",
+    "crm.objects.companies.read",
+    "crm.objects.deals.read"
+  ],
+  "endpoints": [
+    {
+      "purpose": "batch_read",
+      "when": "ids is a non-empty array",
+      "method": "POST",
+      "path": "/crm/v3/objects/{object_type}/batch/read",
+      "batch_size": 100
+    },
+    {
+      "purpose": "list",
+      "when": "ids is absent or empty",
+      "method": "GET",
+      "path": "/crm/v3/objects/{object_type}",
+      "max_page_size": 100
+    }
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$|^\\d+-\\d+$",
+        "description": "contacts, companies, deals, tickets, or a custom object type id like 2-1234567"
+      },
+      "ids": {
+        "description": "Read exactly these records. Omit to page through the whole object type.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "id_property": {
+        "description": "Read by a unique property instead of the record id, for example \"email\".",
+        "type": "string"
+      },
+      "properties": {
+        "description": "Which properties to return. HubSpot returns a small default set when omitted.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "cursor": {
+        "description": "The next_cursor from the previous page. List mode only.",
+        "type": "string"
+      },
+      "limit": {
+        "description": "Page size. List mode only; ids mode reads every id given.",
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 100
+      }
+    },
+    "required": ["object_type"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "mode": {
+        "type": "string",
+        "enum": ["batch_read", "list"],
+        "description": "Which HubSpot endpoint actually answered."
+      },
+      "records": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "created_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "archived": {
+              "type": "boolean"
+            }
+          },
+          "required": ["id", "properties", "created_at", "updated_at", "archived"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "errors": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["mode", "records", "next_cursor", "errors"],
+    "additionalProperties": false
+  },
+  "response_schemas": {
+    "batch_read": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "updatedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "archived": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "numErrors": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "category": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "message": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "list": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "updatedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "archived": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paging": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "next": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "after": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "link": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "quirks": [
+    "One node, two endpoints. The output field \"mode\" names the one that ran so nobody infers it from the shape of next_cursor.",
+    "Batch read returns every id asked for in one answer, so its next_cursor is always null. Only list mode pages.",
+    "More than 100 ids is cut into 100-id calls and fanned out under the app rate limits.",
+    "An id HubSpot cannot read (archived, deleted, never there) comes back in \"errors\" with HTTP 207. It does not fail the call.",
+    "id_property reads records by a unique property such as email instead of the record id."
+  ]
+}

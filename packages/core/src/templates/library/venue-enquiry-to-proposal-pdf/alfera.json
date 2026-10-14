@@ -1,0 +1,93 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A proposal that looks like yours, out the same day the enquiry landed.",
+  "summary_text": "Turn an enquiry into a proposal with your photographs and prices.",
+  "icon": "📄",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "events",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "venue-managers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Spaces that fit the headcount and the date",
+    "Your own photographs, never stock",
+    "Prices from the rate card",
+    "A draft PDF for you to check"
+  ],
+  "what_it_does": [
+    "Picks the spaces that actually fit the headcount and the date",
+    "Uses your own photographs, not stock",
+    "Prices from the rate card, with anything unusual marked to confirm",
+    "Leaves the PDF as a draft attachment for you to check"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the enquiry and your asset folder",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "produce a proposal PDF",
+      "risk": "changes_data"
+    },
+    {
+      "capability": "leave it as a draft",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The enquiry and where the draft goes."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_drive",
+      "requirement_label": "Google Drive",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The photographs, floor plans and the template."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "assets",
+      "label": "Your photograph folder",
+      "input_type": "document"
+    },
+    {
+      "input_key": "template",
+      "label": "Your proposal template",
+      "input_type": "document"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "gmail-new_email_received",
+        "app_key": "gmail",
+        "listener_config": {}
+      },
+      "label": "when an enquiry lands",
+      "note": "Only the mailbox you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Point it at an enquiry whenever you like"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+node_modules
+.tanstack
+.nitro
+.output
+dist
+coverage
+.turbo
+.DS_Store
+# env: never commit a file that holds real values
+.env
+.env.local
+.env.local.*
+.env.*.local
+deploy/.env
+# written by install.sh on a machine where Docker had no free address range
+deploy/docker-compose.override.yml
+# private keys downloaded from provider dashboards; never committed
+.secrets/
+*.log
+*.tsbuildinfo
+
+# Generated Office viewer assets. The app predev and prebuild hooks copy pinned package files.
+apps/app/public/document-viewer-licenses/
+apps/app/public/document-viewers/
+apps/app/public/pptx-react-viewer.css
+
+__pycache__/
+*.pyc
+*.pyo
+
+# Detached dev-server lifecycle (scripts/dev-server.sh)
+.dev-server.pid
+.dev-server.log
+.rivet-engine.pid
+.rivet-engine.log
+
+# Local scratch never belongs in a branch.
+*.local.*
+
+# Written by deploy/install.sh when it runs from a clone.
+deploy/workspaces/
+deploy/source/
+.cache/

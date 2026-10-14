@@ -1,0 +1,39 @@
+{
+  "_source": "Doc-derived, not recorded: Granola's public API needs a Business-plan grn_ key that this repo does not hold. Every field, id pattern and value comes from the published OpenAPI examples for GET /v1/notes — https://docs.granola.ai/api-reference/openapi.json and https://docs.granola.ai/api-reference/list-notes. Re-record against a real key when one exists.",
+  "notes_page_one": {
+    "notes": [
+      {
+        "id": "not_00000000000001",
+        "object": "note",
+        "title": "Quarterly widget budget review",
+        "owner": { "name": "Pat Sample", "email": "pat@granola.ai" },
+        "created_at": "2026-01-27T15:30:00Z",
+        "updated_at": "2026-01-27T16:45:00Z"
+      },
+      {
+        "id": "not_00000000000002",
+        "object": "note",
+        "title": null,
+        "owner": { "name": null, "email": "raisin@granola.ai" },
+        "created_at": "2026-01-26T09:00:00Z",
+        "updated_at": "2026-01-26T09:40:00Z"
+      }
+    ],
+    "hasMore": true,
+    "cursor": "eyJjcmVkZW50aWFsfQ=="
+  },
+  "notes_last_page": {
+    "notes": [
+      {
+        "id": "not_00000000000003",
+        "object": "note",
+        "title": "Almond milk pivot",
+        "owner": { "name": "Pat Sample", "email": "pat@granola.ai" },
+        "created_at": "2026-01-20T11:00:00Z",
+        "updated_at": "2026-01-20T12:05:00Z"
+      }
+    ],
+    "hasMore": false,
+    "cursor": null
+  }
+}

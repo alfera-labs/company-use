@@ -1,0 +1,26 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bash ../../scripts/test-env.sh vitest run --maxWorkers=1 packages/jobs/src"
+  },
+  "dependencies": {
+    "@coworker/config": "workspace:*",
+    "@coworker/core": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "drizzle-orm": "^0.45.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

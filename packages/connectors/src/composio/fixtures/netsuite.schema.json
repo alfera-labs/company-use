@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "refName": { "type": "string" },
+          "type": { "type": "string" },
+          "links": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    },
+    "hasMore": { "type": "boolean" }
+  }
+}

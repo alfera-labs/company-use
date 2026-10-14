@@ -1,0 +1,33 @@
+title = "Alfera secret scan"
+
+# Every default gitleaks rule stays on. The first allowlist names only trees that an install
+# or a dev server writes. None of them is committed, and no build folder or lock file is on it.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Installed trees and tool caches."
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.turbo/''',
+  '''(^|/)\.output/''',
+]
+
+# Made-up values in tests of redaction, key rotation and request headers. Each pattern is
+# matched against the found value alone, from its first character to its last. It excuses
+# that one value and nothing else on the line: a real key next to it is still reported.
+[[allowlists]]
+description = "Filler values in tests. One whole value per pattern."
+regexes = [
+  '''^ak_live_abcdef0123456789$''',
+  '''^sk\-zqtest0123456789abcdef0123$''',
+  '''^zqtest0123456789abcdef0123456789$''',
+  '''^ak_live_abcdefghijklmnop1234$''',
+  '''^k_live_abc123$''',
+  '''^rotation-test-key-[abc]-0123456789abcdef$''',
+  '''^sk-abcdefghijklmnopqrstuvwx1234567890\.$''',
+  '''^attio-bulk_29-1$''',
+  '''^microsoftoutlook$''',
+  '''^env\.E2B_API_KEY$''',
+  '''^shh_0123456789abcdef$''',
+]

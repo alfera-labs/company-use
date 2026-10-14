@@ -1,0 +1,434 @@
+{
+  "source": "nodes.output_schema, catalog_scope global, app attio, node_status active",
+  "output_schemas": {
+    "attio_v2-list_objects-1": {
+      "type": "object",
+      "$defs": {
+        "ObjectId": {
+          "type": "object",
+          "title": "ObjectId",
+          "required": ["workspace_id", "object_id"],
+          "properties": {
+            "object_id": {
+              "type": "string",
+              "title": "Object Id",
+              "description": "A UUID to identify the object"
+            },
+            "workspace_id": {
+              "type": "string",
+              "title": "Workspace Id",
+              "description": "A UUID to identify the workspace this object belongs to"
+            }
+          },
+          "description": "Model representing the nested ID structure"
+        },
+        "ObjectMetadata": {
+          "type": "object",
+          "title": "ObjectMetadata",
+          "required": ["id", "created_at"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/ObjectId",
+              "title": "Id",
+              "description": "The unique identifier structure of the object"
+            },
+            "api_slug": {
+              "type": "string",
+              "title": "Api Slug",
+              "description": "A unique, human-readable slug to access the object through URLs and API calls. Formatted in snake case. Can be null."
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At",
+              "description": "When the object was created (ISO 8601 timestamp format)"
+            },
+            "plural_noun": {
+              "type": "string",
+              "title": "Plural Noun",
+              "description": "The plural form of the object's name. Can be null."
+            },
+            "singular_noun": {
+              "type": "string",
+              "title": "Singular Noun",
+              "description": "The singular form of the object's name. Can be null."
+            }
+          },
+          "description": "Model representing metadata for an individual object"
+        },
+        "ListObjectsResponse": {
+          "type": "object",
+          "title": "ListObjectsResponse",
+          "required": ["objects"],
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ObjectMetadata" },
+              "title": "Objects",
+              "description": "List of objects with their metadata"
+            }
+          }
+        }
+      },
+      "title": "ListObjectsResponseWrapper",
+      "required": ["data", "successful"],
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/ListObjectsResponse",
+          "title": "Data",
+          "description": "Data from the action execution"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error",
+          "description": "Error if any occurred during the execution of the action"
+        },
+        "successful": {
+          "type": "boolean",
+          "title": "Successful",
+          "description": "Whether or not the action execution was successful or not"
+        }
+      }
+    },
+    "attio_v2-query_records-1": {
+      "type": "object",
+      "$defs": {
+        "Record": {
+          "type": "object",
+          "title": "Record",
+          "required": ["id", "created_at", "web_url", "values"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/RecordId",
+              "title": "Id",
+              "description": "Composite identifier for the record."
+            },
+            "values": {
+              "type": "object",
+              "title": "Values",
+              "description": "Object containing attribute values keyed by attribute API slug. Each attribute maps to an array of value objects.",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/AttributeValue" }
+              }
+            },
+            "web_url": {
+              "type": "string",
+              "title": "Web Url",
+              "description": "Direct URL to view the record in the Attio web application."
+            },
+            "created_at": {
+              "type": "string",
+              "title": "Created At",
+              "description": "ISO 8601 timestamp with nanosecond precision indicating when the record was created."
+            }
+          }
+        },
+        "OptionId": {
+          "type": "object",
+          "title": "OptionId",
+          "required": ["workspace_id", "object_id", "attribute_id", "option_id"],
+          "properties": {
+            "object_id": {
+              "type": "string",
+              "title": "Object Id",
+              "description": "UUID of the object."
+            },
+            "option_id": {
+              "type": "string",
+              "title": "Option Id",
+              "description": "UUID of the option."
+            },
+            "attribute_id": {
+              "type": "string",
+              "title": "Attribute Id",
+              "description": "UUID of the attribute."
+            },
+            "workspace_id": {
+              "type": "string",
+              "title": "Workspace Id",
+              "description": "UUID of the workspace."
+            }
+          }
+        },
+        "RecordId": {
+          "type": "object",
+          "title": "RecordId",
+          "required": ["workspace_id", "object_id", "record_id"],
+          "properties": {
+            "object_id": {
+              "type": "string",
+              "title": "Object Id",
+              "description": "UUID of the object type."
+            },
+            "record_id": {
+              "type": "string",
+              "title": "Record Id",
+              "description": "UUID of the specific record."
+            },
+            "workspace_id": {
+              "type": "string",
+              "title": "Workspace Id",
+              "description": "UUID of the workspace."
+            }
+          }
+        },
+        "SelectOption": {
+          "type": "object",
+          "title": "SelectOption",
+          "required": ["id", "title", "is_archived"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/OptionId",
+              "title": "Id",
+              "description": "Composite ID of the option containing workspace_id, object_id, attribute_id, and option_id."
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "description": "Display title of the option."
+            },
+            "is_archived": {
+              "type": "boolean",
+              "title": "Is Archived",
+              "description": "Whether the option is archived."
+            }
+          }
+        },
+        "ActorReference": {
+          "type": "object",
+          "title": "ActorReference",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Id",
+              "description": "UUID of the actor, or null for certain system actors."
+            },
+            "type": {
+              "type": "string",
+              "title": "Type",
+              "description": "Type of actor: 'api-token', 'workspace-member', 'system', or 'app'. May be null for certain system actors."
+            }
+          }
+        },
+        "AttributeValue": {
+          "type": "object",
+          "title": "AttributeValue",
+          "required": ["active_from", "created_by_actor", "attribute_type"],
+          "properties": {
+            "value": {
+              "title": "Value",
+              "description": "The actual value for simple attribute types (text, number, checkbox, date, timestamp, rating, currency). Type depends on attribute_type: string for text/date/timestamp, number for number/rating/currency, boolean for checkbox."
+            },
+            "domain": {
+              "type": "string",
+              "title": "Domain",
+              "description": "For domain attributes: Full domain name."
+            },
+            "line_1": {
+              "type": "string",
+              "title": "Line 1",
+              "description": "For location attributes: First line of the address."
+            },
+            "line_2": {
+              "type": "string",
+              "title": "Line 2",
+              "description": "For location attributes: Second line of the address."
+            },
+            "line_3": {
+              "type": "string",
+              "title": "Line 3",
+              "description": "For location attributes: Third line of the address."
+            },
+            "line_4": {
+              "type": "string",
+              "title": "Line 4",
+              "description": "For location attributes: Fourth line of the address."
+            },
+            "option": {
+              "$ref": "#/$defs/SelectOption",
+              "title": "Option",
+              "description": "For select and status attributes: The selected option object."
+            },
+            "region": {
+              "type": "string",
+              "title": "Region",
+              "description": "For location attributes: State, province, or region."
+            },
+            "latitude": {
+              "type": "number",
+              "title": "Latitude",
+              "description": "For location attributes: Geographic latitude coordinate."
+            },
+            "locality": {
+              "type": "string",
+              "title": "Locality",
+              "description": "For location attributes: City or locality."
+            },
+            "postcode": {
+              "type": "string",
+              "title": "Postcode",
+              "description": "For location attributes: Postal or ZIP code."
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name",
+              "description": "For personal-name attributes: Full name of the person."
+            },
+            "last_name": {
+              "type": "string",
+              "title": "Last Name",
+              "description": "For personal-name attributes: Last name of the person."
+            },
+            "longitude": {
+              "type": "number",
+              "title": "Longitude",
+              "description": "For location attributes: Geographic longitude coordinate."
+            },
+            "first_name": {
+              "type": "string",
+              "title": "First Name",
+              "description": "For personal-name attributes: First name of the person."
+            },
+            "active_from": {
+              "type": "string",
+              "title": "Active From",
+              "description": "ISO 8601 timestamp indicating when this value became active."
+            },
+            "owner_actor": {
+              "$ref": "#/$defs/ActorReference",
+              "title": "Owner Actor",
+              "description": "For interaction attributes: Actor who owns the interaction."
+            },
+            "root_domain": {
+              "type": "string",
+              "title": "Root Domain",
+              "description": "For domain attributes: Root domain name."
+            },
+            "active_until": {
+              "type": "string",
+              "title": "Active Until",
+              "description": "ISO 8601 timestamp indicating when this value expires, or null if still active."
+            },
+            "country_code": {
+              "type": "string",
+              "title": "Country Code",
+              "description": "For phone-number and location attributes: ISO 3166-1 alpha-2 country code."
+            },
+            "email_domain": {
+              "type": "string",
+              "title": "Email Domain",
+              "description": "For email-address attributes: Full domain part of the email."
+            },
+            "currency_code": {
+              "type": "string",
+              "title": "Currency Code",
+              "description": "For currency attributes: ISO 4217 currency code (e.g., 'USD', 'EUR')."
+            },
+            "email_address": {
+              "type": "string",
+              "title": "Email Address",
+              "description": "For email-address attributes: Normalized email address."
+            },
+            "interacted_at": {
+              "type": "string",
+              "title": "Interacted At",
+              "description": "For interaction attributes: ISO 8601 timestamp of when the interaction occurred."
+            },
+            "target_object": {
+              "type": "string",
+              "title": "Target Object",
+              "description": "For record-reference attributes: API slug of the referenced object type (e.g., 'people', 'companies')."
+            },
+            "attribute_type": {
+              "type": "string",
+              "title": "Attribute Type",
+              "description": "Type of attribute: 'text', 'number', 'checkbox', 'currency', 'date', 'timestamp', 'rating', 'status', 'select', 'record-reference', 'actor-reference', 'location', 'domain', 'email-address', 'phone-number', 'interaction', or 'personal-name'."
+            },
+            "created_by_actor": {
+              "$ref": "#/$defs/ActorReference",
+              "title": "Created By Actor",
+              "description": "Reference to the actor (user, API token, or system) that created this value."
+            },
+            "interaction_type": {
+              "type": "string",
+              "title": "Interaction Type",
+              "description": "For interaction attributes: Type of interaction ('calendar-event', 'call', 'chat-thread', 'email', 'in-person-meeting', 'meeting')."
+            },
+            "target_record_id": {
+              "type": "string",
+              "title": "Target Record Id",
+              "description": "For record-reference attributes: UUID of the referenced record."
+            },
+            "email_root_domain": {
+              "type": "string",
+              "title": "Email Root Domain",
+              "description": "For email-address attributes: Root domain part of the email."
+            },
+            "referenced_actor_id": {
+              "type": "string",
+              "title": "Referenced Actor Id",
+              "description": "For actor-reference attributes: UUID of the referenced actor, or null for system actors."
+            },
+            "email_local_specifier": {
+              "type": "string",
+              "title": "Email Local Specifier",
+              "description": "For email-address attributes: Local part of the email (before @)."
+            },
+            "original_phone_number": {
+              "type": "string",
+              "title": "Original Phone Number",
+              "description": "For phone-number attributes: Phone number as inputted by the user."
+            },
+            "referenced_actor_type": {
+              "type": "string",
+              "title": "Referenced Actor Type",
+              "description": "For actor-reference attributes: Type of actor ('workspace-member', 'api-token', 'system')."
+            },
+            "original_email_address": {
+              "type": "string",
+              "title": "Original Email Address",
+              "description": "For email-address attributes: Email as originally input without normalization."
+            },
+            "normalized_phone_number": {
+              "type": "string",
+              "title": "Normalized Phone Number",
+              "description": "For phone-number attributes: Phone number in E.164 format as set by Attio."
+            }
+          }
+        },
+        "QueryRecordsResponse": {
+          "type": "object",
+          "title": "QueryRecordsResponse",
+          "required": ["data"],
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Record" },
+              "title": "Data",
+              "description": "Array of record objects matching the query criteria."
+            }
+          }
+        }
+      },
+      "title": "QueryRecordsResponseWrapper",
+      "required": ["data", "successful"],
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/QueryRecordsResponse",
+          "title": "Data",
+          "description": "Data from the action execution"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error",
+          "description": "Error if any occurred during the execution of the action"
+        },
+        "successful": {
+          "type": "boolean",
+          "title": "Successful",
+          "description": "Whether or not the action execution was successful or not"
+        }
+      }
+    }
+  }
+}

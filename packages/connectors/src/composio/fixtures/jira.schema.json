@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "jira",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "JIRA_GET_RECENT_PROJECTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "JIRA_SEARCH_ISSUES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

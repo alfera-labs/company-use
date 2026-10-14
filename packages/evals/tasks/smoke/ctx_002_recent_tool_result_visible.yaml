@@ -1,0 +1,11 @@
+task_id: ctx_002_recent_tool_result_visible
+prompt: "Keep the latest tool result visible in the engine input snapshot."
+workspace_provider: local
+graders:
+  - grader_type: db_assertion
+    assertion: tool_results_packet
+  - grader_type: db_assertion
+    assertion: context_snapshot_exists
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

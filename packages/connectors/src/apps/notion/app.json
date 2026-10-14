@@ -1,0 +1,91 @@
+{
+  "app_key": "notion",
+  "display_name": "Notion",
+  "base_url": "https://api.notion.com/v1",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://api.notion.com/v1/oauth/authorize",
+    "token_url": "https://api.notion.com/v1/oauth/token",
+    "scopes": [],
+    "authorization_params": { "owner": "user" },
+    "token_auth_method": "client_secret_basic",
+    "token_request_format": "json"
+  },
+  "rate_limits": { "rpm": 180, "concurrency": 3, "burst": 3 },
+  "sync": {
+    "prompt": "Choose which Notion databases to sync",
+    "dimensions": [
+      {
+        "key": "data_sources",
+        "label": "Databases",
+        "note": "No new node: notion-search_pages-1 already lists what a person picks from, browse_input pins it to data sources, and option_mapping turns each result into a scope option.",
+        "shape": "flat",
+        "browse_node": "notion-search_pages-1",
+        "browse_input": { "filter_object_type": "data_source" },
+        "search_param": "query",
+        "option_mapping": {
+          "id": { "$": "item.id" },
+          "label": { "$": "item.title" },
+          "kind": "data_source",
+          "selectable": true
+        },
+        "allow_select_all": true
+      }
+    ],
+    "objects": {
+      "page": {
+        "label": "Pages",
+        "list_node": "notion-query_databases-1",
+        "scoped_by": { "data_sources": "queries[].data_source_id" },
+        "list_input": {
+          "queries": [
+            {
+              "limit": 100,
+              "sorts": [{ "timestamp": "last_edited_time", "direction": "ascending" }],
+              "filter": {
+                "timestamp": "last_edited_time",
+                "last_edited_time": { "on_or_after": "1970-01-01T00:00:00.000Z" }
+              }
+            }
+          ]
+        },
+        "page": {
+          "cursor_param": "queries[].cursor",
+          "items": { "$": "response.results.0.rows" },
+          "next_cursor": { "$": "response.results.0.next_cursor" },
+          "error": { "$": "response.results.0.error.code" }
+        },
+        "strategy": "modified_since",
+        "cursor": {
+          "field": { "$": "item.last_edited_time" },
+          "param": "queries[].filter.last_edited_time.on_or_after",
+          "overlap_minutes": 2
+        },
+        "identity": { "$": "item.id" },
+        "version_signal": { "$": "item.last_edited_time" },
+        "title": { "$": "item.title" },
+        "content": {
+          "read_node": "notion-read_blocks-1",
+          "input": { "blocks": [{ "block_id": { "$": "item.id" } }] },
+          "text": {
+            "$map": { "from": { "$": "response.results.0.blocks" }, "to": { "$": "item.text" } }
+          }
+        },
+        "item_kind": "page",
+        "source_url": { "$": "item.url" },
+        "container": { "id": { "$": "scope.id" }, "path": { "$": "scope.label" } },
+        "note": "A row in a data source is a page, and its text lives in its blocks, so the body costs a second call per page - Notion has no endpoint that lists rows with their content. The watermark rides inside Notion's own timestamp filter: the static list_input carries the whole filter with an epoch floor, and the cursor overwrites the on_or_after inside it, because a Notion filter is invalid without its sibling `timestamp` key. Sorted ascending, so a walk resumes forward. NOT LIVE-TESTED: the dev integration currently has no page shared with it, so this recipe is written from Notion's documented shapes and the node schemas, not from a recorded run. Trash is not detected: a trashed page simply stops coming back from a query, and query_databases-1 returns no in_trash field, so nothing here can mark it deleted. That needs either the field on the node or a full re-list strategy."
+      }
+    }
+  },
+  "notes": {
+    "sync": "The unit is a DATA SOURCE, not a database. Since API version 2025-09-03 a Notion database is a container of one or more data sources, the search object filter takes \"data_source\" and no longer accepts \"database\", and a query addresses the data source. So the honest thing to store in sync_scope is the data source id, which is also what notion-query_databases-1 reads. The picker still says \"Databases\", because that is the word a person sees in Notion's own UI.",
+    "auth": "Notion has no granular OAuth scopes and takes no scope parameter, so `scopes` is empty on purpose and no node declares required_scopes. What an integration may do is set on the integration itself in the developer portal (read content, update content, insert content, read comments, insert comments, and a user-information level); what it may reach is whatever a person picks on the consent screen. Calling outside the configured capabilities answers 403, and a page nobody shared answers 404. The token exchange uses HTTP Basic with client_id:client_secret and returns a non-expiring access_token with no refresh_token.",
+    "api_version": "Every request carries `Notion-Version: 2026-03-11`, sent from notion_requests.ts. Notion versions its REST API by a dated header, not by a path segment, and refuses a request without one. Staying on an older version is not the safe choice: Notion documents that queries, page creation and relation writes start failing on any database a person later gives a second data source.",
+    "version_history": "2022-06-28 -> 2025-09-03 (a database became a container of one or more data sources; queries and page parents address the data source, and the search object filter takes \"data_source\" instead of \"database\") -> 2026-03-11 (`archived` renamed to `in_trash`; the flat `after` parameter on block append became a `position` object).",
+    "rate_limits": "Notion documents an average of three requests per second per connection, with short bursts above it tolerated, plus a workspace-wide ceiling that scales with the workspace plan. Over the limit answers 429 with Retry-After in seconds, which the runtime's rate limiter honours. 180 rpm with a burst of 3 is that average written down.",
+    "no_batch_endpoints": "Notion has no batch endpoints. One request creates one page, queries one data source, reads one block's children. Every plural node here runs its contract on the runtime's fan_out, so a batch of N costs N round trips and the node descriptions say so.",
+    "payload_limits": "2000 characters per rich text span, 100 elements per block array, 1000 blocks and 500 KB per payload, page_size at most 100, and paginated property arrays truncated to 25 items inside a page object.",
+    "mcp_verdict": "Notion's hosted MCP server (mcp.notion.com) was checked against the batch law and fails it. Of about 37 tools only notion-create-pages and notion-move-pages take arrays; notion-fetch, notion-update-page, comments, views and every database mutation are one-object-in. It also answers in Notion-flavored Markdown rather than stable JSON, and caps at 180 requests per minute per user with keyword search at 30. So these nodes are native REST against api.notion.com/v1."
+  }
+}

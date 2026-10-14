@@ -1,0 +1,78 @@
+{
+  "_comment": "doc-derived: shaped from the documented changes.getStartPageToken (drive#startPageToken) and changes.list (drive#changeList) responses and the fields mask this node sends. Ids, names, and tokens are invented; no real Drive content and no credentials.",
+  "start_page_token": {
+    "kind": "drive#startPageToken",
+    "startPageToken": "918274"
+  },
+  "changes_middle_page": {
+    "kind": "drive#changeList",
+    "nextPageToken": "918290",
+    "changes": [
+      {
+        "kind": "drive#change",
+        "changeType": "file",
+        "time": "2026-09-01T08:31:12.004Z",
+        "removed": false,
+        "fileId": "1aBcD_handbook",
+        "file": {
+          "kind": "drive#file",
+          "id": "1aBcD_handbook",
+          "name": "Employee Handbook",
+          "mimeType": "application/vnd.google-apps.document",
+          "modifiedTime": "2026-09-01T08:31:11.902Z",
+          "version": "421",
+          "webViewLink": "https://docs.google.com/document/d/1aBcD_handbook/edit?usp=drivesdk",
+          "parents": ["0AJfolder_people_ops"],
+          "trashed": false
+        }
+      },
+      {
+        "kind": "drive#change",
+        "changeType": "file",
+        "time": "2026-09-01T09:02:44.771Z",
+        "removed": true,
+        "fileId": "1qRsT_old_invoice"
+      }
+    ]
+  },
+  "changes_last_page": {
+    "kind": "drive#changeList",
+    "newStartPageToken": "918301",
+    "changes": [
+      {
+        "kind": "drive#change",
+        "changeType": "file",
+        "time": "2026-09-01T10:15:03.219Z",
+        "removed": false,
+        "driveId": "0AJshared_drive_sales",
+        "fileId": "1eFgH_pricing",
+        "file": {
+          "kind": "drive#file",
+          "id": "1eFgH_pricing",
+          "name": "Pricing 2026.xlsx",
+          "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "modifiedTime": "2026-09-01T10:15:02.500Z",
+          "version": "13",
+          "webViewLink": "https://docs.google.com/spreadsheets/d/1eFgH_pricing/edit?usp=drivesdk",
+          "parents": ["0AJfolder_finance"],
+          "trashed": true
+        }
+      }
+    ]
+  },
+  "changes_expired_token": {
+    "error": {
+      "code": 400,
+      "message": "Invalid Value",
+      "errors": [
+        {
+          "domain": "global",
+          "reason": "invalid",
+          "message": "Invalid Value",
+          "location": "pageToken",
+          "locationType": "parameter"
+        }
+      ]
+    }
+  }
+}

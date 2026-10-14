@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["employees"],
+  "properties": {
+    "employees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "full_name"],
+        "properties": {
+          "id": { "type": "string" },
+          "full_name": { "type": "string" },
+          "email": { "type": "string" },
+          "department": { "type": ["string", "null"] },
+          "jobs": { "type": "array", "items": { "type": "object" } },
+          "terminated": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

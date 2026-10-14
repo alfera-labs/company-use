@@ -1,0 +1,27 @@
+# Build context is the repo root (for `docker build -f apps/api/Dockerfile .`).
+# Keep the image lean and never ship local or secret material.
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+# Nitro writes apps/app/.output. A host build must never be copied in, or the image ships a
+# bundle that was configured for somebody else's domain.
+**/.output
+**/.tanstack
+**/.nitro
+.git
+**/.git
+.github
+.context
+deploy
+tests
+**/*.test.ts
+**/*.test.tsx
+**/*.test.mjs
+**/__tests__
+# Only the guides at the root: the template library under packages/ holds .md files that ship.
+*.md
+*.log
+*.pid
+.env
+.env.*

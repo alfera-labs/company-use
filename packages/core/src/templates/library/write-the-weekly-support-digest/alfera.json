@@ -1,0 +1,85 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "The product conversation starts from what customers said, not from memory.",
+  "summary_text": "Post what customers actually complained about, in cost order.",
+  "icon": "🗞",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Themes with counts, in cost order",
+    "One real customer sentence per theme",
+    "What would make each theme stop",
+    "No padding in a quiet week"
+  ],
+  "what_it_does": [
+    "Themes, with counts, in cost order",
+    "Quotes one real customer sentence per theme",
+    "Names what would make each theme stop",
+    "Never pads a quiet week into a full page"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the week of tickets",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "post the digest",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "zendesk",
+      "requirement_label": "Zendesk",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The week it summarises."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the digest is posted."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "queue",
+      "label": "Which queue it reads",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where the digest is posted",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 16 * * FRI",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for a digest at any time"
+    }
+  ]
+}

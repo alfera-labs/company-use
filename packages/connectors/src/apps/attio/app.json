@@ -1,0 +1,59 @@
+{
+  "app_key": "attio",
+  "display_name": "Attio",
+  "base_url": "https://api.attio.com",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://app.attio.com/authorize",
+    "token_url": "https://app.attio.com/oauth/token",
+    "scopes": ["record_permission:read-write", "object_configuration:read", "note:read-write"],
+    "header": "Authorization: Bearer <access_token>"
+  },
+  "rate_limits": { "rpm": 1500, "concurrency": 8, "burst": 25 },
+  "sync": {
+    "prompt": "Choose which Attio objects to sync",
+    "dimensions": [
+      {
+        "key": "objects",
+        "label": "Objects",
+        "shape": "flat",
+        "browse_node": "attio-list_objects-1",
+        "allow_select_all": true
+      }
+    ],
+    "objects": {
+      "record": {
+        "label": "Records",
+        "list_node": "attio-list_records-1",
+        "scoped_by": { "objects": "object" },
+        "list_input": { "limit": 100 },
+        "page": {
+          "cursor_param": "cursor",
+          "items": { "$": "response.records" },
+          "next_cursor": { "$": "response.next_cursor" }
+        },
+        "strategy": "relist_diff",
+        "identity": { "$": "item.record_id" },
+        "title": {
+          "$default": [
+            { "$": "item.values.name.0.full_name" },
+            { "$": "item.values.name.0.value" },
+            { "$": "item.record_id" }
+          ]
+        },
+        "content": { "$": "item.values" },
+        "item_kind": "crm_record",
+        "source_url": { "$": "item.web_url" },
+        "container": { "id": { "$": "scope.id" }, "path": { "$": "scope.label" } },
+        "note": "relist_diff. attio-list_records-1 forwards a filter and sorts untouched, so a modified-since walk is expressible in principle, but nobody has run it against a real workspace and a wrong filter reads zero records in silence. The stored text is the record's values as sorted JSON. NOT LIVE-TESTED: no Attio connection exists in dev."
+      }
+    }
+  },
+  "quirks": {
+    "sync_stores_the_api_slug": "A picked object is stored as its api_slug — people, companies, deals — because that is what every record node in this app takes as `object`. attio-list_objects-1 falls back to the object_id when Attio sends an object with no slug, which those nodes also accept.",
+    "api_version": "Attio's REST API is v2 and every path carries the version, so base_url stops at the host.",
+    "auth": "Attio takes a bearer token from either an OAuth 2.0 app or a single-workspace API key, and both are used the same way. OAuth is the one that serves many workspaces, so it is the kind declared here. Attio's authorize and token endpoints live on app.attio.com while the data API lives on api.attio.com.",
+    "scopes": "Attio declares scopes in its developer console, not on the authorize URL. The list above is what these nodes need, not a query parameter.",
+    "rate_limits": "Attio publishes 100 reads a second and 25 writes a second for the whole workspace, and answers 429 with a Retry-After that is an HTTP date, not a number of seconds. The write ceiling binds a connector that creates and updates, so the record uses it: 25 a second is 1500 a minute."
+  }
+}

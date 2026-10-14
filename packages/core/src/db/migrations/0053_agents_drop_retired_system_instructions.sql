@@ -1,0 +1,21 @@
+-- Drop the retired twin of `agents.system_prompt`.
+--
+-- `system_instructions` shipped in 0000. `system_prompt` arrived in 0001 as a rename that never
+-- finished, so the table carried the same text twice for fifty migrations. 0051 made
+-- `system_prompt` the single source, backfilled it, and dropped the NOT NULL. It deliberately
+-- did NOT drop the column, because the previous revision was still serving.
+--
+-- RUN THIS ONLY AFTER THE DEPLOY THAT STOPS DECLARING THE COLUMN.
+--
+-- Drizzle selects by explicit column list, so any build whose schema still declares
+-- `system_instructions` emits `select ... "system_instructions" ... from "agents"`. Against a
+-- table without the column that is `column agents.system_instructions does not exist` on every
+-- agent read — no run can start, for every workspace. The ordering is therefore:
+--
+--   1. deploy the build that no longer declares the column
+--   2. then run this migration
+--
+-- Reversible in shape but not in content: the text is gone. It is a stale duplicate of
+-- `system_prompt` on every row, verified equal before this shipped, so nothing is lost.
+
+ALTER TABLE "agents" DROP COLUMN IF EXISTS "system_instructions";

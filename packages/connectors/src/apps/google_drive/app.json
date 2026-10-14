@@ -1,0 +1,38 @@
+{
+  "app_key": "google_drive",
+  "availability": {
+    "status": "held",
+    "reason": "Google has not approved this app's scopes yet."
+  },
+  "display_name": "Google Drive",
+  "base_url": "https://www.googleapis.com/drive/v3",
+  "rate_limits": {
+    "rpm": 600,
+    "concurrency": 8,
+    "burst": 20
+  },
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
+    "token_url": "https://oauth2.googleapis.com/token",
+    "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
+  },
+  "sync": {
+    "prompt": "Choose which Drive folders to sync",
+    "dimensions": [
+      {
+        "key": "folders",
+        "label": "Folders",
+        "shape": "tree",
+        "browse_node": "google_drive-list_folders-1",
+        "allow_select_all": true
+      }
+    ]
+  },
+  "notes": {
+    "sync": "The tree opens at My Drive's root and every folder reports has_children true, because Drive cannot answer that question without one call per row. See google_drive-list_folders-1 quirks. A shared drive's own top level is not under root, so picking inside one starts from a folder the person already opened.",
+    "rate_limits": "From Drive's published per-user quota, not a guess. Google charges a project 325,000 quota units a minute for one user; a list costs 100 units and an export or download costs 200. The worst mix one connection can make is about 1,625 export calls a minute. Projects created before May 2026 keep the older ceiling of 20,000 calls per 100 seconds per user, which is 12,000 a minute. 600 rpm sits under both and leaves the rest of the project traffic room on the same user. https://developers.google.com/workspace/drive/api/guides/limits",
+    "rate_limit_ceiling": "One bucket per connection covers every method, so a cheap list spends the same token as an expensive export. Weight the tokens per node if export traffic ever crowds out listing.",
+    "scopes": "Read-only for now. A write node adds https://www.googleapis.com/auth/drive.file here and names it in its own required_scopes."
+  }
+}

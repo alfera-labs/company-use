@@ -1,0 +1,47 @@
+{
+  "query_records_first_page": {
+    "totalSize": 3,
+    "done": false,
+    "nextRecordsUrl": "/services/data/v61.0/query/01gRO0000016PIYYA2-2000",
+    "records": [
+      {
+        "attributes": {
+          "type": "Account",
+          "url": "/services/data/v61.0/sobjects/Account/001D000000IRFmaIAH"
+        },
+        "Id": "001D000000IRFmaIAH",
+        "Name": "Burlington Textiles Corp of America",
+        "AnnualRevenue": 350000000.0
+      },
+      {
+        "attributes": {
+          "type": "Account",
+          "url": "/services/data/v61.0/sobjects/Account/001D000000IomazIAB"
+        },
+        "Id": "001D000000IomazIAB",
+        "Name": "Dickenson plc",
+        "AnnualRevenue": null
+      }
+    ]
+  },
+  "query_records_last_page": {
+    "totalSize": 3,
+    "done": true,
+    "records": [
+      {
+        "attributes": {
+          "type": "Account",
+          "url": "/services/data/v61.0/sobjects/Account/001D000000IqhSLIAZ"
+        },
+        "Id": "001D000000IqhSLIAZ",
+        "Name": "Edge Communications",
+        "AnnualRevenue": 139000000.0
+      }
+    ]
+  },
+  "query_records_empty": {
+    "totalSize": 0,
+    "done": true,
+    "records": []
+  }
+}

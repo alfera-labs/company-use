@@ -1,0 +1,72 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Quotes that hold their margin without anyone re-checking the arithmetic.",
+  "summary_text": "Hold your line-item order and your margin floor on every quote.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "events",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "wedding-planners",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Puts the line items in the same order every time",
+    "Holds a margin floor per line, not one blanket rate",
+    "Quotes staffing and overtime rather than absorbing them",
+    "Names the expected extras as chargeable"
+  ],
+  "guidance": [
+    {
+      "label": "Order",
+      "value": "The same line items, every quote"
+    },
+    {
+      "label": "Margin",
+      "value": "A floor per line, not one percentage"
+    },
+    {
+      "label": "Staffing",
+      "value": "Quoted, never absorbed"
+    },
+    {
+      "label": "The extras",
+      "value": "Named on the quote as chargeable"
+    }
+  ],
+  "used_when_text": "Used whenever it writes an event price",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before writing an event price",
+      "risk": "reads_data"
+    }
+  ],
+  "requires": [],
+  "asks_you_for": [
+    {
+      "input_key": "line_order",
+      "label": "Your line item order",
+      "input_type": "list",
+      "example_answer": "Venue, catering, staff, hire, travel"
+    },
+    {
+      "input_key": "margin_floor",
+      "label": "Your margin floor",
+      "input_type": "text",
+      "example_answer": "35% on hire, 20% on staff"
+    },
+    {
+      "input_key": "never_free",
+      "label": "Never bundled in",
+      "input_type": "text",
+      "example_answer": "Setup, overtime, travel"
+    }
+  ],
+  "starts_when": []
+}

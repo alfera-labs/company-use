@@ -1,0 +1,1569 @@
+{
+  "stripe_v2-search_invoices-1": {
+    "url": "url-1",
+    "data": [
+      {
+        "id": "id-1",
+        "tax": 1,
+        "paid": false,
+        "lines": {
+          "url": "url-1",
+          "data": [
+            {
+              "id": "id-1",
+              "plan": {
+                "id": "id-1",
+                "active": false,
+                "amount": 1,
+                "object": "object-1",
+                "product": "product-1",
+                "currency": "currency-1",
+                "interval": "interval-1",
+                "nickname": "nickname-1",
+                "interval_count": 1
+              },
+              "type": "type-1",
+              "price": {
+                "id": "id-1",
+                "type": "type-1",
+                "active": false,
+                "object": "object-1",
+                "product": "product-1",
+                "currency": "currency-1",
+                "unit_amount": 1,
+                "unit_amount_decimal": "unit_amount_decimal-1"
+              },
+              "taxes": [{}],
+              "amount": 1,
+              "object": "object-1",
+              "parent": {},
+              "period": {
+                "end": 1,
+                "start": 1
+              },
+              "invoice": "invoice-1",
+              "pricing": {
+                "type": "type-1",
+                "unit_amount": 1,
+                "unit_amount_decimal": "unit_amount_decimal-1"
+              },
+              "currency": "currency-1",
+              "livemode": false,
+              "metadata": {},
+              "quantity": 1,
+              "subtotal": 1,
+              "discounts": ["discounts-1"],
+              "proration": false,
+              "tax_rates": [{}],
+              "description": "description-1",
+              "tax_amounts": [{}],
+              "discountable": false,
+              "subscription": "subscription-1",
+              "discount_amounts": [{}],
+              "proration_details": {
+                "credited_items": {}
+              },
+              "subscription_item": "subscription_item-1",
+              "amount_excluding_tax": 1,
+              "pretax_credit_amounts": [{}],
+              "unit_amount_excluding_tax": "unit_amount_excluding_tax-1"
+            }
+          ],
+          "object": "object-1",
+          "has_more": false
+        },
+        "quote": "quote-1",
+        "total": 1,
+        "footer": "footer-1",
+        "issuer": {
+          "type": "type-1",
+          "account": "account-1"
+        },
+        "number": "number-1",
+        "object": "object-1",
+        "status": "status-1",
+        "created": 1,
+        "currency": "currency-1",
+        "customer": "customer-1",
+        "due_date": 1,
+        "livemode": false,
+        "metadata": {},
+        "payments": {
+          "url": "url-1",
+          "data": [
+            {
+              "id": "id-1",
+              "status": "status-1",
+              "created": 1,
+              "invoice": "invoice-1",
+              "payment": "payment-1",
+              "currency": "currency-1",
+              "livemode": false,
+              "is_default": false,
+              "amount_paid": 1,
+              "amount_requested": 1,
+              "status_transitions": {}
+            }
+          ],
+          "object": "object-1",
+          "has_more": false
+        },
+        "subtotal": 1,
+        "attempted": false,
+        "discounts": ["discounts-1"],
+        "rendering": {
+          "pdf": {
+            "page_size": "page_size-1"
+          },
+          "template": "template-1",
+          "template_version": 1,
+          "amount_tax_display": "amount_tax_display-1"
+        },
+        "amount_due": 1,
+        "period_end": 1,
+        "test_clock": "test_clock-1",
+        "amount_paid": 1,
+        "application": "application-1",
+        "description": "description-1",
+        "invoice_pdf": "invoice_pdf-1",
+        "account_name": "account_name-1",
+        "auto_advance": false,
+        "effective_at": 1,
+        "from_invoice": {
+          "action": "action-1",
+          "invoice": "invoice-1"
+        },
+        "on_behalf_of": "on_behalf_of-1",
+        "period_start": 1,
+        "subscription": "subscription-1",
+        "attempt_count": 1,
+        "automatic_tax": {
+          "status": "status-1",
+          "enabled": false,
+          "liability": {
+            "type": "type-1",
+            "account": "account-1"
+          },
+          "disabled_reason": "disabled_reason-1"
+        },
+        "custom_fields": [
+          {
+            "name": "name-1",
+            "value": "value-1"
+          }
+        ],
+        "customer_name": "customer_name-1",
+        "shipping_cost": {
+          "taxes": [
+            {
+              "rate": {},
+              "amount": 1,
+              "taxable_amount": 1,
+              "taxability_reason": "taxability_reason-1"
+            }
+          ],
+          "amount_tax": 1,
+          "amount_total": 1,
+          "shipping_rate": "shipping_rate-1",
+          "amount_subtotal": 1
+        },
+        "transfer_data": {
+          "amount": 1,
+          "destination": "destination-1"
+        },
+        "billing_reason": "billing_reason-1",
+        "customer_email": "customer_email-1",
+        "customer_phone": "customer_phone-1",
+        "default_source": "default_source-1",
+        "ending_balance": 1,
+        "payment_intent": "payment_intent-1",
+        "receipt_number": "receipt_number-1",
+        "account_country": "account_country-1",
+        "account_tax_ids": ["account_tax_ids-1"],
+        "amount_overpaid": 1,
+        "amount_shipping": 1,
+        "latest_revision": "latest_revision-1",
+        "amount_remaining": 1,
+        "customer_account": "customer_account-1",
+        "customer_address": {
+          "city": "city-1",
+          "line1": "line1-1",
+          "line2": "line2-1",
+          "state": "state-1",
+          "country": "country-1",
+          "postal_code": "postal_code-1"
+        },
+        "customer_tax_ids": [
+          {
+            "type": "type-1",
+            "value": "value-1"
+          }
+        ],
+        "paid_out_of_band": false,
+        "payment_settings": {
+          "default_mandate": "default_mandate-1",
+          "payment_method_types": ["payment_method_types-1"],
+          "payment_method_options": {
+            "card": {
+              "installments": {},
+              "request_three_d_secure": "request_three_d_secure-1"
+            },
+            "payto": {
+              "mandate_options": {}
+            },
+            "konbini": {},
+            "acss_debit": {},
+            "bancontact": {},
+            "sepa_debit": {},
+            "us_bank_account": {
+              "verification_method": "verification_method-1",
+              "financial_connections": {}
+            },
+            "customer_balance": {}
+          }
+        },
+        "shipping_details": {
+          "name": "name-1",
+          "phone": "phone-1",
+          "address": {
+            "city": "city-1",
+            "line1": "line1-1",
+            "line2": "line2-1",
+            "state": "state-1",
+            "country": "country-1",
+            "postal_code": "postal_code-1"
+          }
+        },
+        "starting_balance": 1,
+        "threshold_reason": {
+          "amount_gte": 1,
+          "item_reasons": [
+            {
+              "usage_gte": 1,
+              "line_item_ids": ["line_item_ids-1"]
+            }
+          ]
+        },
+        "collection_method": "collection_method-1",
+        "customer_shipping": {
+          "name": "name-1",
+          "phone": "phone-1",
+          "address": {
+            "city": "city-1",
+            "line1": "line1-1",
+            "line2": "line2-1",
+            "state": "state-1",
+            "country": "country-1",
+            "postal_code": "postal_code-1"
+          }
+        },
+        "default_tax_rates": [
+          {
+            "id": "id-1",
+            "active": false,
+            "country": "country-1",
+            "tax_type": "tax_type-1",
+            "inclusive": false,
+            "percentage": 1,
+            "flat_amount": 1,
+            "display_name": "display_name-1",
+            "jurisdiction": "jurisdiction-1",
+            "jurisdiction_level": "jurisdiction_level-1",
+            "effective_percentage": 1
+          }
+        ],
+        "rendering_options": null,
+        "total_tax_amounts": [
+          {
+            "amount": 1,
+            "tax_rate": "tax_rate-1",
+            "inclusive": false,
+            "taxable_amount": 1,
+            "taxability_reason": "taxability_reason-1"
+          }
+        ],
+        "hosted_invoice_url": "hosted_invoice_url-1",
+        "status_transitions": {
+          "paid_at": 1,
+          "voided_at": 1,
+          "finalized_at": 1,
+          "marked_uncollectible_at": 1
+        },
+        "confirmation_secret": {
+          "type": "type-1",
+          "client_secret": "client_secret-1"
+        },
+        "customer_tax_exempt": "customer_tax_exempt-1",
+        "total_excluding_tax": 1,
+        "next_payment_attempt": 1,
+        "statement_descriptor": "statement_descriptor-1",
+        "subscription_details": {
+          "metadata": {}
+        },
+        "webhooks_delivered_at": 1,
+        "default_payment_method": "default_payment_method-1",
+        "subtotal_excluding_tax": 1,
+        "total_discount_amounts": [
+          {
+            "amount": 1,
+            "discount": "discount-1"
+          }
+        ],
+        "last_finalization_error": {
+          "code": "code-1",
+          "type": "type-1",
+          "message": "message-1"
+        },
+        "automatically_finalizes_at": 1,
+        "subscription_proration_date": 1,
+        "total_pretax_credit_amounts": [
+          {
+            "type": "type-1",
+            "amount": 1,
+            "discount": "discount-1",
+            "credit_balance_transaction": "credit_balance_transaction-1"
+          }
+        ],
+        "pre_payment_credit_notes_amount": 1,
+        "post_payment_credit_notes_amount": 1
+      }
+    ],
+    "object": "object-1",
+    "has_more": false,
+    "next_page": "next_page-1"
+  },
+  "quickbooks-list_invoices-1": {
+    "QueryResponse": {
+      "Invoice": [
+        {
+          "Id": "Id-1",
+          "Line": [
+            {
+              "Id": "Id-1",
+              "Amount": 1,
+              "LineNum": 1,
+              "DetailType": "DetailType-1",
+              "Description": "Description-1",
+              "DiscountLineDetail": {
+                "PercentBased": false,
+                "DiscountPercent": 1
+              },
+              "SubTotalLineDetail": {},
+              "SalesItemLineDetail": {
+                "Qty": 1,
+                "ItemRef": {},
+                "UnitPrice": 1,
+                "TaxCodeRef": {},
+                "ItemAccountRef": {},
+                "TaxClassificationRef": {}
+              }
+            }
+          ],
+          "domain": "domain-1",
+          "sparse": false,
+          "Balance": 1,
+          "Deposit": 1,
+          "DueDate": "DueDate-1",
+          "TxnDate": "TxnDate-1",
+          "BillAddr": {
+            "Id": "Id-1",
+            "Lat": "Lat-1",
+            "City": "City-1",
+            "Long": "Long-1",
+            "Line1": "Line1-1",
+            "Line2": "Line2-1",
+            "Line3": "Line3-1",
+            "Line4": "Line4-1",
+            "Line5": "Line5-1",
+            "Country": "Country-1",
+            "PostalCode": "PostalCode-1",
+            "CountrySubDivisionCode": "CountrySubDivisionCode-1"
+          },
+          "ClassRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "MetaData": {
+            "CreateTime": "CreateTime-1",
+            "LastUpdatedTime": "LastUpdatedTime-1"
+          },
+          "ShipAddr": {
+            "Id": "Id-1",
+            "Lat": "Lat-1",
+            "City": "City-1",
+            "Long": "Long-1",
+            "Line1": "Line1-1",
+            "Line2": "Line2-1",
+            "Line3": "Line3-1",
+            "Line4": "Line4-1",
+            "Line5": "Line5-1",
+            "Country": "Country-1",
+            "PostalCode": "PostalCode-1",
+            "CountrySubDivisionCode": "CountrySubDivisionCode-1"
+          },
+          "ShipDate": "ShipDate-1",
+          "TotalAmt": 1,
+          "BillEmail": {
+            "Address": "Address-1"
+          },
+          "DocNumber": "DocNumber-1",
+          "LinkedTxn": [
+            {
+              "TxnId": "TxnId-1",
+              "TxnType": "TxnType-1",
+              "TxnLineId": "TxnLineId-1"
+            }
+          ],
+          "SyncToken": "SyncToken-1",
+          "TxnSource": "TxnSource-1",
+          "ProjectRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "BillEmailCc": {
+            "Address": "Address-1"
+          },
+          "CurrencyRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "CustomField": [
+            {
+              "Name": "Name-1",
+              "Type": "Type-1",
+              "StringValue": "StringValue-1",
+              "DefinitionId": "DefinitionId-1"
+            }
+          ],
+          "CustomerRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "EmailStatus": "EmailStatus-1",
+          "HomeBalance": 1,
+          "InvoiceLink": "InvoiceLink-1",
+          "PrintStatus": "PrintStatus-1",
+          "PrivateNote": "PrivateNote-1",
+          "TrackingNum": "TrackingNum-1",
+          "BillEmailBcc": {
+            "Address": "Address-1"
+          },
+          "CustomerMemo": {
+            "value": "value-1"
+          },
+          "DeliveryInfo": {
+            "DeliveryTime": "DeliveryTime-1",
+            "DeliveryType": "DeliveryType-1"
+          },
+          "ExchangeRate": 1,
+          "HomeTotalAmt": 1,
+          "RecurDataRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "SalesTermRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "ShipFromAddr": {
+            "Id": "Id-1",
+            "City": "City-1",
+            "Line1": "Line1-1",
+            "Country": "Country-1",
+            "PostalCode": "PostalCode-1",
+            "CountrySubDivisionCode": "CountrySubDivisionCode-1"
+          },
+          "TxnTaxDetail": {
+            "TaxLine": [
+              {
+                "Amount": 1,
+                "DetailType": "DetailType-1",
+                "TaxLineDetail": {}
+              }
+            ],
+            "TotalTax": 1,
+            "TxnTaxCodeRef": {
+              "value": "value-1"
+            }
+          },
+          "DepartmentRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "ShipMethodRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "AllowIPNPayment": false,
+          "FreeFormAddress": false,
+          "TaxExemptionRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "AllowOnlinePayment": false,
+          "DepositToAccountRef": {
+            "name": "name-1",
+            "value": "value-1"
+          },
+          "GlobalTaxCalculation": "GlobalTaxCalculation-1",
+          "AllowOnlineACHPayment": false,
+          "ApplyTaxAfterDiscount": false,
+          "TransactionLocationType": "TransactionLocationType-1",
+          "AllowOnlineCreditCardPayment": false
+        }
+      ],
+      "maxResults": 1,
+      "totalCount": 1,
+      "startPosition": 1
+    }
+  },
+  "xero-get_connections-1": {
+    "connections": [
+      {
+        "id": "id-1",
+        "tenantId": "tenantId-1",
+        "tenantName": "tenantName-1",
+        "tenantType": "tenantType-1",
+        "authEventId": "authEventId-1",
+        "createdDateUtc": "createdDateUtc-1",
+        "updatedDateUtc": "updatedDateUtc-1"
+      }
+    ]
+  },
+  "xero-list_invoices-1": {
+    "Id": "Id-1",
+    "Status": "Status-1",
+    "Invoices": [
+      {
+        "Url": "Url-1",
+        "Date": "Date-1",
+        "Type": "Type-1",
+        "Total": 1,
+        "Status": "Status-1",
+        "CISRate": 1,
+        "Contact": {
+          "name": "name-1",
+          "Phones": [{}],
+          "LastName": "LastName-1",
+          "Addresses": [{}],
+          "ContactID": "ContactID-1",
+          "FirstName": "FirstName-1",
+          "TaxNumber": "TaxNumber-1",
+          "IsCustomer": false,
+          "IsSupplier": false,
+          "EmailAddress": "EmailAddress-1",
+          "ContactNumber": "ContactNumber-1",
+          "ContactStatus": "ContactStatus-1",
+          "UpdatedDateUTC": "UpdatedDateUTC-1",
+          "DefaultCurrency": "DefaultCurrency-1",
+          "BankAccountDetails": "BankAccountDetails-1",
+          "AccountsPayableTaxType": "AccountsPayableTaxType-1",
+          "AccountsReceivableTaxType": "AccountsReceivableTaxType-1"
+        },
+        "DueDate": "DueDate-1",
+        "Payments": [
+          {
+            "Date": "Date-1",
+            "Amount": 1,
+            "PaymentID": "PaymentID-1",
+            "Reference": "Reference-1",
+            "CurrencyRate": 1
+          }
+        ],
+        "SubTotal": 1,
+        "TotalTax": 1,
+        "Warnings": [{}],
+        "AmountDue": 1,
+        "HasErrors": false,
+        "InvoiceID": "InvoiceID-1",
+        "LineItems": [
+          {
+            "TaxType": "TaxType-1",
+            "ItemCode": "ItemCode-1",
+            "Quantity": 1,
+            "Tracking": [{}],
+            "TaxAmount": 1,
+            "LineAmount": 1,
+            "LineItemID": "LineItemID-1",
+            "UnitAmount": 1,
+            "AccountCode": "AccountCode-1",
+            "Description": "Description-1",
+            "DiscountRate": 1,
+            "RepeatingInvoiceID": "RepeatingInvoiceID-1"
+          }
+        ],
+        "Reference": "Reference-1",
+        "AmountPaid": 1,
+        "Attachments": [{}],
+        "CreditNotes": [
+          {
+            "Date": "Date-1",
+            "Total": 1,
+            "CreditNoteID": "CreditNoteID-1",
+            "AppliedAmount": 1,
+            "CreditNoteNumber": "CreditNoteNumber-1"
+          }
+        ],
+        "Prepayments": [
+          {
+            "Date": "Date-1",
+            "Total": 1,
+            "PrepaymentID": "PrepaymentID-1",
+            "AppliedAmount": 1
+          }
+        ],
+        "CISDeduction": 1,
+        "CurrencyCode": "CurrencyCode-1",
+        "CurrencyRate": 1,
+        "IsDiscounted": false,
+        "Overpayments": [
+          {
+            "Date": "Date-1",
+            "Total": 1,
+            "AppliedAmount": 1,
+            "OverpaymentID": "OverpaymentID-1"
+          }
+        ],
+        "InvoiceNumber": "InvoiceNumber-1",
+        "SentToContact": false,
+        "TotalDiscount": 1,
+        "AmountCredited": 1,
+        "HasAttachments": false,
+        "UpdatedDateUTC": "UpdatedDateUTC-1",
+        "BrandingThemeID": "BrandingThemeID-1",
+        "FullyPaidOnDate": "FullyPaidOnDate-1",
+        "LineAmountTypes": "LineAmountTypes-1",
+        "ValidationErrors": [{}],
+        "PlannedPaymentDate": "PlannedPaymentDate-1",
+        "RepeatingInvoiceID": "RepeatingInvoiceID-1",
+        "ExpectedPaymentDate": "ExpectedPaymentDate-1",
+        "StatusAttributeString": "StatusAttributeString-1"
+      }
+    ],
+    "DateTimeUTC": "DateTimeUTC-1",
+    "ProviderName": "ProviderName-1"
+  },
+  "gusto-get_token_info-1": {
+    "scope": "scope-1",
+    "resource": {
+      "type": "type-1",
+      "uuid": "uuid-1"
+    },
+    "resource_owner": {
+      "type": "CompanyAdmin",
+      "uuid": "uuid-1"
+    }
+  },
+  "gusto-list_employees-1": {
+    "employees": [
+      {
+        "ssn": "ssn-1",
+        "jobs": [null],
+        "uuid": "uuid-1",
+        "email": "email-1",
+        "phone": "phone-1",
+        "title": "title-1",
+        "has_ssn": false,
+        "version": "version-1",
+        "hired_at": "hired_at-1",
+        "last_name": "last_name-1",
+        "onboarded": false,
+        "department": "department-1",
+        "first_name": "first_name-1",
+        "hidden_ssn": "hidden_ssn-1",
+        "historical": false,
+        "terminated": false,
+        "work_email": "work_email-1",
+        "flsa_status": "flsa_status-1",
+        "company_uuid": "company_uuid-1",
+        "garnishments": [null],
+        "manager_uuid": "manager_uuid-1",
+        "terminations": [null],
+        "custom_fields": [null],
+        "date_of_birth": "date_of_birth-1",
+        "employee_code": "employee_code-1",
+        "middle_initial": "middle_initial-1",
+        "payment_method": "payment_method-1",
+        "department_uuid": "department_uuid-1",
+        "onboarding_status": "onboarding_status-1",
+        "all_home_addresses": [null],
+        "applicable_tax_ids": [null],
+        "current_home_address": {},
+        "preferred_first_name": "preferred_first_name-1",
+        "eligible_paid_time_off": [null],
+        "two_percent_shareholder": false,
+        "current_employment_status": "current_employment_status-1",
+        "onboarding_documents_config": {},
+        "partner_portal_invitation_sent": false,
+        "member_portal_invitation_status": {}
+      }
+    ]
+  },
+  "mailchimp-list_campaigns-1": {
+    "_links": [
+      {
+        "rel": "rel-1",
+        "href": "href-1",
+        "method": "method-1",
+        "schema": "schema-1",
+        "targetSchema": "targetSchema-1"
+      }
+    ],
+    "campaigns": [
+      {
+        "id": "id-1",
+        "type": "type-1",
+        "webId": 1,
+        "_links": [
+          {
+            "rel": "rel-1",
+            "href": "href-1",
+            "method": "method-1",
+            "schema": "schema-1",
+            "targetSchema": "targetSchema-1"
+          }
+        ],
+        "status": "status-1",
+        "rssOpts": {},
+        "sendTime": "sendTime-1",
+        "settings": {
+          "title": "title-1",
+          "toName": "toName-1",
+          "replyTo": "replyTo-1",
+          "folderId": "folderId-1",
+          "fromName": "fromName-1",
+          "timewarp": false,
+          "autoTweet": false,
+          "inlineCss": false,
+          "autoFooter": false,
+          "fbComments": false,
+          "templateId": 1,
+          "dragAndDrop": false,
+          "previewText": "previewText-1",
+          "subjectLine": "subjectLine-1",
+          "authenticate": false,
+          "useConversation": false
+        },
+        "tracking": {
+          "opens": false,
+          "ecomm360": false,
+          "clicktale": "clicktale-1",
+          "htmlClicks": false,
+          "textClicks": false,
+          "goalTracking": false,
+          "googleAnalytics": "googleAnalytics-1"
+        },
+        "archiveUrl": "archiveUrl-1",
+        "createTime": "createTime-1",
+        "emailsSent": 1,
+        "recipients": {
+          "listId": "listId-1",
+          "listName": "listName-1",
+          "segmentOpts": {
+            "match": "match-1",
+            "conditions": [{}],
+            "savedSegmentId": 1
+          },
+          "segmentText": "segmentText-1",
+          "listIsActive": false,
+          "recipientCount": 1
+        },
+        "resendable": false,
+        "socialCard": {},
+        "abSplitOpts": {},
+        "contentType": "contentType-1",
+        "reportSummary": {},
+        "deliveryStatus": {
+          "status": "status-1",
+          "enabled": false,
+          "canCancel": false,
+          "emailsSent": 1,
+          "emailsCanceled": 1
+        },
+        "longArchiveUrl": "longArchiveUrl-1",
+        "variateSettings": {},
+        "parentCampaignId": "parentCampaignId-1",
+        "needsBlockRefresh": false
+      }
+    ],
+    "totalItems": 1
+  },
+  "mailchimp-get_campaign_content-1": {
+    "html": "html-1",
+    "_links": [
+      {
+        "rel": "rel-1",
+        "href": "href-1",
+        "method": "method-1",
+        "targetSchema": "targetSchema-1"
+      }
+    ],
+    "plain_text": "plain_text-1",
+    "archive_html": "archive_html-1",
+    "variate_contents": [
+      {
+        "html": "html-1",
+        "plain_text": "plain_text-1",
+        "content_label": "content_label-1"
+      }
+    ]
+  },
+  "netsuite-run_suiteql_query-1": {
+    "count": 1,
+    "items": [
+      {
+        "links": [
+          {
+            "rel": "rel-1",
+            "href": "href-1"
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "rel": "rel-1",
+        "href": "href-1"
+      }
+    ],
+    "offset": 1,
+    "hasMore": false,
+    "totalResults": 1
+  },
+  "datadog-list_monitors-1": {
+    "monitors": [
+      {
+        "id": 1,
+        "name": "name-1",
+        "tags": ["tags-1"],
+        "type": "type-1",
+        "query": "query-1",
+        "created": "created-1",
+        "creator": {},
+        "message": "message-1",
+        "options": {},
+        "modified": "modified-1",
+        "overall_state": "overall_state-1"
+      }
+    ],
+    "total_count": 1
+  },
+  "databricks-list_jobs-1": {
+    "jobs": [
+      {
+        "job_id": 1,
+        "run_as": "run_as-1",
+        "settings": {
+          "name": "name-1",
+          "tags": {},
+          "tasks": [{}],
+          "schedule": {
+            "timezone_id": "timezone_id-1",
+            "pause_status": "pause_status-1",
+            "quartz_cron_expression": "quartz_cron_expression-1"
+          },
+          "libraries": [{}],
+          "max_retries": 1,
+          "new_cluster": {},
+          "run_job_task": {},
+          "notebook_task": {},
+          "pipeline_task": {},
+          "spark_jar_task": {},
+          "timeout_seconds": 1,
+          "retry_on_timeout": false,
+          "spark_python_task": {},
+          "spark_submit_task": {},
+          "email_notifications": {
+            "on_start": ["on_start-1"],
+            "on_failure": ["on_failure-1"],
+            "on_success": ["on_success-1"],
+            "no_alert_for_skipped_runs": false,
+            "on_duration_warning_threshold_exceeded": ["on_duration_warning_threshold_exceeded-1"]
+          },
+          "existing_cluster_id": "existing_cluster_id-1",
+          "max_concurrent_runs": 1,
+          "webhook_notifications": {
+            "on_start": [{}],
+            "on_failure": [{}],
+            "on_success": [{}],
+            "on_duration_warning_threshold_exceeded": [{}]
+          },
+          "min_retry_interval_millis": 1
+        },
+        "created_time": 1,
+        "creator_user_name": "creator_user_name-1"
+      }
+    ]
+  },
+  "canva-list_user_designs-1": {
+    "items": [
+      {
+        "id": "id-1",
+        "urls": {
+          "edit_url": "edit_url-1",
+          "view_url": "view_url-1"
+        },
+        "owner": {
+          "team_id": "team_id-1",
+          "user_id": "user_id-1"
+        },
+        "title": "title-1",
+        "thumbnail": {
+          "url": "url-1",
+          "width": 1,
+          "height": 1
+        },
+        "created_at": 1,
+        "page_count": 1,
+        "updated_at": 1,
+        "design_types": ["design_types-1"]
+      }
+    ],
+    "continuation": "continuation-1"
+  },
+  "quickbooks-query_invoices-1": {
+    "time": "time-1",
+    "Invoice": [
+      {
+        "Id": "Id-1",
+        "Line": [
+          {
+            "Id": "Id-1",
+            "Amount": 1,
+            "LineNum": 1,
+            "DetailType": "DetailType-1",
+            "Description": "Description-1",
+            "DiscountLineDetail": {
+              "PercentBased": false,
+              "DiscountPercent": 1
+            },
+            "SubTotalLineDetail": {},
+            "SalesItemLineDetail": {
+              "Qty": 1,
+              "ItemRef": {
+                "name": "name-1",
+                "value": "value-1"
+              },
+              "UnitPrice": 1,
+              "TaxCodeRef": {
+                "value": "value-1"
+              },
+              "ItemAccountRef": {
+                "name": "name-1",
+                "value": "value-1"
+              }
+            }
+          }
+        ],
+        "domain": "domain-1",
+        "sparse": false,
+        "Balance": 1,
+        "Deposit": 1,
+        "DueDate": "DueDate-1",
+        "TxnDate": "TxnDate-1",
+        "BillAddr": {
+          "Id": "Id-1",
+          "Lat": "Lat-1",
+          "City": "City-1",
+          "Long": "Long-1",
+          "Line1": "Line1-1",
+          "Line2": "Line2-1",
+          "Line3": "Line3-1",
+          "Line4": "Line4-1",
+          "Line5": "Line5-1",
+          "Country": "Country-1",
+          "PostalCode": "PostalCode-1",
+          "CountrySubDivisionCode": "CountrySubDivisionCode-1"
+        },
+        "ClassRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "MetaData": {
+          "CreateTime": "CreateTime-1",
+          "LastUpdatedTime": "LastUpdatedTime-1"
+        },
+        "ShipAddr": {
+          "Id": "Id-1",
+          "Lat": "Lat-1",
+          "City": "City-1",
+          "Long": "Long-1",
+          "Line1": "Line1-1",
+          "Line2": "Line2-1",
+          "Line3": "Line3-1",
+          "Line4": "Line4-1",
+          "Line5": "Line5-1",
+          "Country": "Country-1",
+          "PostalCode": "PostalCode-1",
+          "CountrySubDivisionCode": "CountrySubDivisionCode-1"
+        },
+        "ShipDate": "ShipDate-1",
+        "TotalAmt": 1,
+        "BillEmail": {
+          "Address": "Address-1"
+        },
+        "DocNumber": "DocNumber-1",
+        "LinkedTxn": [
+          {
+            "TxnId": "TxnId-1",
+            "TxnType": "TxnType-1",
+            "TxnLineId": "TxnLineId-1"
+          }
+        ],
+        "SyncToken": "SyncToken-1",
+        "ProjectRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "BillEmailCc": {
+          "Address": "Address-1"
+        },
+        "CurrencyRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "CustomField": [
+          {
+            "Name": "Name-1",
+            "Type": "Type-1",
+            "StringValue": "StringValue-1",
+            "DefinitionId": "DefinitionId-1"
+          }
+        ],
+        "CustomerRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "EmailStatus": "EmailStatus-1",
+        "HomeBalance": 1,
+        "InvoiceLink": "InvoiceLink-1",
+        "PrintStatus": "PrintStatus-1",
+        "PrivateNote": "PrivateNote-1",
+        "TrackingNum": "TrackingNum-1",
+        "BillEmailBcc": {
+          "Address": "Address-1"
+        },
+        "CustomerMemo": {
+          "value": "value-1"
+        },
+        "DeliveryInfo": {
+          "DeliveryTime": "DeliveryTime-1",
+          "DeliveryType": "DeliveryType-1"
+        },
+        "ExchangeRate": 1,
+        "HomeTotalAmt": 1,
+        "RecurDataRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "SalesTermRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "TxnTaxDetail": {
+          "TaxLine": [
+            {
+              "Amount": 1,
+              "DetailType": "DetailType-1",
+              "TaxLineDetail": {
+                "TaxPercent": 1,
+                "TaxRateRef": {
+                  "value": "value-1"
+                },
+                "PercentBased": false,
+                "NetAmountTaxable": 1
+              }
+            }
+          ],
+          "TotalTax": 1,
+          "TxnTaxCodeRef": {
+            "value": "value-1"
+          }
+        },
+        "DepartmentRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "ShipMethodRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "AllowIPNPayment": false,
+        "TaxExemptionRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "AllowOnlinePayment": false,
+        "DepositToAccountRef": {
+          "name": "name-1",
+          "value": "value-1"
+        },
+        "GlobalTaxCalculation": "GlobalTaxCalculation-1",
+        "AllowOnlineACHPayment": false,
+        "ApplyTaxAfterDiscount": false,
+        "AllowOnlineCreditCardPayment": false
+      }
+    ],
+    "maxResults": 1,
+    "totalCount": 1,
+    "startPosition": 1
+  },
+  "stripe_v2-list_invoices-1": {
+    "url": "url-1",
+    "data": [
+      {
+        "id": "id-1",
+        "tax": 1,
+        "paid": false,
+        "lines": {
+          "url": "url-1",
+          "data": [
+            {
+              "id": "id-1",
+              "plan": {},
+              "type": "type-1",
+              "price": {
+                "id": "id-1",
+                "type": "type-1",
+                "active": false,
+                "object": "object-1",
+                "created": 1,
+                "product": "product-1",
+                "currency": "currency-1",
+                "livemode": false,
+                "metadata": {},
+                "nickname": "nickname-1",
+                "lookupKey": "lookupKey-1",
+                "recurring": {
+                  "meter": "meter-1",
+                  "interval": "interval-1",
+                  "usageType": "usageType-1",
+                  "intervalCount": 1,
+                  "aggregateUsage": "aggregateUsage-1",
+                  "trialPeriodDays": 1
+                },
+                "tiersMode": "tiersMode-1",
+                "unitAmount": 1,
+                "taxBehavior": "taxBehavior-1",
+                "billingScheme": "billingScheme-1",
+                "customUnitAmount": {
+                  "preset": 1,
+                  "maximum": 1,
+                  "minimum": 1
+                },
+                "transformQuantity": {
+                  "round": "round-1",
+                  "divideBy": 1
+                },
+                "unitAmountDecimal": "unitAmountDecimal-1"
+              },
+              "taxes": [
+                {
+                  "type": "type-1",
+                  "amount": 1,
+                  "taxBehavior": "taxBehavior-1",
+                  "taxableAmount": 1,
+                  "taxRateDetails": {
+                    "taxRate": "taxRate-1"
+                  },
+                  "taxabilityReason": "taxabilityReason-1"
+                }
+              ],
+              "amount": 1,
+              "object": "object-1",
+              "parent": {
+                "type": "type-1"
+              },
+              "period": {
+                "end": 1,
+                "start": 1
+              },
+              "invoice": "invoice-1",
+              "pricing": {
+                "type": "type-1"
+              },
+              "currency": "currency-1",
+              "livemode": false,
+              "metadata": {},
+              "quantity": 1,
+              "subtotal": 1,
+              "taxRates": [
+                {
+                  "id": "id-1",
+                  "active": false,
+                  "country": "country-1",
+                  "taxType": "taxType-1",
+                  "inclusive": false,
+                  "flatAmount": 1,
+                  "percentage": 1,
+                  "displayName": "displayName-1",
+                  "jurisdiction": "jurisdiction-1",
+                  "jurisdictionLevel": "jurisdictionLevel-1",
+                  "effectivePercentage": 1
+                }
+              ],
+              "discounts": ["discounts-1"],
+              "proration": false,
+              "taxAmounts": [
+                {
+                  "amount": 1,
+                  "taxRate": "taxRate-1",
+                  "inclusive": false,
+                  "taxableAmount": 1,
+                  "taxabilityReason": "taxabilityReason-1"
+                }
+              ],
+              "description": "description-1",
+              "discountable": false,
+              "subscription": "subscription-1",
+              "discountAmounts": [
+                {
+                  "amount": 1,
+                  "discount": "discount-1"
+                }
+              ],
+              "prorationDetails": {
+                "creditedItems": {
+                  "invoice": "invoice-1",
+                  "invoiceLineItems": ["invoiceLineItems-1"]
+                }
+              },
+              "subscriptionItem": "subscriptionItem-1",
+              "amountExcludingTax": 1,
+              "pretaxCreditAmounts": [
+                {
+                  "type": "type-1",
+                  "amount": 1,
+                  "discount": "discount-1",
+                  "creditType": "creditType-1"
+                }
+              ],
+              "unitAmountExcludingTax": "unitAmountExcludingTax-1"
+            }
+          ],
+          "object": "object-1",
+          "hasMore": false
+        },
+        "quote": "quote-1",
+        "total": 1,
+        "footer": "footer-1",
+        "issuer": {
+          "type": "type-1",
+          "account": "account-1"
+        },
+        "number": "number-1",
+        "object": "object-1",
+        "parent": {
+          "type": "type-1",
+          "quoteDetails": {},
+          "subscriptionDetails": {
+            "metadata": {},
+            "subscription": "subscription-1"
+          }
+        },
+        "status": "status-1",
+        "created": 1,
+        "dueDate": 1,
+        "currency": "currency-1",
+        "customer": "customer-1",
+        "livemode": false,
+        "metadata": {},
+        "payments": {
+          "url": "url-1",
+          "data": [
+            {
+              "id": "id-1",
+              "object": "object-1",
+              "status": "status-1",
+              "created": 1,
+              "invoice": "invoice-1",
+              "payment": {
+                "type": "type-1",
+                "charge": "charge-1",
+                "paymentIntent": "paymentIntent-1",
+                "paymentRecord": "paymentRecord-1"
+              },
+              "currency": "currency-1",
+              "livemode": false,
+              "isDefault": false,
+              "amountPaid": 1,
+              "amountRequested": 1,
+              "statusTransitions": {
+                "paidAt": 1,
+                "canceledAt": 1
+              }
+            }
+          ],
+          "object": "object-1",
+          "hasMore": false
+        },
+        "subtotal": 1,
+        "amountDue": 1,
+        "attempted": false,
+        "discounts": ["discounts-1"],
+        "periodEnd": 1,
+        "rendering": {
+          "pdf": {
+            "pageSize": "pageSize-1"
+          },
+          "template": "template-1",
+          "templateVersion": 1,
+          "amountTaxDisplay": "amountTaxDisplay-1"
+        },
+        "testClock": "testClock-1",
+        "amountPaid": 1,
+        "invoicePdf": "invoicePdf-1",
+        "onBehalfOf": "onBehalfOf-1",
+        "totalTaxes": [
+          {
+            "type": "type-1",
+            "amount": 1,
+            "taxBehavior": "taxBehavior-1",
+            "taxableAmount": 1,
+            "taxRateDetails": {
+              "taxRate": "taxRate-1"
+            },
+            "taxabilityReason": "taxabilityReason-1"
+          }
+        ],
+        "accountName": "accountName-1",
+        "application": "application-1",
+        "autoAdvance": false,
+        "description": "description-1",
+        "effectiveAt": 1,
+        "fromInvoice": {
+          "action": "action-1",
+          "invoice": "invoice-1"
+        },
+        "periodStart": 1,
+        "attemptCount": 1,
+        "automaticTax": {
+          "status": "status-1",
+          "enabled": false,
+          "liability": {
+            "type": "type-1",
+            "account": "account-1"
+          },
+          "disabledReason": "disabledReason-1"
+        },
+        "customFields": [
+          {
+            "name": "name-1",
+            "value": "value-1"
+          }
+        ],
+        "customerName": "customerName-1",
+        "shippingCost": {
+          "taxes": [
+            {
+              "rate": "rate-1",
+              "amount": 1,
+              "taxableAmount": 1,
+              "taxabilityReason": "taxabilityReason-1"
+            }
+          ],
+          "amountTax": 1,
+          "amountTotal": 1,
+          "shippingRate": "shippingRate-1",
+          "amountSubtotal": 1
+        },
+        "subscription": "subscription-1",
+        "transferData": {
+          "amount": 1,
+          "destination": "destination-1"
+        },
+        "accountTaxIds": ["accountTaxIds-1"],
+        "billingReason": "billingReason-1",
+        "customerEmail": "customerEmail-1",
+        "customerPhone": "customerPhone-1",
+        "defaultSource": "defaultSource-1",
+        "endingBalance": 1,
+        "paidOutOfBand": false,
+        "paymentIntent": "paymentIntent-1",
+        "receiptNumber": "receiptNumber-1",
+        "accountCountry": "accountCountry-1",
+        "amountOverpaid": 1,
+        "amountShipping": 1,
+        "customerTaxIds": [
+          {
+            "type": "type-1",
+            "value": "value-1"
+          }
+        ],
+        "latestRevision": "latestRevision-1",
+        "amountRemaining": 1,
+        "customerAccount": "customerAccount-1",
+        "customerAddress": {
+          "city": "city-1",
+          "line1": "line1-1",
+          "line2": "line2-1",
+          "state": "state-1",
+          "country": "country-1",
+          "postalCode": "postalCode-1"
+        },
+        "defaultTaxRates": [
+          {
+            "id": "id-1",
+            "active": false,
+            "country": "country-1",
+            "taxType": "taxType-1",
+            "inclusive": false,
+            "flatAmount": 1,
+            "percentage": 1,
+            "displayName": "displayName-1",
+            "jurisdiction": "jurisdiction-1",
+            "jurisdictionLevel": "jurisdictionLevel-1",
+            "effectivePercentage": 1
+          }
+        ],
+        "paymentSettings": {
+          "defaultMandate": "defaultMandate-1",
+          "paymentMethodTypes": ["paymentMethodTypes-1"],
+          "paymentMethodOptions": {
+            "card": {
+              "installments": {
+                "enabled": false
+              },
+              "requestThreeDSecure": "requestThreeDSecure-1"
+            },
+            "payto": {
+              "mandateOptions": {
+                "amount": 1,
+                "purpose": "purpose-1",
+                "amountType": "amountType-1"
+              }
+            },
+            "konbini": {},
+            "acssDebit": {
+              "mandateOptions": {
+                "transactionType": "transactionType-1"
+              },
+              "verificationMethod": "verificationMethod-1"
+            },
+            "sepaDebit": {},
+            "bancontact": {
+              "preferredLanguage": "preferredLanguage-1"
+            },
+            "usBankAccount": {
+              "verificationMethod": "verificationMethod-1",
+              "financialConnections": {
+                "filters": {
+                  "accountSubcategories": ["accountSubcategories-1"]
+                },
+                "prefetch": ["prefetch-1"],
+                "permissions": ["permissions-1"]
+              }
+            },
+            "customerBalance": {
+              "fundingType": "fundingType-1",
+              "bankTransfer": {
+                "type": "type-1",
+                "euBankTransfer": {
+                  "country": "country-1"
+                }
+              }
+            }
+          }
+        },
+        "shippingDetails": {
+          "name": "name-1",
+          "phone": "phone-1",
+          "address": {
+            "city": "city-1",
+            "line1": "line1-1",
+            "line2": "line2-1",
+            "state": "state-1",
+            "country": "country-1",
+            "postalCode": "postalCode-1"
+          }
+        },
+        "startingBalance": 1,
+        "thresholdReason": {
+          "amountGte": 1,
+          "itemReasons": [
+            {
+              "usageGte": 1,
+              "lineItemIds": ["lineItemIds-1"]
+            }
+          ]
+        },
+        "totalTaxAmounts": [
+          {
+            "amount": 1,
+            "taxRate": "taxRate-1",
+            "inclusive": false,
+            "taxableAmount": 1,
+            "taxabilityReason": "taxabilityReason-1"
+          }
+        ],
+        "collectionMethod": "collectionMethod-1",
+        "customerShipping": {
+          "name": "name-1",
+          "phone": "phone-1",
+          "address": {
+            "city": "city-1",
+            "line1": "line1-1",
+            "line2": "line2-1",
+            "state": "state-1",
+            "country": "country-1",
+            "postalCode": "postalCode-1"
+          }
+        },
+        "hostedInvoiceUrl": "hostedInvoiceUrl-1",
+        "renderingOptions": {
+          "pdf": {
+            "pageSize": "pageSize-1"
+          },
+          "template": "template-1",
+          "templateVersion": 1,
+          "amountTaxDisplay": "amountTaxDisplay-1"
+        },
+        "customerTaxExempt": "customerTaxExempt-1",
+        "statusTransitions": {
+          "paidAt": 1,
+          "voidedAt": 1,
+          "finalizedAt": 1,
+          "markedUncollectibleAt": 1
+        },
+        "totalExcludingTax": 1,
+        "confirmationSecret": {
+          "type": "type-1",
+          "clientSecret": "clientSecret-1"
+        },
+        "nextPaymentAttempt": 1,
+        "statementDescriptor": "statementDescriptor-1",
+        "subscriptionDetails": {
+          "metadata": {}
+        },
+        "webhooksDeliveredAt": 1,
+        "defaultPaymentMethod": "defaultPaymentMethod-1",
+        "subtotalExcludingTax": 1,
+        "totalDiscountAmounts": [
+          {
+            "amount": 1,
+            "discount": "discount-1"
+          }
+        ],
+        "lastFinalizationError": {
+          "code": "code-1",
+          "type": "type-1",
+          "message": "message-1"
+        },
+        "automaticallyFinalizesAt": 1,
+        "totalPretaxCreditAmounts": [
+          {
+            "type": "type-1",
+            "amount": 1,
+            "discount": "discount-1",
+            "creditType": "creditType-1"
+          }
+        ],
+        "subscriptionProrationDate": 1,
+        "prePaymentCreditNotesAmount": 1,
+        "postPaymentCreditNotesAmount": 1
+      }
+    ],
+    "object": "object-1",
+    "hasMore": false
+  }
+}

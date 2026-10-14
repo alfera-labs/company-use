@@ -1,0 +1,94 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A sheet where every row has a contact and a reason to reach out, or a clear note when no reliable match exists.",
+  "summary_text": "Add the right contact and one factual reason to reach out.",
+  "icon": "🧩",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    },
+    {
+      "facet_kind": "topic",
+      "facet_key": "featured",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Company size, sector, and location",
+    "The best matching contact",
+    "A factual reason to reach out now",
+    "A clear note when no match exists"
+  ],
+  "what_it_does": [
+    "Reads the company names or domains in your sheet",
+    "Finds company details from reliable public sources",
+    "Chooses the contact that matches your target role",
+    "Writes every result back in one pass"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the sheet you choose",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "write columns back to the sheet",
+      "risk": "changes_data"
+    },
+    {
+      "capability": "research companies on the web",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Reads your lead list and writes results back."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "linkedin",
+      "requirement_label": "LinkedIn",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "Improves contact matching. The task still works without it."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "lead_sheet",
+      "label": "The Google Sheet",
+      "input_type": "document"
+    },
+    {
+      "input_key": "columns",
+      "label": "The input and output columns",
+      "input_type": "columns"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "you_ask",
+      "note": "Run it on any sheet you choose"
+    },
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 8 * * MON",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    }
+  ]
+}

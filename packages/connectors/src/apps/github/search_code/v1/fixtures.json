@@ -1,0 +1,41 @@
+{
+  "_note": "Shapes taken from the GitHub REST documentation for GET /search/code (API version 2022-11-28). The repository object is trimmed to the fields the node reads; GitHub sends a full minimal-repository record.",
+  "code_search_page_one": {
+    "total_count": 7,
+    "incomplete_results": false,
+    "items": [
+      {
+        "name": "classes.js",
+        "path": "src/attributes/classes.js",
+        "sha": "d7212f9dee2dcc18f084d7df8f417b80846ded5a",
+        "url": "https://api.github.com/repositories/167174/contents/src/attributes/classes.js?ref=825ac3773694e0cd23ee74895fd5aeb535b27da4",
+        "git_url": "https://api.github.com/repositories/167174/git/blobs/d7212f9dee2dcc18f084d7df8f417b80846ded5a",
+        "html_url": "https://github.com/jquery/jquery/blob/825ac3773694e0cd23ee74895fd5aeb535b27da4/src/attributes/classes.js",
+        "repository": {
+          "id": 167174,
+          "node_id": "MDEwOlJlcG9zaXRvcnkxNjcxNzQ=",
+          "name": "jquery",
+          "full_name": "jquery/jquery",
+          "private": false,
+          "html_url": "https://github.com/jquery/jquery",
+          "fork": false
+        },
+        "score": 1
+      },
+      {
+        "name": "Dockerfile",
+        "path": "deploy/Dockerfile",
+        "sha": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4",
+        "url": "https://api.github.com/repositories/999001/contents/deploy/Dockerfile?ref=main",
+        "git_url": "https://api.github.com/repositories/999001/git/blobs/a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4",
+        "html_url": "https://github.com/acme/platform/blob/main/deploy/Dockerfile",
+        "repository": null,
+        "score": 0.8
+      }
+    ]
+  },
+  "rate_limited": {
+    "message": "You have exceeded a secondary rate limit. Please wait a few minutes before you try again.",
+    "documentation_url": "https://docs.github.com/rest/search/search#rate-limit"
+  }
+}

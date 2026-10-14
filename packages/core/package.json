@@ -1,0 +1,57 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth": "./src/auth.ts",
+    "./db": "./src/db/index.ts",
+    "./db/connection": "./src/db/connection.ts",
+    "./db/database_error": "./src/db/database_error.ts",
+    "./db/database_statement_count": "./src/db/database_statement_count.ts",
+    "./db/migration_execution": "./src/db/migration_execution.ts",
+    "./db/wake_channel": "./src/db/wake_channel.ts",
+    "./db/write_after_earlier_writes": "./src/db/write_after_earlier_writes.ts",
+    "./db/queries/*": "./src/db/queries/*.ts",
+    "./db/schema": "./src/db/schema/index.ts",
+    "./db/schema/common": "./src/db/schema/common.ts",
+    "./db/schema/core": "./src/db/schema/core.ts",
+    "./db/schema/json_column_types": "./src/db/schema/json_column_types.ts",
+    "./db/schema/*": "./src/db/schema/*.ts",
+    "./db/schema/connectors": "./src/db/schema/connectors.ts",
+    "./db/schema/source_actors": "./src/db/schema/source_actors.ts",
+    "./db/schema/policies": "./src/db/schema/policies.ts",
+    "./db/schema/projects": "./src/db/schema/projects.ts",
+    "./integrations/*": "./src/integrations/*.ts",
+    "./services/*": "./src/services/*.ts",
+    "./templates": "./src/templates/index.ts",
+    "./templates/*": "./src/templates/*.ts",
+    "./db/__tests__/*": "./src/db/__tests__/*.ts",
+    "./access/*": "./src/access/*.ts",
+    "./credentials/*": "./src/credentials/*.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun --no-env-file ../../node_modules/vitest/vitest.mjs run --root ../.. --maxWorkers=1 packages/core/src"
+  },
+  "dependencies": {
+    "@coworker/config": "workspace:*",
+    "@coworker/memory": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "@opentelemetry/api": "1.9.1",
+    "drizzle-orm": "^0.45.0",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.7",
+    "yaml": "^2.9.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.4.5",
+    "@types/pg": "^8.23.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

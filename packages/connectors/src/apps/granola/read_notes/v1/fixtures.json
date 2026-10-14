@@ -1,0 +1,60 @@
+{
+  "_source": "Doc-derived, not recorded: Granola's public API needs a Business-plan grn_ key that this repo does not hold. Every field and value comes from the published OpenAPI examples for GET /v1/notes/{note_id} — https://docs.granola.ai/api-reference/openapi.json and https://docs.granola.ai/api-reference/get-note. Re-record against a real key when one exists.",
+  "note_with_calendar_event": {
+    "id": "not_00000000000001",
+    "object": "note",
+    "title": "Quarterly widget budget review",
+    "owner": { "name": "Pat Sample", "email": "pat@granola.ai" },
+    "created_at": "2026-01-27T15:30:00Z",
+    "updated_at": "2026-01-27T16:45:00Z",
+    "web_url": "https://notes.granola.ai/d/f3e45e0f-24cc-480b-9a6c-8b1f5e3d7a2c",
+    "calendar_event": {
+      "event_title": "Quarterly widget budget review",
+      "invitees": [{ "email": "raisin@granola.ai" }, { "email": "pat@granola.ai" }],
+      "organiser": "pat@granola.ai",
+      "calendar_event_id": "2su99n6iiik37iiknmb5t4fkfh_20260127T153000Z",
+      "scheduled_start_time": "2026-01-27T15:30:00Z",
+      "scheduled_end_time": "2026-01-27T16:30:00Z"
+    },
+    "attendees": [
+      { "name": "Pat Sample", "email": "pat@granola.ai" },
+      { "name": "Raisin Patel", "email": "raisin@granola.ai" }
+    ],
+    "folder_membership": [
+      {
+        "id": "fol_00000000000001",
+        "object": "folder",
+        "name": "Top secret recipes",
+        "parent_folder_id": "fol_00000000000002"
+      }
+    ],
+    "summary_text": "The quarterly widget budget review was a success. We spent $100,000 on widget and made $150,000 in profit.",
+    "summary_markdown": "## Quarterly Widget Budget Review\n\nThe quarterly widget budget review was a success.\n\n- Spent **$100,000** on widget\n- Made **$150,000** in profit",
+    "private_notes_text": "Push back on the dairy forecast. Ask about the almond milk pivot.",
+    "private_notes_markdown": "- Push back on the dairy forecast\n- Ask about the **almond milk** pivot",
+    "transcript": null
+  },
+  "note_without_calendar_event": {
+    "id": "not_00000000000003",
+    "object": "note",
+    "title": "Almond milk pivot",
+    "owner": { "name": "Raisin Patel", "email": "raisin@granola.ai" },
+    "created_at": "2026-01-20T11:00:00Z",
+    "updated_at": "2026-01-20T12:05:00Z",
+    "web_url": "https://notes.granola.ai/d/6b1c2d90-7f43-4a55-9d18-2c7a0e5b4f31",
+    "calendar_event": null,
+    "attendees": [],
+    "folder_membership": [],
+    "summary_text": "Raisin walked through the almond milk numbers alone.",
+    "summary_markdown": null,
+    "private_notes_text": null,
+    "private_notes_markdown": null,
+    "transcript": null
+  },
+  "note_not_found": {
+    "error": {
+      "code": "NOT_FOUND",
+      "message": "Note not found, or it has no generated summary yet."
+    }
+  }
+}

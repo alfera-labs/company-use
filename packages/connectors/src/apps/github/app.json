@@ -1,0 +1,80 @@
+{
+  "app_key": "github",
+  "display_name": "GitHub",
+  "base_url": "https://api.github.com",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://github.com/login/oauth/authorize",
+    "token_url": "https://github.com/login/oauth/access_token",
+    "scopes": ["repo", "read:org"]
+  },
+  "rate_limits": { "rpm": 80, "concurrency": 4, "burst": 10 },
+  "sync": {
+    "prompt": "Choose which repositories to sync",
+    "dimensions": [
+      {
+        "key": "repositories",
+        "label": "Repositories",
+        "shape": "flat",
+        "browse_node": "github-list_repos-1",
+        "allow_select_all": true
+      }
+    ],
+    "objects": {
+      "issue": {
+        "label": "Issues",
+        "list_node": "github-list_issues-1",
+        "scoped_by": { "repositories": "repos[].full_name" },
+        "list_input": { "state": "all" },
+        "page": {
+          "cursor_param": "repos[].cursor",
+          "items": { "$": "response.repos.0.issues" },
+          "next_cursor": { "$": "response.repos.0.next_cursor" },
+          "error": { "$": "response.repos.0.error.code" }
+        },
+        "strategy": "modified_since",
+        "cursor": {
+          "field": { "$": "item.last_updated_time" },
+          "param": "since",
+          "overlap_minutes": 2
+        },
+        "identity": { "$": "item.html_url" },
+        "version_signal": { "$": "item.last_updated_time" },
+        "title": { "$": "item.title" },
+        "content": { "$default": [{ "$": "item.body" }, { "$": "item.title" }] },
+        "item_kind": "issue",
+        "source_url": { "$": "item.html_url" },
+        "container": { "id": { "$": "scope.id" }, "path": { "$": "scope.label" } },
+        "note": "The identity is the html_url, because an issue number is unique only inside its repository and the four operators cannot join owner, repo and number into one id. `since` is GitHub's own updated-at filter on GET /repos/{owner}/{repo}/issues, which github-list_issues-1 already passes through."
+      },
+      "pull_request": {
+        "label": "Pull requests",
+        "list_node": "github-list_pull_requests-1",
+        "scoped_by": { "repositories": "repos[].full_name" },
+        "list_input": { "state": "all" },
+        "page": {
+          "cursor_param": "repos[].cursor",
+          "items": { "$": "response.repos.0.pull_requests" },
+          "next_cursor": { "$": "response.repos.0.next_cursor" },
+          "error": { "$": "response.repos.0.error.code" }
+        },
+        "strategy": "relist_diff",
+        "identity": { "$": "item.html_url" },
+        "version_signal": { "$": "item.last_updated_time" },
+        "title": { "$": "item.title" },
+        "content": { "$default": [{ "$": "item.body" }, { "$": "item.title" }] },
+        "item_kind": "pull_request",
+        "source_url": { "$": "item.html_url" },
+        "container": { "id": { "$": "scope.id" }, "path": { "$": "scope.label" } },
+        "note": "relist_diff, not modified_since: GET /repos/{owner}/{repo}/pulls takes no `since`, only sort and direction, and github-list_pull_requests-1 exposes neither. A repository has far fewer pull requests than issues, so re-listing them costs little and the content hash still writes nothing twice."
+      }
+    }
+  },
+  "notes": {
+    "sync": "What gets stored is the owner/repo full name, not GitHub's numeric id, because every node in this app addresses a repository that way. github-list_repos-1 reads GET /user/repos, which is the endpoint that matches today's user-token auth; the GitHub App installation endpoint answers a different shape and is a v2 of that node.",
+    "auth": "Today a person connects their own GitHub account and the runtime sends that user token as `Authorization: Bearer`. At integration this app moves to a GitHub App installation token: the same bearer header, a different token source (a signed app JWT exchanged for an installation token that expires every hour), higher limits, and per-repository grants instead of per-user scopes. No node changes when that lands; only the way the connection's access_token is minted does.",
+    "scopes": "`repo` covers issues and pull requests on private repositories; a public-only install can narrow to `public_repo` later. `read:org` lets code search reach org-owned repositories.",
+    "rate_limits": "The primary limit for an authenticated caller is 5,000 requests per hour, which is 83 per minute, so 80 rpm stays under it and leaves room for the retry climb. The secondary limits are why concurrency and burst are small: GitHub allows 100 concurrent requests, 900 points per minute (a write costs 5 points, a read 1), and only 80 content-creating requests per minute with 500 per hour, and it asks callers to send mutating requests serially rather than in parallel. Four in flight keeps every one of those ceilings far away, and a 429 still pauses the whole bucket through Retry-After.",
+    "code_search": "The code search endpoint carries its own tighter secondary limit that this record cannot express, so github-search_code-1 paces itself. See github_requests.ts."
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "node_key": "google_drive-list_changes-1",
+  "display_name": "List Drive Changes",
+  "description": "List everything that changed in Google Drive since a cursor. Call it once with no cursor to start: it returns no changes and a `next_cursor` that means \"now\". Store that cursor, then call it again later with it to get what changed since. Always store the `next_cursor` you get back; it is the only token the next call needs. `has_more` is true while more pages of the same batch are waiting, so keep calling until it is false, then wait and poll again. A change with `removed` true means the file left this account: deleted, trashed, or unshared. Shared drives are included.",
+  "required_scopes": ["https://www.googleapis.com/auth/drive.readonly"],
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous call. Omit it once to receive the cursor that means \"now\"."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 1000,
+        "description": "Changes per page, 1 to 1000. Drive defaults to 100."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "changes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "file_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "change_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removed": {
+              "type": "boolean"
+            },
+            "drive_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "mime_type": {
+                      "type": "string"
+                    },
+                    "modified_time": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "version": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "web_view_link": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "parent_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "trashed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "mime_type",
+                    "modified_time",
+                    "version",
+                    "web_view_link",
+                    "parent_ids",
+                    "trashed"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": ["file_id", "change_type", "time", "removed", "drive_id", "file"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "has_more": {
+        "type": "boolean"
+      }
+    },
+    "required": ["changes", "next_cursor", "has_more"],
+    "additionalProperties": false
+  },
+  "requests": {
+    "changes_start_page_token": {
+      "method": "GET",
+      "path": "changes/startPageToken",
+      "query": {
+        "supportsAllDrives": true
+      },
+      "when": "input.cursor is absent",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "changes.getStartPageToken. Drive always sends the token; everything else is lenient.",
+        "type": "object",
+        "required": ["startPageToken"],
+        "properties": {
+          "startPageToken": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "changes_list": {
+      "method": "GET",
+      "path": "changes",
+      "query": {
+        "pageToken": "input.cursor",
+        "pageSize": "input.limit",
+        "fields": "nextPageToken newStartPageToken changes(fileId, changeType, time, removed, driveId, file(id, name, mimeType, modifiedTime, version, webViewLink, parents, trashed))",
+        "includeRemoved": true,
+        "includeItemsFromAllDrives": true,
+        "supportsAllDrives": true
+      },
+      "when": "input.cursor is present",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "changes.list. Lenient on purpose: a change may name a file this user can no longer see, and Drive adds fields between releases.",
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fileId": {
+                  "type": "string"
+                },
+                "changeType": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "string"
+                },
+                "removed": {
+                  "type": "boolean"
+                },
+                "driveId": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "type": "string"
+                    },
+                    "modifiedTime": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "webViewLink": {
+                      "type": "string"
+                    },
+                    "parents": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "trashed": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "nextPageToken": {
+            "type": ["string", "null"]
+          },
+          "newStartPageToken": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "The changes API is two endpoints. changes/startPageToken says \"here is now\" and changes lists what happened after a token, so one node call picks between them.",
+    "one_cursor": "Drive sends nextPageToken on a middle page and newStartPageToken on the last one. Both mean \"the token for the next call\", so the node returns one next_cursor and the caller never tells them apart.",
+    "removed_changes": "A removed change arrives with no file record. It still keeps its place in the list, because a sync has to act on it.",
+    "expired_cursor": "Drive rejects a cursor that is too old with 400 Invalid Value on pageToken. The caller recovers by calling with no cursor and re-listing."
+  }
+}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self'">
+<title>Alfera</title>
+<style>
+  /* The strip takes its colours and the sidebar width from the Alfera page under it, so the two
+     read as one surface. Where things are is worked out in strip_layout.js from the window, the
+     sidebar and the number of tabs, and from nothing else: a name never moves a tab.
+     The width follows the page frame by frame while the sidebar folds, so it has no motion of its own. */
+  :root { --page:#fbfaf9; --sidebar:#edecea; --text:#1c1a17; --band-width:0px; --tabs-left:92px; --tab-width:190px; --row-width:0px; --orange:#f74e00; --green:#2c7a4b; --ease:cubic-bezier(.2,.8,.2,1); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:var(--page); color:var(--text); font:13px/1 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing:antialiased; user-select:none; cursor:default; }
+  .strip { position:relative; height:44px; display:flex; align-items:center; -webkit-app-region:drag; }
+  /* The line at the right edge of the sidebar runs on to the top of the window. */
+  .above-sidebar { flex:none; align-self:stretch; width:var(--band-width); background:var(--sidebar); box-shadow:inset -1px 0 0 var(--sidebar-edge, transparent); transition:background .2s ease; }
+  .tabs { display:flex; gap:2px; flex:none; width:var(--row-width); margin-left:calc(var(--tabs-left) - var(--band-width)); overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  /* A row that scrolls fades out on the side where more tabs are, and only there. */
+  .tabs.more-left { -webkit-mask-image:linear-gradient(to right, transparent 0, #000 18px); }
+  .tabs.more-right { -webkit-mask-image:linear-gradient(to left, transparent 0, #000 18px); }
+  .tabs.more-left.more-right { -webkit-mask-image:linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%); }
+  .tabs:empty + .new, body.covered .tabs, body.covered .new, body.covered .above-sidebar, body.covered .dim { display:none; }
+  .tab { -webkit-app-region:no-drag; display:flex; align-items:center; gap:8px; height:30px; padding:0 8px 0 11px; border-radius:8px; color:color-mix(in srgb, var(--text) 62%, transparent); flex:none; width:var(--tab-width); transition:background .16s ease, color .16s ease; animation:arrive .22s var(--ease); }
+  @keyframes arrive { from { opacity:0; transform:translateY(3px) scale(.97); } }
+  .tab:hover { background:color-mix(in srgb, var(--text) 5%, transparent); }
+  .tab.front { background:color-mix(in srgb, var(--text) 8%, transparent); color:var(--text); font-weight:600; }
+  .name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:30px; }
+  /* A tab whose name is not known yet shows a place for the name, not another name. */
+  .name:empty { height:8px; flex:none; width:72px; border-radius:4px; background:color-mix(in srgb, var(--text) 12%, transparent); }
+  .name:empty + .close { margin-left:auto; }
+  .close { width:16px; height:16px; border-radius:4px; display:grid; place-items:center; opacity:0; transition:opacity .12s; flex:none; }
+  .tab:hover .close { opacity:.7; } .tab .close:hover { opacity:1; background:color-mix(in srgb, var(--text) 12%, transparent); }
+  .close svg, .new svg { stroke:currentColor; stroke-width:1.6; stroke-linecap:round; fill:none; }
+  .close svg { width:9px; height:9px; }
+  .new { -webkit-app-region:no-drag; width:28px; height:28px; margin-left:4px; border-radius:7px; display:grid; place-items:center; color:color-mix(in srgb, var(--text) 55%, transparent); flex:none; }
+  .new:hover { background:color-mix(in srgb, var(--text) 7%, transparent); color:var(--text); } .new svg { width:12px; height:12px; }
+  /* A dialog or the search dims the page. The strip is dimmed with the same colour, so the
+     window reads as one surface under one layer. */
+  .dim { position:absolute; inset:0; pointer-events:none; background:var(--dim-color, transparent); opacity:var(--dim-share, 0); }
+
+  .state { width:12px; height:12px; flex:none; position:relative; display:none; }
+  .state[data-state] { display:block; }
+  .state i { position:absolute; inset:0; opacity:0; transform:scale(.6); transition:opacity .25s ease, transform .3s var(--ease); }
+  .state[data-state="working"] .w, .state[data-state="loading"] .w, .state[data-state="needs_you"] .n, .state[data-state="done"] .d { opacity:1; transform:none; }
+  .w { border-radius:50%; border:1.6px solid color-mix(in srgb, var(--text) 18%, transparent); border-top-color:var(--orange); animation:spin .9s linear infinite; }
+  /* A page that loads is not Alfera at work: its mark has no colour. */
+  .state[data-state="loading"] .w { border-top-color:color-mix(in srgb, var(--text) 55%, transparent); }
+  .n::after { content:""; position:absolute; inset:2.5px; border-radius:50%; background:var(--orange); animation:ring 1.8s ease-out infinite; }
+  .d svg { width:12px; height:12px; stroke:var(--green); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes ring { 0% { box-shadow:0 0 0 0 rgba(247,78,0,.5); } 70%, 100% { box-shadow:0 0 0 6px rgba(247,78,0,0); } }
+  @media (prefers-color-scheme:dark) { :root { --page:#202026; --sidebar:#14141c; --text:#f5f5f7; --green:#58b47d; } }
+  @media (prefers-reduced-motion:reduce) { * { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+<div class="strip">
+  <div class="above-sidebar"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="new" id="new" title="New tab"><svg viewBox="0 0 12 12"><title>New tab</title><path d="M6 1.500v9M1.500 6h9"/></svg></div>
+  <div class="dim"></div>
+</div>
+<script src="strip_layout.js"></script>
+<script src="shell_page.js"></script>
+</body>
+</html>

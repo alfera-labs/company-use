@@ -1,0 +1,281 @@
+# Self-host stack. `./deploy/install.sh` writes `deploy/.env` and starts it. By hand:
+#
+#   cd deploy && cp .env.selfhost.example .env && docker compose up -d --build
+#
+# Compose reads `deploy/.env` for both `${VAR}` interpolation below and for the `env_file`
+# each service loads. One file holds every setting.
+#
+# `image:` pulls the published release. `build:` builds the same service from a clone, so
+# `docker compose build` works without any other file.
+name: alfera
+
+# Four services run from the API image: the migration job, the Rivet Engine, the API, and the
+# queue worker.
+x-api-image: &api_image
+  image: ${API_IMAGE:-ghcr.io/alfera-labs/alfera-api}:${PRODUCT_VERSION:-latest}
+  build:
+    context: ..
+    dockerfile: apps/api/Dockerfile
+
+# COWORKER_WORKSPACE_RUNTIME_PROVIDER=docker runs each agent workspace in a sibling container
+# started through the host Docker socket. That container goes on the network named by
+# COWORKER_SANDBOX_NETWORK, which no service below is on, so it cannot reach them. The worker runs the agent, and the API reads the
+# workspace files, so both get the same access.
+x-workspace-access: &workspace_access
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    # The sibling container is started by the HOST daemon, so the bind-mount source it is
+    # given is a host path. Mounting the workspace root at the SAME path inside this
+    # container is what makes the two agree. Keep both sides identical.
+    - ${COWORKER_WORKSPACE_HOST_PATH:-/var/lib/coworker/workspaces}:${COWORKER_WORKSPACE_HOST_PATH:-/var/lib/coworker/workspaces}
+    # Uploaded files and tool artifacts, when no bucket is set. The API writes and serves
+    # them and the worker reads them, so both mount the same volume.
+    - coworker_files:/var/lib/coworker/files
+  # The containers run as uid 1000, which is not in the host's docker group. Add the group
+  # that owns /var/run/docker.sock; install.sh reads it from the socket.
+  group_add:
+    - "${DOCKER_GROUP_ID:-999}"
+  # The API and the worker reach a server on this machine at host.docker.internal: a model you
+  # host (OPENAI_COMPATIBLE_BASE_URL), or an MCP server when COWORKER_MCP_PRIVATE_ADDRESSES=open
+  # lets an owner or admin add one. Docker Desktop knows that name by itself. Docker Engine on
+  # Linux needs this line. It gives these two services a name, not a new route: the code decides
+  # which address gets a request. No sandbox container gets the name.
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+x-master-key: &master_key
+  secrets:
+    - master_key
+    - master_key_fallbacks
+  entrypoint:
+    - /bin/sh
+    - -c
+    - >-
+      [ -s /run/secrets/master_key ] || { echo 'secrets/master_key is empty or missing' >&2; exit 1; };
+      export COWORKER_CREDENTIAL_ENCRYPTION_KEY="$$(cat /run/secrets/master_key)"
+      COWORKER_CREDENTIAL_ENCRYPTION_KEY_FALLBACKS="$$(cat /run/secrets/master_key_fallbacks)";
+      exec "$$@"
+    - read_master_key
+
+services:
+  postgres:
+    # pgvector-enabled Postgres 17. The migrations create vector columns, so plain Postgres
+    # cannot run them.
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coworker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-coworker}
+    volumes:
+      - coworker_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-coworker} -d ${POSTGRES_DB:-coworker}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Runs the schema migrations, seeds the native tool catalog, and publishes the template
+  # library on the first start, then exits. The API and the worker wait for it to exit 0, so
+  # an upgrade can never serve requests against an old schema. Every step is safe to run again.
+  migrations:
+    <<: [*api_image, *master_key]
+    env_file: .env
+    environment:
+      # Only the API and the worker sign in to the engine. This service never does, so it
+      # does not get the engine's admin token.
+      RIVET_TOKEN: ""
+    # The script bundles live in /repo/scripts. The image's own WORKDIR is apps/api.
+    working_dir: /repo
+    command:
+      - /bin/sh
+      - -c
+      - bun --no-env-file scripts/migrate.js && bun --no-env-file scripts/seed-native-catalog.js && bun --no-env-file scripts/seed-library.js --only-when-empty
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The Rivet Engine carries the job queue between the API and the worker. It is reachable on
+  # the compose network only.
+  engine:
+    <<: *api_image
+    restart: unless-stopped
+    command: ["rivet-engine", "start"]
+    environment:
+      RIVET__GUARD__HOST: 0.0.0.0
+      RIVET__GUARD__PORT: 6420
+      RIVET__API_PEER__HOST: 127.0.0.1
+      RIVET__API_PEER__PORT: 6421
+      RIVET__METRICS__HOST: 127.0.0.1
+      RIVET__METRICS__PORT: 6430
+      RIVET__FILE_SYSTEM__PATH: /var/lib/rivet-engine/db
+      RIVET__AUTH__ADMIN_TOKEN: ${RIVET_TOKEN:?set RIVET_TOKEN in .env}
+      # The engine reports usage statistics to its maker unless this is false.
+      RIVET__TELEMETRY__ENABLED: "false"
+    volumes:
+      - rivet_engine:/var/lib/rivet-engine
+    # The engine refuses a worker until its pool has a runner config. Writing that config is
+    # also the health check: it answers only once the engine serves its API.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "--no-env-file",
+          "-e",
+          "fetch('http://127.0.0.1:6420/runner-configs/default?namespace=default', { method: 'PUT', headers: { authorization: 'Bearer ' + process.env.RIVET__AUTH__ADMIN_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ datacenters: { default: { normal: {} } } }) }).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+  api:
+    <<: [*api_image, *workspace_access, *master_key]
+    restart: unless-stopped
+    env_file: .env
+    command: ["bun", "--no-env-file", "--preload", "./dist/instrument.js", "dist/server.js"]
+    secrets:
+      - master_key
+      - master_key_fallbacks
+      - setup_token_hash
+    environment:
+      SETUP_TOKEN_HASH_FILE: /run/secrets/setup_token_hash
+      # Fixed inside the container; APP_PORT / API_PORT only choose the published host ports.
+      # Do not move PORT into .env: the app container reads the same name.
+      PORT: 3001
+      HOST: 0.0.0.0
+      # env_file already carries these. Naming them here as well makes compose refuse to
+      # start the whole stack when one is empty, instead of starting a container that falls
+      # back to a well-known development value. One declaration gates every service.
+      COWORKER_API_PROXY_SECRET: ${COWORKER_API_PROXY_SECRET:?set COWORKER_API_PROXY_SECRET in .env}
+      WORKOS_COOKIE_PASSWORD: ${WORKOS_COOKIE_PASSWORD:?set WORKOS_COOKIE_PASSWORD in .env}
+      COWORKER_BROWSER_STATE_ENCRYPTION_KEY: ${COWORKER_BROWSER_STATE_ENCRYPTION_KEY:?set COWORKER_BROWSER_STATE_ENCRYPTION_KEY in .env}
+    ports:
+      # Loopback only. The app container reaches the API over the compose network
+      # (API_URL=http://api:3001), so nothing outside this host needs the published port.
+      - "127.0.0.1:${API_PORT:-3001}:3001"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "--no-env-file",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      engine:
+        condition: service_healthy
+
+  # The queue worker (apps/worker) runs every job: agent runs, syncs, and automations. The
+  # API only writes the job rows and rings the worker through the engine.
+  worker:
+    <<: [*api_image, *workspace_access, *master_key]
+    restart: unless-stopped
+    env_file: .env
+    working_dir: /repo/apps/worker
+    # The queue engine moves the work to the newest worker by this number, so each start gets
+    # a higher one: the second it started. Without it the worker logs an error at every start.
+    command:
+      - sh
+      - -c
+      - RIVET_ENVOY_VERSION=$$(date +%s) exec bun --no-env-file --preload ./dist/instrument.js dist/server.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      engine:
+        condition: service_healthy
+
+  app:
+    image: ${APP_IMAGE:-ghcr.io/alfera-labs/alfera-app}:${PRODUCT_VERSION:-latest}
+    build:
+      context: ..
+      dockerfile: apps/app/Dockerfile
+      args:
+        NEXT_PUBLIC_ENVIRONMENT: ${NEXT_PUBLIC_ENVIRONMENT:-production}
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: ${NODE_ENV:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      NEXT_PUBLIC_ENVIRONMENT: ${NEXT_PUBLIC_ENVIRONMENT:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-}
+      API_URL: ${API_URL:-http://api:3001}
+      COWORKER_API_PROXY_SECRET: ${COWORKER_API_PROXY_SECRET:?set COWORKER_API_PROXY_SECRET in .env}
+      COWORKER_AUTH_MODE: ${COWORKER_AUTH_MODE:-}
+      COWORKER_SELF_HOSTED: ${COWORKER_SELF_HOSTED:-true}
+      APP_BIND: ${APP_BIND:-127.0.0.1}
+      COWORKER_MCP_PRIVATE_ADDRESSES: ${COWORKER_MCP_PRIVATE_ADDRESSES:-closed}
+      COWORKER_LOCAL_USER_NAME: ${COWORKER_LOCAL_USER_NAME:-}
+      AUTH_HINT_COOKIE_DOMAIN: ${AUTH_HINT_COOKIE_DOMAIN:-}
+      WORKOS_API_KEY: ${WORKOS_API_KEY:-}
+      WORKOS_CLIENT_ID: ${WORKOS_CLIENT_ID:-}
+      WORKOS_COOKIE_PASSWORD: ${WORKOS_COOKIE_PASSWORD:?set WORKOS_COOKIE_PASSWORD in .env}
+      WORKOS_REDIRECT_URI: ${WORKOS_REDIRECT_URI:-}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+      NEXT_PUBLIC_WORKOS_REDIRECT_URI: ${NEXT_PUBLIC_WORKOS_REDIRECT_URI:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    ports:
+      # APP_BIND=127.0.0.1 keeps the dashboard port on this machine, which is how install.sh
+      # leaves it. `./alfera add team` and a WorkOS install set 0.0.0.0.
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Off by default. COMPOSE_PROFILES=https in .env turns it on: `./deploy/install.sh --https`
+  # and `./alfera add https` write that line. Caddy holds ports 80 and 443, gets a certificate
+  # for ALFERA_PUBLIC_HOST by itself and renews it, and passes requests on over the compose
+  # network: /v1 and /health to the API, the rest to the dashboard (see Caddyfile). It reads
+  # two settings and no secret of the install.
+  caddy:
+    profiles: ["https"]
+    image: caddy:2.11
+    restart: unless-stopped
+    environment:
+      ALFERA_PUBLIC_HOST: ${ALFERA_PUBLIC_HOST:-localhost}
+      CADDY_GLOBAL_OPTIONS: ${CADDY_GLOBAL_OPTIONS:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # The certificate and its key. Without this volume each restart asks for a new one, and
+      # a certificate authority gives out only a few a week for one name.
+      - caddy_data:/data
+    depends_on:
+      app:
+        condition: service_started
+
+secrets:
+  master_key:
+    file: ./secrets/master_key
+  master_key_fallbacks:
+    file: ./secrets/master_key_fallbacks
+  setup_token_hash:
+    file: ./secrets/setup_token_hash
+
+volumes:
+  coworker_postgres:
+  coworker_files:
+  rivet_engine:
+  caddy_data:

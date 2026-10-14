@@ -1,0 +1,65 @@
+{
+  "batch_create_complete": {
+    "completedAt": "2026-09-02T11:03:12.998Z",
+    "startedAt": "2026-09-02T11:03:12.640Z",
+    "status": "COMPLETE",
+    "results": [
+      {
+        "id": "60011",
+        "properties": {
+          "createdate": "2026-09-02T11:03:12.812Z",
+          "email": "nina.haas@example.com",
+          "firstname": "Nina",
+          "hs_object_id": "60011",
+          "lastmodifieddate": "2026-09-02T11:03:12.812Z",
+          "lastname": "Haas"
+        },
+        "createdAt": "2026-09-02T11:03:12.812Z",
+        "updatedAt": "2026-09-02T11:03:12.812Z",
+        "archived": false
+      },
+      {
+        "id": "60012",
+        "properties": {
+          "createdate": "2026-09-02T11:03:12.844Z",
+          "email": "tom.li@example.com",
+          "firstname": "Tom",
+          "hs_object_id": "60012",
+          "lastmodifieddate": "2026-09-02T11:03:12.844Z",
+          "lastname": "Li"
+        },
+        "createdAt": "2026-09-02T11:03:12.844Z",
+        "updatedAt": "2026-09-02T11:03:12.844Z",
+        "archived": false
+      }
+    ]
+  },
+  "batch_create_partly_rejected": {
+    "completedAt": "2026-09-02T11:07:44.201Z",
+    "startedAt": "2026-09-02T11:07:43.977Z",
+    "status": "COMPLETE",
+    "numErrors": 1,
+    "results": [
+      {
+        "id": "60013",
+        "properties": {
+          "createdate": "2026-09-02T11:07:44.101Z",
+          "email": "nina.haas@example.com",
+          "hs_object_id": "60013",
+          "lastmodifieddate": "2026-09-02T11:07:44.101Z"
+        },
+        "createdAt": "2026-09-02T11:07:44.101Z",
+        "updatedAt": "2026-09-02T11:07:44.101Z",
+        "archived": false
+      }
+    ],
+    "errors": [
+      {
+        "status": "error",
+        "category": "VALIDATION_ERROR",
+        "message": "Property values were not valid: [{\"isValid\":false,\"message\":\"Email address not-an-email is invalid\",\"error\":\"INVALID_EMAIL\",\"name\":\"email\"}]",
+        "context": { "properties": ["email"] }
+      }
+    ]
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "node_key": "google_drive-list_files-1",
+  "display_name": "List Drive Files",
+  "description": "List Google Drive files, newest change first. Filters combine with AND: `query` searches the full text and the name, `folder_ids` keeps files whose direct parent is one of those folders, and `mime_types` keeps files of those exact types (a folder is application/vnd.google-apps.folder). Trashed files are never returned. Shared drives are included. Pass `next_cursor` back as `cursor` for the next page; a null `next_cursor` ends the list.",
+  "required_scopes": ["https://www.googleapis.com/auth/drive.readonly"],
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Free text. Drive searches the file content and the name."
+      },
+      "folder_ids": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Keep only files whose direct parent is one of these folder ids."
+      },
+      "mime_types": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Keep only files of these exact mime types."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous call. Omit for the first page."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 1000,
+        "description": "Files per page, 1 to 1000. Drive defaults to 100."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "mime_type": {
+              "type": "string"
+            },
+            "modified_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "web_view_link": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parent_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "mime_type",
+            "modified_time",
+            "version",
+            "web_view_link",
+            "parent_ids"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "required": ["files", "next_cursor"],
+    "additionalProperties": false
+  },
+  "requests": {
+    "files_list": {
+      "method": "GET",
+      "path": "files",
+      "query": {
+        "q": "built by execute.ts from query + folder_ids + mime_types, always with trashed = false",
+        "fields": "nextPageToken, files(id, name, mimeType, modifiedTime, version, webViewLink, parents)",
+        "orderBy": "modifiedTime desc",
+        "includeItemsFromAllDrives": true,
+        "supportsAllDrives": true,
+        "pageToken": "input.cursor",
+        "pageSize": "input.limit"
+      },
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "files.list. Lenient on purpose: Drive omits a field rather than sending null, adds fields between releases, and returns version as a string because it is an int64.",
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "mimeType": {
+                  "type": "string"
+                },
+                "modifiedTime": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "webViewLink": {
+                  "type": "string"
+                },
+                "parents": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "nextPageToken": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "Drive expresses all three filters in one `q` string with its own quoting rules, so the query is built in code. The provider ingress lives with it, because send_request takes a runtime validator.",
+    "query_escaping": "Drive quotes values in single quotes and escapes with a backslash, so a searched phrase containing an apostrophe would otherwise be a syntax error.",
+    "shared_drives": "supportsAllDrives and includeItemsFromAllDrives are both always sent: the first lets a shared-drive file appear, the second lets the call succeed once one does.",
+    "dropped_rows": "An entry with no id, name, or mimeType is not a file anyone can act on, so it is dropped and the rest of the page is kept."
+  }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self'">
+<title>Alfera</title>
+<style>
+  /* The colours are the ones of the Alfera web app, so the setup and the app read as one product. */
+  :root { --page:#fbfaf9; --text:#1c1a17; --quiet:#6e6a64; --line:#e3e1dc; --field:#fffefd; --brand:#f74e00; --brand-pressed:#d24000; --on-brand:#fffdf9; --red:#c8321e; --green:#2c7a4b; --ease:cubic-bezier(.2,.8,.2,1); }
+  @media (prefers-color-scheme:dark) { :root { --page:#202026; --text:#f5f5f7; --quiet:#adadb5; --line:rgba(255,255,255,.1); --field:#2b2b32; --red:#f0715c; --green:#58b47d; } }
+  * { box-sizing:border-box; }
+  html { background:var(--page); }
+  /* The column sits a bit above the middle: the eye reads the middle of a window as higher than
+     it is. The room over and under it is spare room only, so a tall step never scrolls over
+     empty space, and a step that does not fit starts at its top. */
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; background:var(--page); color:var(--text); font:17px/1.5 "Inter Variable", Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing:antialiased; cursor:default; user-select:none; }
+  body::before { content:""; flex:1; }
+  body::after { content:""; flex:1.7; }
+  main { flex:none; width:100%; max-width:616px; padding:32px 36px; }
+  main.leaving { opacity:0; transform:translateY(-4px); transition:opacity .13s ease, transform .13s ease; }
+  main.arriving { animation:arrive .2s var(--ease); }
+  @keyframes arrive { from { opacity:0; transform:translateY(8px); } }
+  .mark { display:block; width:34px; height:34px; margin:0 0 28px -3px; fill:var(--brand); }
+  h1 { font:400 46px/1.08 Georgia, "Times New Roman", serif; letter-spacing:-.018em; margin:0 0 14px; }
+  h2 { font-size:18px; font-weight:600; line-height:1.4; letter-spacing:-.005em; margin:0 0 2px; }
+  p { margin:0; color:var(--quiet); }
+  .lead { font-size:18px; margin-bottom:40px; }
+  section { border-top:1px solid var(--line); padding:24px 0; }
+  section p { font-size:15px; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  main > .row { margin-top:4px; gap:12px; }
+  main > .row > span { flex:1; }
+  input { flex:1; min-width:0; font-family:inherit; font-size:17px; line-height:1.4; color:var(--text); padding:11px 14px; border:1px solid var(--line); border-radius:10px; background:var(--field); outline:none; user-select:text; transition:border-color .15s ease, box-shadow .15s ease; }
+  input::placeholder { color:color-mix(in srgb, var(--quiet) 60%, transparent); }
+  input:focus { border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 16%, transparent); }
+  button { flex:none; font-family:inherit; font-size:15px; font-weight:600; line-height:1.4; border-radius:10px; padding:11px 20px; border:1px solid var(--line); background:transparent; color:var(--text); transition:background .15s ease, border-color .15s ease, opacity .15s ease; }
+  button:not(:disabled):hover { background:color-mix(in srgb, var(--text) 5%, transparent); }
+  button:focus-visible { outline:2px solid color-mix(in srgb, var(--brand) 50%, transparent); outline-offset:2px; }
+  button:disabled { opacity:.55; }
+  .main_choice { background:var(--brand); border-color:var(--brand); color:var(--on-brand); }
+  .main_choice:not(:disabled):hover { background:var(--brand-pressed); border-color:var(--brand-pressed); }
+  main[data-state="done"] > .row .main_choice { background:var(--green); border-color:var(--green); opacity:1; }
+  .back, .quiet { border:0; padding:6px 0; font-weight:400; color:var(--quiet); background:none; }
+  .back:not(:disabled):hover, .quiet:not(:disabled):hover { background:none; color:var(--text); }
+  .back { display:block; margin:0 0 28px; font-size:15px; }
+  .quiet { font-size:14px; text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in srgb, var(--quiet) 45%, transparent); }
+  .link { display:block; margin-top:8px; padding-top:22px; border-top:1px solid var(--line); width:100%; text-align:left; font-size:15px; border-radius:0; }
+  .lines { margin:0 0 24px; padding:0 0 0 22px; color:var(--text); font-size:16px; }
+  .lines li { padding:5px 0 5px 4px; }
+  .lines li::marker { color:var(--quiet); }
+  .copied_text { display:flex; align-items:center; gap:16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:16px 0; margin-bottom:20px; }
+  .copied_text code { flex:1; min-width:0; font:13px/1.5 ui-monospace, Menlo, monospace; color:var(--quiet); word-break:break-all; user-select:text; }
+  .progress { list-style:none; margin:0; padding:0; font-size:16px; }
+  .progress li { display:flex; align-items:center; gap:14px; border-top:1px solid var(--line); padding:11px 0; color:var(--quiet); transition:color .2s ease; }
+  .progress li::before { content:""; flex:none; width:13px; height:13px; border-radius:50%; border:1.6px solid var(--line); transition:background .2s ease, border-color .2s ease; }
+  .progress li[data-state="working"] { color:var(--text); }
+  .progress li[data-state="working"]::before { border-color:color-mix(in srgb, var(--text) 18%, transparent); border-top-color:var(--brand); animation:spin .9s linear infinite; }
+  .progress li[data-state="done"] { color:var(--text); }
+  .progress li[data-state="done"]::before { border-color:var(--green); background:var(--green); }
+  .progress li[data-state="failed"] { color:var(--text); }
+  .progress li[data-state="failed"]::before { border-color:var(--red); background:var(--red); }
+  .timing { border-top:1px solid var(--line); padding-top:14px; font-size:14px; }
+  .note { border-top:1px solid var(--line); padding-top:16px; font-size:14px; }
+  .problem { color:var(--red); font-size:15px; user-select:text; }
+  .problem:not(:empty) { margin-top:12px; }
+  .after_failure { display:flex; align-items:center; flex-wrap:wrap; gap:10px 18px; }
+  .other_action { display:block; margin-top:14px; }
+  section > .quiet { margin-top:10px; }
+  .after_failure:not(:empty) { margin-top:18px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce) { main.leaving, main.arriving { transition:none; animation:none; transform:none; } .progress li::before { animation-duration:2.4s; } }
+  @media (max-height:700px) { h1 { font-size:38px; } .lead { margin-bottom:28px; } .back { margin-bottom:18px; } main { padding:20px 36px; } }
+</style>
+</head>
+<body>
+<main></main>
+<script src="setup_provider.js"></script>
+<script src="setup_steps.js"></script>
+<script src="setup_page.js"></script>
+</body>
+</html>

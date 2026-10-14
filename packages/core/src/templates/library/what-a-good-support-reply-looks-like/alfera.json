@@ -1,0 +1,72 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Replies that close the loop first time.",
+  "summary_text": "Shape every reply so it ends the ticket instead of starting a thread.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Answers first, explains second",
+    "Apologises only when it is our fault",
+    "Never explains our internal structure",
+    "Names the next step and who owns it"
+  ],
+  "guidance": [
+    {
+      "label": "Order",
+      "value": "Answer first, explanation second"
+    },
+    {
+      "label": "An apology",
+      "value": "Only when the fault is ours"
+    },
+    {
+      "label": "Internals",
+      "value": "Never explained to a customer"
+    },
+    {
+      "label": "The close",
+      "value": "The next step, and its owner"
+    }
+  ],
+  "used_when_text": "Used before any customer-facing reply",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before any customer reply",
+      "risk": "reads_data"
+    }
+  ],
+  "requires": [],
+  "asks_you_for": [
+    {
+      "input_key": "sign_off",
+      "label": "Sign off as",
+      "input_type": "text",
+      "example_answer": "The support team"
+    },
+    {
+      "input_key": "length",
+      "label": "Length",
+      "input_type": "text",
+      "example_answer": "Under 120 words"
+    },
+    {
+      "input_key": "never_say",
+      "label": "Never say",
+      "input_type": "text",
+      "example_answer": "As per our policy"
+    }
+  ],
+  "starts_when": []
+}

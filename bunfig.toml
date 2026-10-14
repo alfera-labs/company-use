@@ -1,0 +1,27 @@
+# Bun reads this file from the directory where it starts.
+
+# Do not load .env files automatically. dotenvx is the only env authority in this repo.
+# Bun would load the ENCRYPTED .env.development, and dotenvx never overrides a variable
+# that is already set, so the app would read ciphertext.
+env = false
+
+[install]
+# Quarantine window for new npm releases: a hijacked package is usually yanked within 48 hours.
+# 259200 seconds is three days. Workspace packages come from disk and are not affected.
+minimumReleaseAge = 259200
+# CVE-2026-102989 (GHSA-qx66-fv34-fjm8): these packages skip the window so the fixed version
+# installs at once.
+minimumReleaseAgeExcludes = [
+  "@tanstack/react-router",
+  "@tanstack/react-start",
+  "@tanstack/react-start-client",
+  "@tanstack/react-start-rsc",
+  "@tanstack/react-start-server",
+  "@tanstack/router-core",
+  "@tanstack/router-generator",
+  "@tanstack/router-plugin",
+  "@tanstack/start-client-core",
+  "@tanstack/start-plugin-core",
+  "@tanstack/start-server-core",
+  "@tanstack/start-storage-context",
+]

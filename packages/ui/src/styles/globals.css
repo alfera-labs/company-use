@@ -1,0 +1,769 @@
+/*
+ * The Alfera product stylesheet. Every app imports this one file (`@coworker/ui/globals.css`).
+ *
+ * There are exactly two stylesheets, and the split is the only one that earns its keep:
+ *
+ *   ./shadcn.css   shadcn CLI output for the `base-rhea` preset. CLI-OWNED, NEVER HAND-EDITED.
+ *                  It defines the variable contract every registry component expects, plus a
+ *                  placeholder palette. `components.json` points the CLI's `tailwind.css` at
+ *                  that file, so `shadcn add` rewrites it and cannot touch anything below.
+ *
+ *   this file      everything Alfera decides: tokens, then the handful of classes built on
+ *                  them. Loads after shadcn.css and overrides its placeholders.
+ *
+ * ONE RADIUS VOCABULARY
+ *
+ * There is no `--radius-control` / `-surface` / `-overlay` here. The preset's own ramp already
+ * covers it: at our anchor `rounded-xl` is 6.3px (menu rows), `rounded-2xl` is 8px (controls and
+ * menus), `rounded-4xl` is 11.6px (cards and dialogs). A second set of names for the same three
+ * numbers is a synonym to keep in sync, not an abstraction. Retune --radius and all of it moves.
+ *
+ * THE SURFACE LADDER
+ *
+ * The page is not white. Five steps carry every background in the product:
+ *
+ *   sunken     wells, input tracks, code blocks, the area a panel sits in
+ *   chrome     sidebar, toolbars, footers — the frame around the work
+ *   page       the reading surface, the default background
+ *   raised     cards, the selected row, anything that wants attention
+ *   floating   popovers, menus, dialogs, the composer
+ *
+ * Because the page is beige, near-white reads as "look here". That is the contrast strategy:
+ * attention is spent by moving UP the ladder, not by adding color.
+ *
+ * In LIGHT the rungs are marketing-site hexes — #efeeec / #f6f5f4 / #fbfaf9 / #fffefd — so the
+ * app and the site are literally one palette, and they sit ~0.014 apart in OKLCH lightness:
+ * visible as a boundary, quiet enough that no edge shouts. `floating` collapses onto `raised`
+ * there, because near-white is the ceiling and an overlay has to separate with shadow instead.
+ *
+ * DARK IS NOT THE LIGHT THEME DIMMED. It turns cool (hue ~283) where light is warm, spreads its
+ * rungs much wider, and keeps `floating` as a real fifth step. See the `.dark` block for why.
+ *
+ * ACCENT
+ *
+ * --brand is the Alfera orange, #f74e00. It is the whole accent: it fills the primary button,
+ * marks the current thing, and draws the focus ring. --primary points at it rather than holding
+ * a second value, so there is exactly one orange in the product. Hover deepens to #dd4500.
+ * Both values, and white as the label color, are the treatment marketing.css already ships as
+ * --mk-accent / --mk-accent-hover.
+ *
+ * KNOWN CONTRAST EXCEPTION: white on #f74e00 measures 3.42:1, under the 4.5:1 AA floor for
+ * body-sized text. Deliberate brand match, not an oversight, and contained to the filled
+ * primary button — orange TEXT uses --brand-ink (5.75:1), which passes. Raising the button to
+ * AA means darkening --primary to about oklch(0.575 0.19 38): one token, no other change.
+ *
+ * Every other semantic role ships the same three slots, so a status chip is built the same way
+ * whatever it means:
+ *
+ *   <role>        solid fill, for bars and dots
+ *   <role>-ink    text and icons on a light surface
+ *   <role>-wash   tinted background, derived from the fill so it tracks the theme
+ *
+ * Contrast was measured, not estimated. Every -ink clears 4.5:1 on every rung, in both themes.
+ *
+ * ELEVATION
+ *
+ * Warm-tinted and tight: premium reads as a close, soft shadow, not a wide gray haze. Three
+ * steps, one per thing that can float — `raised` for a card, `float` for a dropdown, `overlay`
+ * for a dialog. A deliberate departure from Tailwind's default shadow scale, whose neutral gray
+ * turns muddy over a beige page.
+ *
+ * MOTION
+ *
+ * Exponential ease-out only: no bounce, no elastic. Durations use Tailwind's own scale
+ * (duration-150 for feedback, duration-200 for a surface arriving) and never exceed 200ms on
+ * anything the pointer is waiting for.
+ *
+ * The marketing site imports this file too, but scopes its own palette under `.marketing`, so
+ * product token changes stop at the product.
+ */
+
+@import "./shadcn.css";
+
+@plugin "@tailwindcss/typography";
+
+@source "../**/*.{ts,tsx}";
+@source "../../../../apps/**/*.{ts,tsx}";
+@source "../../../../node_modules/streamdown/dist/index.js";
+
+@theme inline {
+  /* The ladder, as Tailwind color utilities: bg-sunken, bg-chrome, bg-page, bg-raised. */
+  --color-sunken: var(--surface-sunken);
+  --color-chrome: var(--surface-chrome);
+  --color-page: var(--surface-page);
+  --color-raised: var(--surface-raised);
+  --color-floating: var(--surface-floating);
+
+  /* Semantic roles. */
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-wash: var(--brand-wash);
+  --color-primary-hover: var(--primary-hover);
+  --color-positive: var(--positive);
+  --color-positive-ink: var(--positive-ink);
+  --color-positive-wash: var(--positive-wash);
+  --color-caution: var(--caution);
+  --color-caution-ink: var(--caution-ink);
+  --color-caution-wash: var(--caution-wash);
+  --color-danger: var(--destructive);
+  --color-danger-ink: var(--danger-ink);
+  --color-danger-wash: var(--danger-wash);
+
+  /* Edges. `border-strong` is for the rare boundary that must survive on a raised surface. */
+  --color-strong: var(--border-strong);
+
+  /* File-type tints. The one place the product is allowed a multi-hue palette, because these
+     encode a CATEGORY rather than a state: green does not mean "good" on a spreadsheet icon,
+     it means "spreadsheet". Semantic roles above must never be reused for this — a category
+     that borrows the success colour teaches the wrong thing. Documents stay neutral so the
+     commonest file type does not compete with the accent. Icons only, so 3:1 is the bar; the
+     lowest measured is 4.38:1 in light and 7.07:1 in dark. */
+  --color-file-sheet: var(--file-sheet);
+  --color-file-image: var(--file-image);
+  --color-file-code: var(--file-code);
+
+  /* Interaction washes, as utilities: hover:bg-hover, active:bg-pressed. */
+  --color-hover: var(--state-hover);
+  --color-pressed: var(--state-pressed);
+
+  /* The scrim behind a modal. Its own token because it is the one wash that must NOT follow
+     --foreground: in dark mode the foreground is near-white, so a "35% foreground" scrim
+     lightens the page it is meant to dim. Always ink, both themes. */
+  --color-scrim: var(--scrim);
+
+  /* The chat bubble that holds the reader's own words. */
+  --color-bubble-mine: var(--bubble-mine);
+
+  --shadow-raised: var(--elevation-1);
+  --shadow-float: var(--elevation-2);
+  --shadow-overlay: var(--elevation-3);
+  --shadow-soft: var(--elevation-soft);
+
+  --color-grid-line: var(--grid-line);
+  --color-hairline-soft: var(--hairline-soft);
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Shell metrics, shared by the app header, the composer, and the chat scroll math. They sit
+     in the theme block rather than on :root because they are only ever read as utilities
+     (`h-app-header`, and the scroll offsets the chat transcript is anchored with). */
+  --spacing-app-header: 56px;
+  --spacing-input-area: 134px;
+  --spacing-scroll-area: calc(-1 * (var(--spacing-input-area) + var(--spacing-app-header)));
+  --spacing-scroll-anchor-offset: 140px;
+  --spacing-scroll-anchor: calc(
+    var(--spacing-scroll-area) -
+    var(--spacing-scroll-anchor-offset) +
+    100dvh
+  );
+}
+
+/*
+ * Tokens that do not change between themes: the accent, the geometry, and every shadcn name
+ * that is only an alias for a rung of the ladder.
+ *
+ * The selector list is `:root, .dark` on purpose. ./shadcn.css sets these same names inside its
+ * own `.dark` block, and a bare `:root` loses to `.dark` on specificity — dark mode would keep
+ * shadcn's placeholder grays and the accent would come out light gray. Matching the selector
+ * and landing later in the cascade is what makes the override hold in both themes.
+ * `scripts/check-theme-covers-shadcn-dark.ts` fails the build if any of them slips back out.
+ */
+:root,
+.dark {
+  --font-sans:
+    var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  /* Kept as an alias: marketing.css and the WorkOS widget sheet name the stack this way. */
+  --font-sans-stack: var(--font-sans);
+
+  /* The anchor for the whole radius ramp (--radius-sm ... --radius-4xl in shadcn.css). Tuned
+     down from the preset's 0.625rem: its multipliers give the right RATIOS, but at its anchor
+     an 18px corner on a 32px button reads as a consumer app rather than as software. */
+  --radius: 0.28rem;
+
+  /* --- accent. Identical in both themes: the primary button is the one object that should
+     look the same day and night. --- */
+  --brand: oklch(0.6555 0.2154 37.8); /* #f74e00 */
+  /* One orange in the product. --primary is not a second value to keep in sync; it is a
+     pointer, so retuning --brand retunes every filled action with it. */
+  --primary: var(--brand);
+  --primary-foreground: oklch(0.995 0.008 80);
+  /* Hover deepens the fill instead of fading it. `bg-primary/80` over a beige page washes the
+     orange out toward pink, which reads as disabled rather than as pressed. */
+  /* Deep enough that the white label still clears AA while the pointer is down: at the
+     marketing site's #dd4500 it measures 4.19:1, just under. #d24000 is the same hue two
+     steps darker and measures 4.59:1. */
+  --primary-hover: oklch(0.58 0.192 38); /* #d24000 */
+
+  /* --- shadcn aliases: one ladder, many names --- */
+  --background: var(--surface-page);
+  --card: var(--surface-raised);
+  --card-foreground: var(--foreground);
+  /* Popovers take the floating rung, not the card rung. In light they are the same value —
+     white is the ceiling, so an overlay separates with shadow instead. In dark there is
+     headroom above the card, and a menu that does not use it reads as painted onto the page. */
+  --popover: var(--surface-floating);
+  --popover-foreground: var(--foreground);
+  --muted: var(--surface-sunken);
+  --secondary: var(--surface-sunken);
+  --secondary-foreground: var(--foreground);
+  --accent: var(--surface-sunken);
+  --accent-foreground: var(--foreground);
+  --sidebar: var(--surface-chrome);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--surface-raised);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --input: var(--border);
+  --ring: var(--brand);
+
+  /* Stacking order. Every floating layer names one of these, so nothing guesses a z-index and
+     no two surfaces can fight. Reached through the .z-* utilities at the end of this file. */
+  --z-raised: 10;
+  --z-sticky: 20;
+  /* Portaled controls must sit above modal backdrops and viewports. */
+  --z-dropdown: 55;
+  --z-overlay: 50;
+  --z-toast: 60;
+}
+
+:root {
+  /* --- the ladder. Each rung is a marketing-site hex, kept in OKLCH so the steps read as even
+     perceptual intervals rather than as four unrelated colors. --- */
+  --surface-sunken: oklch(0.9493 0.0029 68); /* #efeeec */
+  --surface-chrome: #edecea;
+  --surface-page: #fbfaf9;
+  --surface-raised: oklch(0.9975 0.0017 68); /* #fffefd */
+  --sidebar-selected: #dddcda;
+  /* No headroom above near-white, so an overlay separates with shadow rather than lightness. */
+  --surface-floating: var(--surface-raised);
+
+  /* --- ink --- */
+  --foreground: oklch(0.205 0.008 60);
+  --muted-foreground: oklch(0.525 0.012 65);
+
+  /* --- accent on a light surface --- */
+  --brand-ink: oklch(0.52 0.185 38);
+  --brand-wash: color-mix(in oklch, var(--brand) 12%, var(--surface-raised));
+
+  /* The chat bubble that holds the reader's own words, and nothing else.
+     Not --accent: accent is the shared hover/selected wash, so a bubble on it would move
+     every time a control state moved. A warm sand against the assistant's white cards. */
+  --bubble-mine: oklch(0.925 0.018 78);
+
+  /* --- state --- */
+  --positive: oklch(0.52 0.128 152);
+  --positive-ink: oklch(0.5 0.128 152);
+  --positive-wash: color-mix(in oklch, var(--positive) 12%, var(--surface-raised));
+  /* 0.64 rather than 0.68: caution is used as a bare status dot, where colour is the only
+     signal and 3:1 against the page is the floor. At 0.68 it measured 2.84:1. */
+  --caution: oklch(0.64 0.15 72);
+  --caution-ink: oklch(0.52 0.13 70);
+  --caution-wash: color-mix(in oklch, var(--caution) 16%, var(--surface-raised));
+  --destructive: oklch(0.545 0.205 27);
+  --danger-ink: oklch(0.53 0.205 27);
+  --danger-wash: color-mix(in oklch, var(--destructive) 10%, var(--surface-raised));
+
+  /* --- edges --- */
+  --border: oklch(0.928 0.004 88);
+  --border-strong: oklch(0.855 0.006 78);
+
+  /* --- interaction ---
+     Hover darkens (toward ink); selection lightens (to raised, see .row-interactive). They move
+     in opposite directions, so "pointing at" and "on" can never be mistaken for each other. */
+  --state-hover: color-mix(in oklch, var(--foreground) 7%, transparent);
+  --state-pressed: color-mix(in oklch, var(--foreground) 11%, transparent);
+  --scrim: oklch(0.24 0.02 60 / 0.35);
+
+  /* --- file-type tints (see the @theme block) --- */
+  --file-sheet: oklch(0.55 0.13 152);
+  --file-image: oklch(0.55 0.15 300);
+  --file-code: oklch(0.55 0.13 250);
+
+  /* --- charts: one orange ramp, light to dark, so a series reads as one family --- */
+  --chart-1: oklch(0.8 0.13 52);
+  --chart-2: oklch(0.72 0.175 44);
+  --chart-3: oklch(0.6555 0.2154 37.8);
+  --chart-4: oklch(0.545 0.175 34);
+  --chart-5: oklch(0.44 0.135 32);
+
+  --elevation-1: 0 1px 1px oklch(0.24 0.02 60 / 0.04), 0 1px 2px -1px oklch(0.24 0.02 60 / 0.07);
+  /* A floating surface has to detach from the page on its own; at a lower alpha the hairline
+     was doing all the work and an open menu read as a patch pasted onto the content. */
+  --elevation-2:
+    0 2px 6px -2px oklch(0.24 0.02 60 / 0.1), 0 6px 16px -6px oklch(0.24 0.02 60 / 0.14);
+  --elevation-3:
+    0 8px 24px -6px oklch(0.24 0.02 60 / 0.14), 0 24px 56px -16px oklch(0.24 0.02 60 / 0.22);
+
+  --grid-line: color-mix(in oklch, var(--foreground) 4.5%, transparent);
+  --hairline-soft: color-mix(in oklch, var(--border) 70%, transparent);
+  --elevation-soft:
+    0 0 0 1px var(--border), 0 2px 4px -2px oklch(0.24 0.02 60 / 0.06),
+    0 12px 32px -12px oklch(0.24 0.02 60 / 0.16);
+}
+
+/*
+ * Dark theme: the same product at night, and a different palette on purpose.
+ *
+ * The neutrals turn COOL here (hue ~283, chroma ~0.011) rather than staying warm like the light
+ * theme. A warm dark neutral reads as brown, which looks like a dimmed light theme instead of a
+ * designed one; every dark product UI worth copying sits slightly blue. The values are measured
+ * off the reference screenshots, not invented: chrome #14141c, page #202026, raised ~#292930,
+ * floating #37383d.
+ *
+ * The ladder also gains a rung dark mode actually needs. In light it tops out at near-white, so
+ * `floating` collapses onto `raised` and overlays separate with shadow. In dark there is real
+ * headroom above a card, and a popover that does not use it reads as painted onto the page.
+ *
+ * One asymmetry, deliberate: `chrome` is the FLOOR here, below `sunken`, where in light it sits
+ * above. The frame around the work is the darkest thing in every dark UI, and a well is still
+ * recessed relative to the page it sits on — which is what the name actually means.
+ */
+.dark {
+  --surface-chrome: oklch(0.195 0.014 284); /* #14141c — the frame, and the floor */
+  --surface-sunken: oklch(0.212 0.012 285);
+  --surface-page: oklch(0.246 0.011 285); /* #202026 — the app background */
+  --surface-raised: oklch(0.283 0.011 282);
+  --surface-floating: oklch(0.342 0.009 277); /* #37383d — popovers, menus, the composer */
+  --sidebar-selected: var(--surface-raised);
+
+  --foreground: oklch(0.97 0.003 285);
+  /* 0.73 rather than 0.71: the floating rung is the lightest surface anything sits on, and
+     muted text has to clear 4.5:1 there too (measured 4.87:1). */
+  --muted-foreground: oklch(0.73 0.012 286);
+
+  --brand-ink: oklch(0.78 0.16 45);
+
+  /* One rung above raised, and cool like the rest of the dark palette. Warm sand at night
+     reads as a stain, so the reader's bubble separates by lightness instead of by hue. */
+  --bubble-mine: oklch(0.36 0.012 282);
+  --brand-wash: color-mix(in oklch, var(--brand) 22%, var(--surface-raised));
+
+  --positive: oklch(0.62 0.14 152);
+  --positive-ink: oklch(0.78 0.14 155);
+  --positive-wash: color-mix(in oklch, var(--positive) 22%, var(--surface-raised));
+  --caution: oklch(0.72 0.15 72);
+  --caution-ink: oklch(0.83 0.13 78);
+  --caution-wash: color-mix(in oklch, var(--caution) 22%, var(--surface-raised));
+  --destructive: oklch(0.58 0.2 27);
+  --danger-ink: oklch(0.75 0.17 25);
+  --danger-wash: color-mix(in oklch, var(--destructive) 24%, var(--surface-raised));
+
+  /* Translucent rather than a fixed gray. The ladder spans 0.195 to 0.342 here, and one opaque
+     edge cannot read on both ends — it either vanishes on the floating rung or cuts the
+     sidebar. A white wash lands at the right strength on whatever it is drawn over. */
+  --border: oklch(1 0 0 / 9%);
+  --border-strong: oklch(1 0 0 / 15%);
+
+  /* Lifted from light mode: a 5% wash disappears against a dark surface. */
+  --state-hover: color-mix(in oklch, var(--foreground) 9%, transparent);
+  --state-pressed: color-mix(in oklch, var(--foreground) 14%, transparent);
+  /* Deeper than light: the surfaces underneath are already dark, so a 35% wash barely reads. */
+  --scrim: oklch(0 0 0 / 0.6);
+
+  --file-sheet: oklch(0.76 0.13 155);
+  --file-image: oklch(0.76 0.13 300);
+  --file-code: oklch(0.74 0.12 250);
+
+  --chart-1: oklch(0.85 0.12 55);
+  --chart-2: oklch(0.76 0.17 46);
+  --chart-3: oklch(0.6555 0.2154 37.8);
+  --chart-4: oklch(0.56 0.18 34);
+  --chart-5: oklch(0.46 0.14 32);
+
+  /* Near-black rather than tinted: a warm shadow over a warm dark surface reads as a smudge. */
+  --elevation-1: 0 1px 1px oklch(0 0 0 / 0.3), 0 1px 2px -1px oklch(0 0 0 / 0.4);
+  --elevation-2: 0 2px 6px -2px oklch(0 0 0 / 0.4), 0 6px 16px -6px oklch(0 0 0 / 0.5);
+  --elevation-3: 0 8px 24px -6px oklch(0 0 0 / 0.5), 0 24px 56px -16px oklch(0 0 0 / 0.6);
+
+  --grid-line: oklch(1 0 0 / 3.5%);
+  --hairline-soft: oklch(1 0 0 / 6%);
+  --elevation-soft:
+    0 0 0 1px var(--border-strong), 0 2px 4px -2px oklch(0 0 0 / 0.3),
+    0 16px 40px -12px oklch(0 0 0 / 0.55);
+}
+
+/*
+ * The handful of shapes the product repeats everywhere. Each encodes one decision from the
+ * tokens above so screens stop restating it. They live in `@layer components`, so any Tailwind
+ * utility on the element still wins and a one-off stays a one-off.
+ *
+ * Radii go through `@apply` rather than `var(--radius-2xl)`: the ramp lives in shadcn.css's
+ * `@theme` block, which Tailwind inlines into utilities and never emits to the cascade, so a
+ * raw `var()` here would resolve to nothing and the corner would come out square.
+ *
+ * Add a class here only when a third screen needs the same shape. Two uses is a coincidence.
+ */
+@layer components {
+  /*
+   * A panel is the product's card: raised off the page, hairline edge, soft close shadow.
+   * `.panel-quiet` is the same shape without the lift, for a container that groups content
+   * rather than presenting it. Neither sets padding — the caller owns spacing, because a
+   * settings row and a file tile need different rhythm from the same surface.
+   */
+  .panel {
+    @apply rounded-4xl;
+    background: var(--surface-raised);
+    box-shadow:
+      inset 0 0 0 1px var(--border),
+      var(--elevation-1);
+  }
+
+  .panel-quiet {
+    @apply rounded-4xl;
+    background: var(--surface-chrome);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  /*
+   * A well is the opposite move: content pushed below the page rather than lifted above it.
+   * Read-only values, code blocks, and the empty area a grid fills use it.
+   */
+  .well {
+    @apply rounded-2xl;
+    background: var(--surface-sunken);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  /*
+   * A plate holds someone else's artwork: a vendor logo, an app icon, an avatar fallback.
+   *
+   * It is the one surface that stays white in dark mode, on purpose. Third-party logos are
+   * drawn for a white background and a dark plate turns half of them into invisible smudges.
+   * Because it does not follow the theme, it is deliberately not part of the ladder — name it
+   * only when the content really is a foreign asset.
+   */
+  .plate {
+    @apply rounded-2xl;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: oklch(1 0 0);
+    box-shadow: inset 0 0 0 1px oklch(0.24 0.02 60 / 0.12);
+    color: oklch(0.24 0.02 60);
+  }
+
+  /*
+   * The one interactive row: sidebar navigation, menu items, list rows, command results.
+   *
+   * Hover darkens toward the ink; selection lightens to the raised surface and gains a
+   * hairline. The two states move in opposite directions, so pointing at a row can never look
+   * like being on one — the failure the old sidebar had, where both resolved to the same fill
+   * 1.5% of lightness away from the background.
+   *
+   * Selection stacks three signals that each survive alone: the near-white fill, the hairline,
+   * and medium weight. It still reads with the fill removed, which is what anyone who cannot
+   * separate two warm grays actually gets.
+   */
+  .row-interactive {
+    @apply rounded-2xl;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    color: var(--muted-foreground);
+    text-align: start;
+    transition:
+      background-color 150ms var(--ease-out-quart),
+      color 150ms var(--ease-out-quart);
+  }
+
+  /* `data-highlighted` is how Base UI marks the row the keyboard is on inside a menu, combobox,
+     or command list. Treating it as hover is what makes arrowing through a menu feel the same
+     as pointing at the sidebar, from one rule. */
+  .row-interactive:hover,
+  .row-interactive[data-highlighted] {
+    background-color: var(--state-hover);
+    color: var(--foreground);
+  }
+
+  .row-interactive:active {
+    background-color: var(--state-pressed);
+  }
+
+  .row-interactive[data-active="true"],
+  .row-interactive[aria-current="page"],
+  .row-interactive[data-selected="true"] {
+    background-color: var(--surface-raised);
+    box-shadow:
+      inset 0 0 0 1px var(--border),
+      var(--elevation-1);
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  aside[data-slot="sidebar"] .row-interactive[data-active="true"],
+  aside[data-slot="sidebar"] .row-interactive[aria-current="page"],
+  aside[data-slot="sidebar"] .row-interactive[data-selected="true"] {
+    background-color: var(--sidebar-selected);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  /*
+   * A field is any surface that takes typing.
+   *
+   * It takes the raised step, the same as a card, because an empty input IS an attention target
+   * and the ladder is how this product spends attention. On the beige page it reads as an
+   * opening; inside an already-raised card it falls back to the hairline alone, which is the
+   * standard treatment for a form on a white panel and stops a dialog turning into a stack of
+   * same-colored boxes.
+   */
+  .field {
+    @apply rounded-2xl;
+    background: var(--surface-raised);
+    box-shadow: inset 0 0 0 1px var(--border);
+    color: var(--foreground);
+    transition: box-shadow 150ms var(--ease-out-quart);
+  }
+
+  .field::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .field:hover:not(:focus, :disabled) {
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
+
+  .field:focus-visible,
+  .field:focus-within {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 1px var(--ring),
+      0 0 0 3px color-mix(in oklch, var(--ring) 25%, transparent);
+  }
+
+  .field:disabled {
+    background: var(--surface-sunken);
+    color: var(--muted-foreground);
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /*
+   * A list of rows inside a card. Rows are split by a soft hairline inset 12px from the edges,
+   * and the hairline next to a hovered row hides so the hover fill reads as one shape.
+   */
+  .hairline-rows > li + li {
+    position: relative;
+  }
+
+  .hairline-rows > li + li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline: 12px;
+    height: 1px;
+    background: var(--hairline-soft);
+    transition: opacity var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .hairline-rows > li:hover + li::before,
+  .hairline-rows > li + li:hover::before {
+    opacity: 0;
+  }
+
+  /*
+   * Expand and collapse by grid rows, so the height animates without measuring the content.
+   * The only child must allow itself to shrink to zero: `min-height: 0; overflow: hidden`.
+   */
+  .collapse-rows {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows var(--duration-base) var(--ease-out-quart),
+      opacity var(--duration-base) var(--ease-out-quart);
+  }
+
+  .collapse-rows > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .collapse-rows[data-open="true"] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  /* A loading bar that shimmers instead of pulsing, so a list of them reads as one sweep. */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--surface-sunken) 0%,
+      color-mix(in oklch, var(--surface-sunken) 40%, var(--surface-raised)) 50%,
+      var(--surface-sunken) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+
+  /* Real rows arrive with a 4px rise, staggered 30ms each and never more than 120ms in total. */
+  .rise-in > * {
+    animation: rise var(--duration-base) var(--ease-out-quart) both;
+  }
+  .rise-in > *:nth-child(2) {
+    animation-delay: 30ms;
+  }
+  .rise-in > *:nth-child(3) {
+    animation-delay: 60ms;
+  }
+  .rise-in > *:nth-child(4) {
+    animation-delay: 90ms;
+  }
+  .rise-in > *:nth-child(n + 5) {
+    animation-delay: 120ms;
+  }
+
+  /* A step inside a dialog slides in from the side it came from. */
+  .step-in-forward {
+    animation: step-in-forward var(--duration-base) var(--ease-out-expo) both;
+  }
+  .step-in-back {
+    animation: step-in-back var(--duration-base) var(--ease-out-expo) both;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes step-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+@keyframes step-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+@layer utilities {
+  /*
+   * The stacking scale, as classes. Naming the layer beats an arbitrary z-40 scattered across
+   * files, because "is a dropdown above a sticky header" becomes a question the scale answers
+   * rather than one each component guesses at.
+   */
+  .z-raised {
+    z-index: var(--z-raised);
+  }
+  .z-sticky {
+    z-index: var(--z-sticky);
+  }
+  .z-dropdown {
+    z-index: var(--z-dropdown);
+  }
+  .z-overlay {
+    z-index: var(--z-overlay);
+  }
+  .z-toast {
+    z-index: var(--z-toast);
+  }
+}
+
+/*
+ * The menu-dropdown transition, for surfaces that grow from the trigger they are anchored to.
+ * Values are the tuned defaults from transitions.dev; only the state hooks are adapted, because
+ * Base UI already owns open/close and exposes it as `data-starting-style` (animating in) and
+ * `data-ending-style` (animating out). Wiring a second `.is-open`/`.is-closing` owner on top of
+ * that would be two sources for one state.
+ */
+:root {
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-exit: 140ms;
+  --dropdown-open-dur: 200ms;
+  --dropdown-close-dur: 140ms;
+  --dropdown-pre-scale: 0.97;
+  --dropdown-closing-scale: 0.99;
+}
+
+.t-dropdown {
+  /* Base UI computes this from the resolved placement, so the surface still grows from the
+     trigger after a collision flips it to the other side. */
+  transform-origin: var(--transform-origin, top left);
+  transform: scale(1);
+  opacity: 1;
+  transition:
+    transform var(--dropdown-open-dur) var(--ease-out-expo),
+    opacity var(--dropdown-open-dur) var(--ease-out-expo);
+}
+
+/* `will-change` is scoped to the two states that are actually animating. Left on the base class
+   it promotes a compositor layer for every mounted popup and never releases it. */
+.t-dropdown[data-starting-style] {
+  transform: scale(var(--dropdown-pre-scale));
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.t-dropdown[data-ending-style] {
+  transform: scale(var(--dropdown-closing-scale));
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    transform var(--dropdown-close-dur) var(--ease-out-expo),
+    opacity var(--dropdown-close-dur) var(--ease-out-expo);
+}
+
+/* The snippet ships this guard with `!important`, because the two attribute rules above outrank
+   a bare `.t-dropdown`. Naming those same selectors here reaches the same specificity and wins
+   on source order instead, so the guard survives without the `!important` the linter refuses —
+   and the surface still appears and disappears instantly for anyone who has asked the OS for
+   less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .t-dropdown,
+  .t-dropdown[data-starting-style],
+  .t-dropdown[data-ending-style],
+  .row-interactive,
+  .field,
+  .collapse-rows {
+    transition: none;
+  }
+
+  .skeleton-shimmer,
+  .rise-in > *,
+  .step-in-forward,
+  .step-in-back {
+    animation: none;
+  }
+}
+
+/* Marks the node a jump just landed on, so the landing spot is obvious for a moment. The class is
+   added and removed on the node itself (see scroll_to_section_and_flash in
+   use_scroll_to_hash_section.ts), and the animation ends on --card so the surface returns to
+   exactly the colour it started at. Anyone who asked the OS for less motion never gets the class.
+   This is the only flash rule: a surface that wants a different start colour sets --flash-color on
+   an ancestor, which is what the rewards board does for its louder orange. */
+.is-flashing {
+  animation: flash-section 1.2s ease-out;
+}
+@keyframes flash-section {
+  from {
+    background-color: var(--flash-color, color-mix(in oklab, var(--primary) 14%, transparent));
+  }
+  to {
+    background-color: var(--card);
+  }
+}

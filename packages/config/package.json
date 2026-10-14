@@ -1,0 +1,39 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/env.ts",
+    "./api_origin": "./src/api_origin.ts",
+    "./billing_words": "./src/billing_words.ts",
+    "./connector_oauth_clients": "./src/connector_oauth_clients.server.ts",
+    "./company_use_deploy_env": "./src/company_use_deploy_env.ts",
+    "./constants": "./src/constants.ts",
+    "./credit_pricing": "./src/credit_pricing.ts",
+    "./discovery_model_env": "./src/discovery_model_env.ts",
+    "./env": "./src/env.ts",
+    "./env_value_schemas": "./src/env_value_schemas.ts",
+    "./file_storage_env": "./src/file_storage_env.ts",
+    "./founder_contact": "./src/founder_contact.ts",
+    "./hosted_defaults": "./src/hosted_defaults.ts",
+    "./integration_env": "./src/integration_env.ts",
+    "./local_mode_switch": "./src/local_mode_switch.server.ts",
+    "./model_provider_env": "./src/model_provider_env.ts",
+    "./plans": "./src/plans.ts",
+    "./workspace_runtime_env": "./src/workspace_runtime_env.ts",
+    "./public_env": "./src/public_env.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.8",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

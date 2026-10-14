@@ -1,0 +1,33 @@
+{
+  "app_key": "salesforce",
+  "display_name": "Salesforce",
+  "base_url": "https://login.salesforce.com",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://login.salesforce.com/services/oauth2/authorize",
+    "token_url": "https://login.salesforce.com/services/oauth2/token",
+    "scopes": ["api", "refresh_token"]
+  },
+  "rate_limits": { "rpm": 600, "concurrency": 5, "burst": 10 },
+  "sync": {
+    "prompt": "Choose which Salesforce objects to sync",
+    "dimensions": [
+      {
+        "key": "objects",
+        "label": "Objects",
+        "shape": "flat",
+        "browse_node": "salesforce-list_object_types-1",
+        "allow_select_all": true
+      }
+    ],
+    "sync_objects_note": "No sync.objects yet, on purpose. The only listing node this app has is salesforce-query_records-1, which takes a SOQL statement, and a SOQL statement for a picked object type is built by joining strings - which the four value-expression operators cannot do. The engine would need a salesforce-list_records-1 node taking { object_type, since, cursor } and writing its own SOQL inside execute.ts. That node is the whole work; the recipe after it is ten lines."
+  },
+  "quirks": {
+    "sync_stores_the_api_name": "A picked object is stored as its API name — Account, Roast_Batch__c — because that is what a SOQL FROM clause takes, so a crawler reading sync_scope can query with the id it saved. salesforce-list_object_types-1 hides the share, history, feed and change-event shadows.",
+    "base_url_is_a_template": "Salesforce has no shared API host. The token response returns instance_url (https://acme.my.salesforce.com) beside the access token, and that host is where every API call goes. base_url above is the LOGIN host: correct for /services/oauth2/authorize, /services/oauth2/token, and the app's catalog request origin. The call host is resolved per connection in salesforce_api.ts.",
+    "connection_must_carry_instance_url": "Whatever completes the OAuth exchange must store instance_url from the token response on the connection. Without it every node in this app fails with a named error instead of calling the login host.",
+    "api_version": "v61.0, pinned per node version. A newer Salesforce API version is a new v{n}/ folder, never an edit to an existing one.",
+    "rate_limits": "Salesforce meters a daily org quota (tens of thousands of calls), not a per-minute one, and caps concurrent long-running requests at 25. These numbers keep one connection under both while still filling a 200-record composite batch quickly.",
+    "sandboxes_not_supported": "Sandbox orgs authenticate at test.salesforce.com. This app targets production orgs; a sandbox app is a separate app_key."
+  }
+}

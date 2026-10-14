@@ -1,0 +1,20 @@
+/*
+ * A word of a streaming reply fades in once, when it enters the page. The rule has fixed timing
+ * and does not read the markdown renderer's timing variables, so a block that parses again
+ * cannot make words already on screen fade a second time.
+ */
+@keyframes chat-streamed-word-in {
+  from {
+    opacity: 0;
+  }
+}
+
+[data-sd-animate] {
+  animation: chat-streamed-word-in 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-sd-animate] {
+    animation: none;
+  }
+}

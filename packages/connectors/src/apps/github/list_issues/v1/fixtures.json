@@ -1,0 +1,101 @@
+{
+  "_note": "Shapes taken from the GitHub REST documentation for GET /repos/{owner}/{repo}/issues (API version 2022-11-28). Ids, names, and urls are the documentation's own placeholders.",
+  "issues_page_one": [
+    {
+      "id": 1,
+      "node_id": "MDU6SXNzdWUx",
+      "url": "https://api.github.com/repos/octocat/Hello-World/issues/1347",
+      "repository_url": "https://api.github.com/repos/octocat/Hello-World",
+      "html_url": "https://github.com/octocat/Hello-World/issues/1347",
+      "number": 1347,
+      "state": "open",
+      "title": "Found a bug",
+      "body": "I'm having a problem with this.",
+      "user": { "login": "octocat", "id": 1, "type": "User", "site_admin": false },
+      "labels": [
+        {
+          "id": 208045946,
+          "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+          "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+          "name": "bug",
+          "description": "Something isn't working",
+          "color": "f29513",
+          "default": true
+        }
+      ],
+      "assignee": null,
+      "assignees": [],
+      "milestone": null,
+      "locked": true,
+      "active_lock_reason": "too heated",
+      "comments": 0,
+      "closed_at": null,
+      "created_at": "2011-04-22T13:33:48Z",
+      "updated_at": "2011-04-22T13:33:48Z",
+      "author_association": "COLLABORATOR",
+      "state_reason": "completed"
+    },
+    {
+      "id": 2,
+      "node_id": "MDExOlB1bGxSZXF1ZXN0MQ==",
+      "url": "https://api.github.com/repos/octocat/Hello-World/issues/1348",
+      "repository_url": "https://api.github.com/repos/octocat/Hello-World",
+      "html_url": "https://github.com/octocat/Hello-World/pull/1348",
+      "number": 1348,
+      "state": "open",
+      "title": "Fix the bug",
+      "body": "Closes #1347.",
+      "user": { "login": "hubot", "id": 2, "type": "User", "site_admin": false },
+      "labels": [],
+      "assignee": null,
+      "assignees": [],
+      "milestone": null,
+      "locked": false,
+      "active_lock_reason": null,
+      "comments": 3,
+      "pull_request": {
+        "url": "https://api.github.com/repos/octocat/Hello-World/pulls/1348",
+        "html_url": "https://github.com/octocat/Hello-World/pull/1348",
+        "diff_url": "https://github.com/octocat/Hello-World/pull/1348.diff",
+        "patch_url": "https://github.com/octocat/Hello-World/pull/1348.patch",
+        "merged_at": null
+      },
+      "closed_at": null,
+      "created_at": "2011-04-23T09:12:00Z",
+      "updated_at": "2011-04-24T10:01:12Z",
+      "author_association": "CONTRIBUTOR",
+      "state_reason": null
+    }
+  ],
+  "issues_second_page": [
+    {
+      "id": 3,
+      "node_id": "MDU6SXNzdWUz",
+      "url": "https://api.github.com/repos/octocat/Spoon-Knife/issues/42",
+      "repository_url": "https://api.github.com/repos/octocat/Spoon-Knife",
+      "html_url": "https://github.com/octocat/Spoon-Knife/issues/42",
+      "number": 42,
+      "state": "closed",
+      "title": "Document the fork button",
+      "body": null,
+      "user": { "login": "octocat", "id": 1, "type": "User", "site_admin": false },
+      "labels": ["documentation"],
+      "assignee": null,
+      "assignees": [],
+      "milestone": null,
+      "locked": false,
+      "active_lock_reason": null,
+      "comments": 1,
+      "closed_at": "2011-05-02T08:00:00Z",
+      "created_at": "2011-05-01T08:00:00Z",
+      "updated_at": "2011-05-02T08:00:00Z",
+      "author_association": "OWNER",
+      "state_reason": "completed"
+    }
+  ],
+  "repository_not_found": {
+    "message": "Not Found",
+    "documentation_url": "https://docs.github.com/rest/issues/issues#list-repository-issues",
+    "status": "404"
+  }
+}

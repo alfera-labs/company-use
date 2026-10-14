@@ -1,0 +1,72 @@
+{
+  "node_key": "example-echo_items-1",
+  "display_name": "Echo Items",
+  "description": "Echo a batch of items back, one page at a time.",
+  "note": "Plural in, plural out, cursor on both sides — the batch law, expressed with nothing but the declarative http mapping. This node exists so the framework can be tested end to end without a real provider; nothing ships it. `note` is also the proof that an unknown top-level key survives the loader.",
+  "implementation": "http",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+      "cursor": { "type": "string" },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+    },
+    "required": ["items"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": { "id": { "type": "string" }, "text": { "type": "string" } },
+          "required": ["id", "text"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": { "type": ["string", "null"] }
+    },
+    "required": ["items", "next_cursor"],
+    "additionalProperties": false
+  },
+  "http": {
+    "method": "POST",
+    "path": "/echo",
+    "body": { "items": { "$": "input.items" } },
+    "paginate": {
+      "cursor_query_parameter": "cursor",
+      "cursor_from_input": { "$": "input.cursor" },
+      "limit_query_parameter": "limit",
+      "limit_from_input": { "$": "input.limit" }
+    },
+    "response_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "echoed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "id": { "type": "string" }, "value": { "type": "string" } },
+            "required": ["id", "value"]
+          }
+        },
+        "next_cursor": { "type": ["string", "null"] }
+      },
+      "required": ["echoed"]
+    },
+    "to_output": {
+      "items": {
+        "$map": {
+          "from": { "$": "response.echoed" },
+          "to": { "id": { "$": "item.id" }, "text": { "$": "item.value" } }
+        }
+      },
+      "next_cursor": { "$default": [{ "$": "response.next_cursor" }, null] }
+    }
+  }
+}

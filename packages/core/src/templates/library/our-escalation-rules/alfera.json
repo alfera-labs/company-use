@@ -1,0 +1,72 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "The right things reach a person early, and only those things.",
+  "summary_text": "Say what stops being handled quietly, and who it goes to.",
+  "icon": "📗",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "support",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "support-teams",
+      "is_primary": false
+    }
+  ],
+  "what_it_does": [
+    "Escalates on impact, never on volume",
+    "Escalates anything that cannot be undone",
+    "Names a person, never a channel",
+    "Prefers a false alarm to a late one"
+  ],
+  "guidance": [
+    {
+      "label": "The trigger",
+      "value": "Impact and irreversibility, not volume"
+    },
+    {
+      "label": "Irreversible",
+      "value": "Escalates immediately, every time"
+    },
+    {
+      "label": "Who",
+      "value": "A named person, never a channel"
+    },
+    {
+      "label": "A false alarm",
+      "value": "Cheaper than a late one, and treated so"
+    }
+  ],
+  "used_when_text": "Used before it raises or sits on anything",
+  "it_will_be_able_to": [
+    {
+      "capability": "read this skill before raising or sitting on anything",
+      "risk": "reads_data"
+    }
+  ],
+  "requires": [],
+  "asks_you_for": [
+    {
+      "input_key": "who",
+      "label": "Who gets an escalation",
+      "input_type": "text",
+      "example_answer": "Kim, then the on-call rota"
+    },
+    {
+      "input_key": "how_fast",
+      "label": "How fast it must reach them",
+      "input_type": "text",
+      "example_answer": "Within 15 minutes, any hour"
+    },
+    {
+      "input_key": "never_waits",
+      "label": "What never waits",
+      "input_type": "text",
+      "example_answer": "Data loss, refunds over £500"
+    }
+  ],
+  "starts_when": []
+}

@@ -1,0 +1,23 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "alfera-desktop",
+  "productName": "Alfera",
+  "version": "0.2.2",
+  "description": "Alfera in its own window.",
+  "private": true,
+  "main": "src/main.cjs",
+  "workspaces": [],
+  "scripts": {
+    "start": "electron .",
+    "smoke": "ALFERA_INVISIBLE=1 ALFERA_SMOKE=1 node test/run_invisible.cjs",
+    "test": "node --test --test-concurrency=1 test/*.test.cjs",
+    "check-setup": "ALFERA_INVISIBLE=1 node test/setup_check/check_setup.mjs",
+    "check-app": "ALFERA_INVISIBLE=1 node test/app_check/check_app.cjs",
+    "dist": "electron-builder --mac",
+    "install-app": "ALFERA_BUILD_FOR_THIS_MAC=1 electron-builder --mac dir && rm -rf /Applications/Alfera.app && cp -R dist/mac*/Alfera.app /Applications/ && open /Applications/Alfera.app"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  }
+}

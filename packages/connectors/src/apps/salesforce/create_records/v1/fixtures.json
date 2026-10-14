@@ -1,0 +1,26 @@
+{
+  "create_records_mixed_outcome": [
+    {
+      "id": "001RM000003oLruYAE",
+      "success": true,
+      "errors": []
+    },
+    {
+      "success": false,
+      "errors": [
+        {
+          "statusCode": "REQUIRED_FIELD_MISSING",
+          "message": "Required fields are missing: [LastName]",
+          "fields": ["LastName"]
+        }
+      ]
+    }
+  ],
+  "create_records_all_succeeded": [
+    {
+      "id": "001RM000003oLrvYAE",
+      "success": true,
+      "errors": []
+    }
+  ]
+}

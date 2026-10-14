@@ -1,0 +1,392 @@
+{
+  "_source": "Shapes taken from the Gmail v1 discovery document (gmail.googleapis.com/$discovery/rest?version=v1): ListMessagesResponse, Message, MessagePart, MessagePartHeader, MessagePartBody. Addresses, ids, and bodies are invented; no real mailbox appears here.",
+  "messages_list_page_one": {
+    "messages": [
+      {
+        "id": "18f3a1c9b2d40011",
+        "threadId": "18f3a1c9b2d40011"
+      },
+      {
+        "id": "18f3a1c9b2d40022",
+        "threadId": "18f3a1c0aa9e0099"
+      }
+    ],
+    "nextPageToken": "09876543210987654321",
+    "resultSizeEstimate": 42
+  },
+  "messages_list_last_page": {
+    "messages": [
+      {
+        "id": "18f3a1c9b2d40011",
+        "threadId": "18f3a1c9b2d40011"
+      }
+    ],
+    "resultSizeEstimate": 1
+  },
+  "messages_list_empty": {
+    "resultSizeEstimate": 0
+  },
+  "message_multipart_full": {
+    "id": "18f3a1c9b2d40011",
+    "threadId": "18f3a1c9b2d40011",
+    "labelIds": ["UNREAD", "INBOX", "IMPORTANT"],
+    "snippet": "Hi Otto, The Q3 numbers are attached. Let me know by Friday.",
+    "historyId": "884412",
+    "internalDate": "1756900000000",
+    "sizeEstimate": 8241,
+    "payload": {
+      "partId": "",
+      "mimeType": "multipart/mixed",
+      "filename": "",
+      "headers": [
+        {
+          "name": "Delivered-To",
+          "value": "otto@alfera.test"
+        },
+        {
+          "name": "Date",
+          "value": "Wed, 3 Sep 2026 09:26:40 +0200"
+        },
+        {
+          "name": "From",
+          "value": "Ana Sample <ana@acme.test>"
+        },
+        {
+          "name": "To",
+          "value": "otto@alfera.test"
+        },
+        {
+          "name": "Subject",
+          "value": "Q3 numbers"
+        },
+        {
+          "name": "Message-ID",
+          "value": "<CAF7=abc123@mail.gmail.com>"
+        }
+      ],
+      "body": {
+        "size": 0
+      },
+      "parts": [
+        {
+          "partId": "0",
+          "mimeType": "multipart/alternative",
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "multipart/alternative; boundary=\"00000000000a\""
+            }
+          ],
+          "body": {
+            "size": 0
+          },
+          "parts": [
+            {
+              "partId": "0.0",
+              "mimeType": "text/plain",
+              "filename": "",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "text/plain; charset=\"UTF-8\""
+                }
+              ],
+              "body": {
+                "size": 61,
+                "data": "SGkgT3R0bywKClRoZSBRMyBudW1iZXJzIGFyZSBhdHRhY2hlZC4gTGV0IG1lIGtub3cgYnkgRnJpZGF5LgoKQW5hCg"
+              }
+            },
+            {
+              "partId": "0.1",
+              "mimeType": "text/html",
+              "filename": "",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "text/html; charset=\"UTF-8\""
+                }
+              ],
+              "body": {
+                "size": 178,
+                "data": "PGRpdiBkaXI9Imx0ciI-PHA-SGkgT3R0byw8L3A-PHA-VGhlIFEzIG51bWJlcnMgYXJlIDxiPmF0dGFjaGVkPC9iPi4gUGluZyBtZSAmYW1wOyBNYXJ0YSBieSBGcmlkYXkuPC9wPjxicj48ZGl2PkFuYTwvZGl2PjxzdHlsZT5we2NvbG9yOnJlZH08L3N0eWxlPjwvZGl2Pg"
+              }
+            }
+          ]
+        },
+        {
+          "partId": "1",
+          "mimeType": "application/pdf",
+          "filename": "q3-numbers.pdf",
+          "headers": [
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"q3-numbers.pdf\""
+            }
+          ],
+          "body": {
+            "size": 7420,
+            "attachmentId": "ANGjdJ_redacted_attachment_id"
+          }
+        }
+      ]
+    }
+  },
+  "message_html_only_full": {
+    "id": "18f3a1c9b2d40022",
+    "threadId": "18f3a1c0aa9e0099",
+    "labelIds": ["INBOX", "CATEGORY_UPDATES"],
+    "snippet": "Hi Otto, The Q3 numbers are attached. Ping me &amp; Marta by Friday.",
+    "historyId": "884413",
+    "internalDate": "1756900100000",
+    "sizeEstimate": 3110,
+    "payload": {
+      "partId": "",
+      "mimeType": "multipart/mixed",
+      "filename": "",
+      "headers": [
+        {
+          "name": "Date",
+          "value": "Wed, 3 Sep 2026 09:28:20 +0200"
+        },
+        {
+          "name": "From",
+          "value": "Marta Neri <marta@acme.test>"
+        },
+        {
+          "name": "To",
+          "value": "otto@alfera.test"
+        },
+        {
+          "name": "Cc",
+          "value": "ana@acme.test"
+        },
+        {
+          "name": "Subject",
+          "value": "Q3 numbers, HTML only"
+        }
+      ],
+      "body": {
+        "size": 0
+      },
+      "parts": [
+        {
+          "partId": "0",
+          "mimeType": "text/html",
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/html; charset=\"UTF-8\""
+            }
+          ],
+          "body": {
+            "size": 178,
+            "data": "PGRpdiBkaXI9Imx0ciI-PHA-SGkgT3R0byw8L3A-PHA-VGhlIFEzIG51bWJlcnMgYXJlIDxiPmF0dGFjaGVkPC9iPi4gUGluZyBtZSAmYW1wOyBNYXJ0YSBieSBGcmlkYXkuPC9wPjxicj48ZGl2PkFuYTwvZGl2PjxzdHlsZT5we2NvbG9yOnJlZH08L3N0eWxlPjwvZGl2Pg"
+          }
+        }
+      ]
+    }
+  },
+  "message_metadata": {
+    "id": "18f3a1c9b2d40011",
+    "threadId": "18f3a1c9b2d40011",
+    "labelIds": ["UNREAD", "INBOX"],
+    "snippet": "Hi Otto, The Q3 numbers are attached. Let me know by Friday.",
+    "historyId": "884412",
+    "internalDate": "1756900000000",
+    "sizeEstimate": 8241,
+    "payload": {
+      "partId": "",
+      "mimeType": "multipart/mixed",
+      "filename": "",
+      "headers": [
+        {
+          "name": "Date",
+          "value": "Wed, 3 Sep 2026 09:26:40 +0200"
+        },
+        {
+          "name": "From",
+          "value": "Ana Sample <ana@acme.test>"
+        },
+        {
+          "name": "To",
+          "value": "otto@alfera.test"
+        },
+        {
+          "name": "Subject",
+          "value": "Q3 numbers"
+        }
+      ],
+      "body": {
+        "size": 0
+      }
+    }
+  },
+  "message_not_found": {
+    "error": {
+      "code": 404,
+      "message": "Requested entity was not found.",
+      "errors": [
+        {
+          "message": "Not Found",
+          "domain": "global",
+          "reason": "notFound"
+        }
+      ],
+      "status": "NOT_FOUND"
+    }
+  },
+  "message_marketing_junk_full": {
+    "id": "18f3a1c9b2d40033",
+    "threadId": "18f3a1c0aa9e0099",
+    "labelIds": ["INBOX", "Label_8", "Label_12"],
+    "snippet": "Hi Otto, The renewal is signed. Invoice attached.",
+    "historyId": "884414",
+    "internalDate": "1788610020000",
+    "sizeEstimate": 15220,
+    "payload": {
+      "partId": "",
+      "mimeType": "multipart/mixed",
+      "filename": "",
+      "headers": [
+        {
+          "name": "Date",
+          "value": "Sat, 5 Sep 2026 14:07:00 +0200"
+        },
+        {
+          "name": "From",
+          "value": "Ana Sample <ana@acme.test>"
+        },
+        {
+          "name": "To",
+          "value": "otto@alfera.test"
+        },
+        {
+          "name": "Cc",
+          "value": "Marta Neri <marta@acme.test>"
+        },
+        {
+          "name": "Subject",
+          "value": "Renewal signed"
+        }
+      ],
+      "body": {
+        "size": 0
+      },
+      "parts": [
+        {
+          "partId": "0",
+          "mimeType": "text/plain",
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/plain; charset=\"UTF-8\""
+            }
+          ],
+          "body": {
+            "size": 414,
+            "data": "DQoNCg0K4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_4oCM4oCN4oCO4oCP77u_DQoNCg0KDQpIaSBPdHRvLA0KDQpUaGUgcmVuZXdhbCBpcyBzaWduZWQuIEludm9pY2UgYXR0YWNoZWQuDQoNCg0KDQoNCkFuYQ0KDQpPbiBXZWQsIDMgU2VwIDIwMjYgYXQgMDk6MjYsIE90dG8gUGFyayA8b3R0b0BhbGZlcmEudGVzdD4NCndyb3RlOg0KDQo-IENhbiB5b3UgY29uZmlybSB0aGUgcmVuZXdhbCBkYXRlPw0KPiBUaGFua3MNCg"
+          }
+        },
+        {
+          "partId": "1",
+          "mimeType": "application/pdf",
+          "filename": "invoice-2026-09.pdf",
+          "headers": [
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"invoice-2026-09.pdf\""
+            }
+          ],
+          "body": {
+            "size": 51200,
+            "attachmentId": "ANGjdJ_redacted_invoice_id"
+          }
+        }
+      ]
+    }
+  },
+  "message_attachment_only_full": {
+    "id": "18f3a1c9b2d40044",
+    "threadId": "18f3a1c9b2d40044",
+    "labelIds": ["INBOX", "Label_12"],
+    "snippet": "",
+    "historyId": "884415",
+    "internalDate": "1788618000000",
+    "sizeEstimate": 4210,
+    "payload": {
+      "partId": "",
+      "mimeType": "multipart/mixed",
+      "filename": "",
+      "headers": [
+        {
+          "name": "Date",
+          "value": "Sat, 5 Sep 2026 16:20:00 +0200"
+        },
+        {
+          "name": "From",
+          "value": "noreply-dmarc-support@google.com"
+        },
+        {
+          "name": "To",
+          "value": "dmarc@alfera.test"
+        },
+        {
+          "name": "Subject",
+          "value": "Report domain: alfera.test Submitter: google.com"
+        }
+      ],
+      "body": {
+        "size": 0
+      },
+      "parts": [
+        {
+          "partId": "0",
+          "mimeType": "application/gzip",
+          "filename": "google.com!alfera.test!1757030400!1757116799.xml.gz",
+          "headers": [
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"google.com!alfera.test!1757030400!1757116799.xml.gz\""
+            }
+          ],
+          "body": {
+            "size": 1289,
+            "attachmentId": "ANGjdJ_redacted_dmarc_id"
+          }
+        }
+      ]
+    }
+  },
+  "labels_list": {
+    "labels": [
+      {
+        "id": "INBOX",
+        "name": "INBOX",
+        "type": "system"
+      },
+      {
+        "id": "UNREAD",
+        "name": "UNREAD",
+        "type": "system"
+      },
+      {
+        "id": "IMPORTANT",
+        "name": "IMPORTANT",
+        "type": "system"
+      },
+      {
+        "id": "Label_8",
+        "name": "Internal - Alfera",
+        "type": "user"
+      },
+      {
+        "id": "Label_12",
+        "name": "Needs Action",
+        "type": "user"
+      }
+    ]
+  }
+}

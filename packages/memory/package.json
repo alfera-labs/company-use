@@ -1,0 +1,26 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/memory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./store/schema": "./src/store/schema/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun --no-env-file ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "^3.0.1",
+    "drizzle-orm": "^0.45.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "bun-types": "^1.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

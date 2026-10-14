@@ -1,0 +1,1382 @@
+{
+  "github_v2-find_pull_requests-1": {
+    "total_count": 1,
+    "pull_requests": [
+      {
+        "id": 1,
+        "url": "url-1",
+        "base": {
+          "ref": "ref-1",
+          "sha": "sha-1",
+          "repo": "repo-1",
+          "user": "user-1",
+          "label": "label-1"
+        },
+        "body": "body-1",
+        "head": {
+          "ref": "ref-1",
+          "sha": "sha-1",
+          "repo": "repo-1",
+          "user": "user-1",
+          "label": "label-1"
+        },
+        "user": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "avatar_url": "avatar_url-1",
+          "site_admin": false
+        },
+        "draft": false,
+        "state": "state-1",
+        "title": "title-1",
+        "_links": {
+          "html": {
+            "href": "href-1"
+          },
+          "self": {
+            "href": "href-1"
+          },
+          "issue": {
+            "href": "href-1"
+          },
+          "commits": {
+            "href": "href-1"
+          },
+          "comments": {
+            "href": "href-1"
+          },
+          "statuses": {
+            "href": "href-1"
+          },
+          "review_comment": {
+            "href": "href-1"
+          },
+          "review_comments": {
+            "href": "href-1"
+          }
+        },
+        "author": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "avatar_url": "avatar_url-1",
+          "site_admin": false
+        },
+        "labels": [
+          {
+            "id": 1,
+            "url": "url-1",
+            "name": "name-1",
+            "color": "color-1",
+            "node_id": "node_id-1",
+            "description": "description-1"
+          }
+        ],
+        "locked": false,
+        "number": 1,
+        "commits": 1,
+        "node_id": "node_id-1",
+        "assignee": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "avatar_url": "avatar_url-1",
+          "site_admin": false
+        },
+        "comments": 1,
+        "diff_url": "diff_url-1",
+        "html_url": "html_url-1",
+        "additions": 1,
+        "assignees": [
+          {
+            "id": 1,
+            "url": "url-1",
+            "type": "type-1",
+            "login": "login-1",
+            "node_id": "node_id-1",
+            "html_url": "html_url-1",
+            "avatar_url": "avatar_url-1",
+            "site_admin": false
+          }
+        ],
+        "closed_at": "2026-10-01T12:00:00Z",
+        "deletions": 1,
+        "issue_url": "issue_url-1",
+        "merged_at": "2026-10-01T12:00:00Z",
+        "milestone": {
+          "id": 1,
+          "state": "state-1",
+          "title": "title-1",
+          "number": 1,
+          "node_id": "node_id-1",
+          "description": "description-1"
+        },
+        "patch_url": "patch_url-1",
+        "auto_merge": "auto_merge-1",
+        "created_at": "2026-10-01T12:00:00Z",
+        "repository": {},
+        "updated_at": "2026-10-01T12:00:00Z",
+        "base_branch": "base_branch-1",
+        "commits_url": "commits_url-1",
+        "head_branch": "head_branch-1",
+        "comments_url": "comments_url-1",
+        "statuses_url": "statuses_url-1",
+        "changed_files": 1,
+        "requested_teams": [
+          {
+            "id": 1,
+            "name": "name-1",
+            "slug": "slug-1",
+            "node_id": "node_id-1"
+          }
+        ],
+        "merge_commit_sha": "merge_commit_sha-1",
+        "active_lock_reason": "active_lock_reason-1",
+        "author_association": "author_association-1",
+        "review_comment_url": "review_comment_url-1",
+        "requested_reviewers": [
+          {
+            "id": 1,
+            "url": "url-1",
+            "type": "type-1",
+            "login": "login-1",
+            "node_id": "node_id-1",
+            "html_url": "html_url-1",
+            "avatar_url": "avatar_url-1",
+            "site_admin": false
+          }
+        ],
+        "review_comments_url": "review_comments_url-1"
+      }
+    ],
+    "incomplete_results": false
+  },
+  "github_v2-list_repositories_for_the_authenticated_user-1": {
+    "repositories": [
+      {
+        "id": 1,
+        "fork": false,
+        "name": "name-1",
+        "size": 1,
+        "owner": {
+          "id": 1,
+          "login": "login-1"
+        },
+        "topics": ["topics-1"],
+        "license": {
+          "key": "key-1",
+          "url": "url-1",
+          "name": "name-1",
+          "node_id": "node_id-1",
+          "spdx_id": "spdx_id-1"
+        },
+        "private": false,
+        "archived": false,
+        "disabled": false,
+        "homepage": "homepage-1",
+        "html_url": "html_url-1",
+        "language": "language-1",
+        "full_name": "full_name-1",
+        "pushed_at": "2026-10-01T12:00:00Z",
+        "created_at": "2026-10-01T12:00:00Z",
+        "has_issues": false,
+        "updated_at": "2026-10-01T12:00:00Z",
+        "visibility": "visibility-1",
+        "description": "description-1",
+        "forks_count": 1,
+        "is_template": false,
+        "permissions": {
+          "pull": false,
+          "push": false,
+          "admin": false
+        },
+        "default_branch": "default_branch-1",
+        "stargazers_count": 1,
+        "open_issues_count": 1
+      }
+    ]
+  },
+  "github_v2-search_issues_and_pull_requests-1": {
+    "items": [
+      {
+        "id": 1,
+        "url": "url-1",
+        "body": "body-1",
+        "user": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "gists_url": "gists_url-1",
+          "repos_url": "repos_url-1",
+          "avatar_url": "avatar_url-1",
+          "events_url": "events_url-1",
+          "site_admin": false,
+          "gravatar_id": "gravatar_id-1",
+          "starred_url": "starred_url-1",
+          "followers_url": "followers_url-1",
+          "following_url": "following_url-1",
+          "organizations_url": "organizations_url-1",
+          "subscriptions_url": "subscriptions_url-1",
+          "received_events_url": "received_events_url-1"
+        },
+        "draft": false,
+        "score": 1,
+        "state": "state-1",
+        "title": "title-1",
+        "labels": [
+          {
+            "id": 1,
+            "url": "url-1",
+            "name": "name-1",
+            "color": "color-1",
+            "default": false,
+            "node_id": "node_id-1",
+            "description": "description-1"
+          }
+        ],
+        "locked": false,
+        "number": 1,
+        "node_id": "node_id-1",
+        "assignee": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "gists_url": "gists_url-1",
+          "repos_url": "repos_url-1",
+          "avatar_url": "avatar_url-1",
+          "events_url": "events_url-1",
+          "site_admin": false,
+          "gravatar_id": "gravatar_id-1",
+          "starred_url": "starred_url-1",
+          "followers_url": "followers_url-1",
+          "following_url": "following_url-1",
+          "organizations_url": "organizations_url-1",
+          "subscriptions_url": "subscriptions_url-1",
+          "received_events_url": "received_events_url-1"
+        },
+        "comments": 1,
+        "html_url": "html_url-1",
+        "assignees": [
+          {
+            "id": 1,
+            "url": "url-1",
+            "type": "type-1",
+            "login": "login-1",
+            "node_id": "node_id-1",
+            "html_url": "html_url-1",
+            "gists_url": "gists_url-1",
+            "repos_url": "repos_url-1",
+            "avatar_url": "avatar_url-1",
+            "events_url": "events_url-1",
+            "site_admin": false,
+            "gravatar_id": "gravatar_id-1",
+            "starred_url": "starred_url-1",
+            "followers_url": "followers_url-1",
+            "following_url": "following_url-1",
+            "organizations_url": "organizations_url-1",
+            "subscriptions_url": "subscriptions_url-1",
+            "received_events_url": "received_events_url-1"
+          }
+        ],
+        "closed_at": "2026-10-01T12:00:00Z",
+        "closed_by": {
+          "id": 1,
+          "url": "url-1",
+          "type": "type-1",
+          "login": "login-1",
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "gists_url": "gists_url-1",
+          "repos_url": "repos_url-1",
+          "avatar_url": "avatar_url-1",
+          "events_url": "events_url-1",
+          "site_admin": false,
+          "gravatar_id": "gravatar_id-1",
+          "starred_url": "starred_url-1",
+          "followers_url": "followers_url-1",
+          "following_url": "following_url-1",
+          "organizations_url": "organizations_url-1",
+          "subscriptions_url": "subscriptions_url-1",
+          "received_events_url": "received_events_url-1"
+        },
+        "milestone": {
+          "id": 1,
+          "url": "url-1",
+          "state": "state-1",
+          "title": "title-1",
+          "due_on": "due_on-1",
+          "number": 1,
+          "creator": {
+            "id": 1,
+            "url": "url-1",
+            "type": "type-1",
+            "login": "login-1",
+            "node_id": "node_id-1",
+            "html_url": "html_url-1",
+            "gists_url": "gists_url-1",
+            "repos_url": "repos_url-1",
+            "avatar_url": "avatar_url-1",
+            "events_url": "events_url-1",
+            "site_admin": false,
+            "gravatar_id": "gravatar_id-1",
+            "starred_url": "starred_url-1",
+            "followers_url": "followers_url-1",
+            "following_url": "following_url-1",
+            "organizations_url": "organizations_url-1",
+            "subscriptions_url": "subscriptions_url-1",
+            "received_events_url": "received_events_url-1"
+          },
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "closed_at": "2026-10-01T12:00:00Z",
+          "created_at": "2026-10-01T12:00:00Z",
+          "labels_url": "labels_url-1",
+          "updated_at": "2026-10-01T12:00:00Z",
+          "description": "description-1",
+          "open_issues": 1,
+          "closed_issues": 1
+        },
+        "reactions": {
+          "+1": 1,
+          "-1": 1,
+          "url": "url-1",
+          "eyes": 1,
+          "heart": 1,
+          "laugh": 1,
+          "hooray": 1,
+          "rocket": 1,
+          "confused": 1,
+          "total_count": 1
+        },
+        "created_at": "2026-10-01T12:00:00Z",
+        "events_url": "events_url-1",
+        "labels_url": "labels_url-1",
+        "updated_at": "2026-10-01T12:00:00Z",
+        "comments_url": "comments_url-1",
+        "pull_request": {
+          "url": "url-1",
+          "diff_url": "diff_url-1",
+          "html_url": "html_url-1",
+          "patch_url": "patch_url-1"
+        },
+        "state_reason": "state_reason-1",
+        "text_matches": [
+          {
+            "matches": [],
+            "fragment": "fragment-1",
+            "property": "property-1",
+            "object_url": "object_url-1",
+            "object_type": "object_type-1"
+          }
+        ],
+        "timeline_url": "timeline_url-1",
+        "repository_url": "repository_url-1",
+        "active_lock_reason": "active_lock_reason-1",
+        "author_association": "author_association-1",
+        "performed_via_github_app": {
+          "id": 1,
+          "name": "name-1",
+          "slug": "slug-1",
+          "owner": {
+            "id": 1,
+            "url": "url-1",
+            "type": "type-1",
+            "login": "login-1",
+            "node_id": "node_id-1",
+            "html_url": "html_url-1",
+            "gists_url": "gists_url-1",
+            "repos_url": "repos_url-1",
+            "avatar_url": "avatar_url-1",
+            "events_url": "events_url-1",
+            "site_admin": false,
+            "gravatar_id": "gravatar_id-1",
+            "starred_url": "starred_url-1",
+            "followers_url": "followers_url-1",
+            "following_url": "following_url-1",
+            "organizations_url": "organizations_url-1",
+            "subscriptions_url": "subscriptions_url-1",
+            "received_events_url": "received_events_url-1"
+          },
+          "events": ["events-1"],
+          "node_id": "node_id-1",
+          "html_url": "html_url-1",
+          "client_id": "client_id-1",
+          "created_at": "2026-10-01T12:00:00Z",
+          "updated_at": "2026-10-01T12:00:00Z",
+          "description": "description-1",
+          "permissions": {},
+          "external_url": "external_url-1"
+        }
+      }
+    ],
+    "total_count": 1,
+    "incomplete_results": false
+  },
+  "gmail_v2-fetch_emails-1": {
+    "messages": [
+      {
+        "to": "to-1",
+        "sender": "sender-1",
+        "payload": {},
+        "preview": {},
+        "subject": "subject-1",
+        "labelIds": ["labelIds-1"],
+        "threadId": "threadId-1",
+        "messageId": "messageId-1",
+        "display_url": "display_url-1",
+        "messageText": "messageText-1",
+        "attachmentList": ["attachmentList-1"],
+        "messageTimestamp": "2026-10-01T12:00:00Z"
+      }
+    ],
+    "nextPageToken": "nextPageToken-1",
+    "resultSizeEstimate": 1,
+    "composio_execution_message": "composio_execution_message-1"
+  },
+  "gmail_v2-list_labels-1": {
+    "labels": [
+      {
+        "id": "id-1",
+        "name": "name-1",
+        "type": "type-1",
+        "color": {
+          "textColor": "textColor-1",
+          "backgroundColor": "backgroundColor-1"
+        },
+        "display_url": "display_url-1",
+        "threadsTotal": 1,
+        "messagesTotal": 1,
+        "threadsUnread": 1,
+        "messagesUnread": 1,
+        "labelListVisibility": "labelListVisibility-1",
+        "messageListVisibility": "messageListVisibility-1"
+      }
+    ],
+    "display_url": "display_url-1"
+  },
+  "google_drive_v2-find_file-1": {
+    "kind": "kind-1",
+    "files": [
+      {
+        "id": "id-1",
+        "kind": "kind-1",
+        "name": "name-1",
+        "size": "size-1",
+        "owners": [
+          {
+            "me": false,
+            "kind": "kind-1",
+            "photoLink": "photoLink-1",
+            "displayName": "displayName-1",
+            "emailAddress": "emailAddress-1",
+            "permissionId": "permissionId-1"
+          }
+        ],
+        "shared": false,
+        "spaces": ["spaces-1"],
+        "driveId": "driveId-1",
+        "parents": ["parents-1"],
+        "starred": false,
+        "trashed": false,
+        "version": "version-1",
+        "iconLink": "iconLink-1",
+        "mimeType": "mimeType-1",
+        "labelInfo": {},
+        "ownedByMe": false,
+        "link_label": "link_label-1",
+        "properties": {},
+        "viewedByMe": false,
+        "createdTime": "2026-10-01T12:00:00Z",
+        "description": "description-1",
+        "display_url": "display_url-1",
+        "exportLinks": {},
+        "md5Checksum": "md5Checksum-1",
+        "permissions": [
+          {
+            "id": "id-1",
+            "kind": "kind-1",
+            "role": "owner",
+            "type": "user",
+            "domain": "domain-1",
+            "deleted": false,
+            "photoLink": "photoLink-1",
+            "displayName": "displayName-1",
+            "emailAddress": "emailAddress-1",
+            "pendingOwner": false,
+            "expirationTime": "2026-10-01T12:00:00Z",
+            "permissionDetails": [],
+            "allowFileDiscovery": false
+          }
+        ],
+        "resourceKey": "resourceKey-1",
+        "sharingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "teamDriveId": "teamDriveId-1",
+        "trashedTime": "2026-10-01T12:00:00Z",
+        "webViewLink": "webViewLink-1",
+        "capabilities": {
+          "canCopy": false,
+          "canEdit": false,
+          "canShare": false,
+          "canTrash": false,
+          "canDelete": false,
+          "canRename": false,
+          "canComment": false,
+          "canUntrash": false,
+          "canDownload": false,
+          "canReadLabels": false,
+          "canAddChildren": false,
+          "canListChildren": false,
+          "canModifyLabels": false,
+          "canModifyContent": false,
+          "canReadRevisions": false,
+          "canRemoveChildren": false,
+          "canAcceptOwnership": false,
+          "canAddMyDriveParent": false,
+          "canMoveItemIntoDrive": false,
+          "canMoveItemOutOfDrive": false,
+          "canMoveItemWithinDrive": false,
+          "canRemoveMyDriveParent": false,
+          "canMoveItemIntoTeamDrive": false,
+          "canMoveChildrenOutOfDrive": false,
+          "canMoveChildrenWithinDrive": false,
+          "canModifyContentRestriction": false,
+          "canRemoveContentRestriction": false,
+          "canEnableInheritedPermissions": false,
+          "canChangeSecurityUpdateEnabled": false,
+          "canChangeViewersCanCopyContent": false,
+          "canDisableInheritedPermissions": false,
+          "canChangeItemDownloadRestriction": false,
+          "canModifyOwnerContentRestriction": false,
+          "canModifyEditorContentRestriction": false,
+          "canChangeCopyRequiresWriterPermission": false
+        },
+        "contentHints": {
+          "thumbnail": {
+            "image": "image-1",
+            "mimeType": "mimeType-1"
+          },
+          "indexableText": "indexableText-1"
+        },
+        "hasThumbnail": false,
+        "modifiedByMe": false,
+        "modifiedTime": "2026-10-01T12:00:00Z",
+        "trashingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "appProperties": {},
+        "fileExtension": "fileExtension-1",
+        "permissionIds": ["permissionIds-1"],
+        "thumbnailLink": "thumbnailLink-1",
+        "folderColorRgb": "folderColorRgb-1",
+        "headRevisionId": "headRevisionId-1",
+        "quotaBytesUsed": "quotaBytesUsed-1",
+        "viewedByMeTime": "2026-10-01T12:00:00Z",
+        "webContentLink": "webContentLink-1",
+        "isAppAuthorized": false,
+        "shortcutDetails": {
+          "targetId": "targetId-1",
+          "targetMimeType": "targetMimeType-1",
+          "targetResourceKey": "targetResourceKey-1"
+        },
+        "writersCanShare": false,
+        "modifiedByMeTime": "2026-10-01T12:00:00Z",
+        "originalFilename": "originalFilename-1",
+        "sharedWithMeTime": "2026-10-01T12:00:00Z",
+        "thumbnailVersion": "thumbnailVersion-1",
+        "explicitlyTrashed": false,
+        "fullFileExtension": "fullFileExtension-1",
+        "lastModifyingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "linkShareMetadata": {
+          "securityUpdateEnabled": false,
+          "securityUpdateEligible": false
+        },
+        "imageMediaMetadata": {
+          "lens": "lens-1",
+          "time": "2026-10-01T12:00:00Z",
+          "flash": false,
+          "width": 1,
+          "height": 1,
+          "sensor": "sensor-1",
+          "aperture": 1,
+          "isoSpeed": 1,
+          "location": {
+            "altitude": 1,
+            "latitude": 1,
+            "longitude": 1
+          },
+          "rotation": 1,
+          "cameraMake": "cameraMake-1",
+          "colorSpace": "colorSpace-1",
+          "cameraModel": "cameraModel-1",
+          "focalLength": 1,
+          "exposureBias": 1,
+          "exposureMode": "exposureMode-1",
+          "exposureTime": 1,
+          "meteringMode": "meteringMode-1",
+          "whiteBalance": "whiteBalance-1",
+          "subjectDistance": 1,
+          "maxApertureValue": 1
+        },
+        "videoMediaMetadata": {
+          "width": 1,
+          "height": 1,
+          "durationMillis": "durationMillis-1"
+        },
+        "contentRestrictions": [
+          {
+            "reason": "reason-1",
+            "readOnly": false,
+            "restrictingUser": {},
+            "restrictionTime": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "securityUpdateEnabled": false,
+        "viewersCanCopyContent": false,
+        "securityUpdateEligible": false,
+        "hasAugmentedPermissions": false,
+        "copyRequiresWriterPermission": false
+      }
+    ],
+    "nextPageToken": "nextPageToken-1",
+    "incompleteSearch": false,
+    "composio_execution_message": "composio_execution_message-1"
+  },
+  "google_drive_v2-find_folder-1": {
+    "kind": "kind-1",
+    "files": [
+      {
+        "id": "id-1",
+        "kind": "kind-1",
+        "name": "name-1",
+        "size": "size-1",
+        "owners": [
+          {
+            "me": false,
+            "kind": "kind-1",
+            "photoLink": "photoLink-1",
+            "displayName": "displayName-1",
+            "emailAddress": "emailAddress-1",
+            "permissionId": "permissionId-1"
+          }
+        ],
+        "shared": false,
+        "spaces": ["spaces-1"],
+        "driveId": "driveId-1",
+        "parents": ["parents-1"],
+        "starred": false,
+        "trashed": false,
+        "version": "version-1",
+        "iconLink": "iconLink-1",
+        "mimeType": "mimeType-1",
+        "ownedByMe": false,
+        "link_label": "link_label-1",
+        "properties": {},
+        "viewedByMe": false,
+        "createdTime": "2026-10-01T12:00:00Z",
+        "description": "description-1",
+        "display_url": "display_url-1",
+        "exportLinks": {},
+        "md5Checksum": "md5Checksum-1",
+        "permissions": [
+          {
+            "id": "id-1",
+            "kind": "kind-1",
+            "role": "role-1",
+            "type": "type-1",
+            "domain": "domain-1",
+            "photoLink": "photoLink-1",
+            "displayName": "displayName-1",
+            "emailAddress": "emailAddress-1",
+            "expirationTime": "2026-10-01T12:00:00Z",
+            "permissionDetails": [],
+            "allowFileDiscovery": false
+          }
+        ],
+        "resourceKey": "resourceKey-1",
+        "sharingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "teamDriveId": "teamDriveId-1",
+        "trashedTime": "2026-10-01T12:00:00Z",
+        "webViewLink": "webViewLink-1",
+        "capabilities": {
+          "canCopy": false,
+          "canEdit": false,
+          "canShare": false,
+          "canTrash": false,
+          "canDelete": false,
+          "canRename": false,
+          "canComment": false,
+          "canUntrash": false,
+          "canDownload": false,
+          "canReadLabels": false,
+          "canAddChildren": false,
+          "canListChildren": false,
+          "canModifyLabels": false,
+          "canModifyContent": false,
+          "canReadRevisions": false,
+          "canAddDriveParent": false,
+          "canRemoveChildren": false,
+          "canAcceptOwnership": false,
+          "canAddMyDriveParent": false,
+          "canMoveItemIntoDrive": false,
+          "canRemoveDriveParent": false,
+          "canMoveItemOutOfDrive": false,
+          "canMoveItemWithinDrive": false,
+          "canRemoveMyDriveParent": false,
+          "canMoveChildrenIntoDrive": false,
+          "canMoveItemIntoTeamDrive": false,
+          "canMoveChildrenOutOfDrive": false,
+          "canMoveChildrenWithinDrive": false,
+          "canModifyContentRestriction": false,
+          "canRemoveContentRestriction": false,
+          "canEnableInheritedPermissions": false,
+          "canChangeSecurityUpdateEnabled": false,
+          "canChangeViewersCanCopyContent": false,
+          "canDisableInheritedPermissions": false,
+          "canChangeItemDownloadRestriction": false,
+          "canModifyOwnerContentRestriction": false,
+          "canModifyEditorContentRestriction": false,
+          "canChangeCopyRequiresWriterPermission": false
+        },
+        "contentHints": {
+          "thumbnail": {
+            "image": "image-1",
+            "mimeType": "mimeType-1"
+          },
+          "indexableText": "indexableText-1"
+        },
+        "hasThumbnail": false,
+        "modifiedByMe": false,
+        "modifiedTime": "2026-10-01T12:00:00Z",
+        "trashingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "appProperties": {},
+        "fileExtension": "fileExtension-1",
+        "permissionIds": ["permissionIds-1"],
+        "thumbnailLink": "thumbnailLink-1",
+        "folderColorRgb": "folderColorRgb-1",
+        "headRevisionId": "headRevisionId-1",
+        "quotaBytesUsed": "quotaBytesUsed-1",
+        "viewedByMeTime": "2026-10-01T12:00:00Z",
+        "webContentLink": "webContentLink-1",
+        "isAppAuthorized": false,
+        "shortcutDetails": {
+          "targetId": "targetId-1",
+          "targetMimeType": "targetMimeType-1",
+          "targetResourceKey": "targetResourceKey-1"
+        },
+        "writersCanShare": false,
+        "modifiedByMeTime": "2026-10-01T12:00:00Z",
+        "originalFilename": "originalFilename-1",
+        "sharedWithMeTime": "2026-10-01T12:00:00Z",
+        "explicitlyTrashed": false,
+        "fullFileExtension": "fullFileExtension-1",
+        "lastModifyingUser": {
+          "me": false,
+          "kind": "kind-1",
+          "photoLink": "photoLink-1",
+          "displayName": "displayName-1",
+          "emailAddress": "emailAddress-1",
+          "permissionId": "permissionId-1"
+        },
+        "linkShareMetadata": {
+          "securityUpdateEnabled": false,
+          "securityUpdateEligible": false
+        },
+        "imageMediaMetadata": {
+          "date": "2026-10-01T12:00:00Z",
+          "lens": "lens-1",
+          "width": 1,
+          "height": 1,
+          "sensor": "sensor-1",
+          "aperture": 1,
+          "isoSpeed": 1,
+          "location": {
+            "altitude": 1,
+            "latitude": 1,
+            "longitude": 1
+          },
+          "rotation": 1,
+          "flashUsed": false,
+          "cameraMake": "cameraMake-1",
+          "colorSpace": "colorSpace-1",
+          "cameraModel": "cameraModel-1",
+          "focalLength": 1,
+          "exposureBias": 1,
+          "exposureMode": "exposureMode-1",
+          "exposureTime": 1,
+          "meteringMode": "meteringMode-1",
+          "whiteBalance": "whiteBalance-1",
+          "subjectDistance": 1,
+          "maxApertureValue": 1
+        },
+        "videoMediaMetadata": {
+          "width": 1,
+          "height": 1,
+          "durationMillis": "durationMillis-1"
+        },
+        "contentRestrictions": [
+          {
+            "type": "type-1",
+            "reason": "reason-1",
+            "readOnly": false,
+            "restrictingUser": {},
+            "restrictionTime": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "viewersCanCopyContent": false,
+        "hasAugmentedPermissions": false,
+        "copyRequiresWriterPermission": false
+      }
+    ],
+    "link_label": "link_label-1",
+    "display_url": "display_url-1",
+    "nextPageToken": "nextPageToken-1",
+    "incompleteSearch": false
+  },
+  "microsoft_outlook-list_mail_folders-1": {
+    "value": [
+      {
+        "id": "id-1",
+        "isHidden": false,
+        "@odata.type": "@odata.type-1",
+        "displayName": "displayName-1",
+        "filterQuery": "filterQuery-1",
+        "isSupported": false,
+        "parentFolderId": "parentFolderId-1",
+        "totalItemCount": 1,
+        "sourceFolderIds": ["sourceFolderIds-1"],
+        "unreadItemCount": 1,
+        "childFolderCount": 1,
+        "includeNestedFolders": false
+      }
+    ],
+    "@odata.count": 1,
+    "@odata.context": "@odata.context-1",
+    "@odata.nextLink": "@odata.nextLink-1",
+    "next_page_token": "next_page_token-1"
+  },
+  "microsoft_outlook-list_messages-1": {
+    "value": [
+      {
+        "id": "id-1",
+        "body": {
+          "content": "content-1",
+          "contentType": "contentType-1"
+        },
+        "flag": {
+          "flagStatus": "flagStatus-1",
+          "dueDateTime": {
+            "dateTime": "2026-10-01T12:00:00Z",
+            "timeZone": "timeZone-1"
+          },
+          "startDateTime": {
+            "dateTime": "2026-10-01T12:00:00Z",
+            "timeZone": "timeZone-1"
+          },
+          "completedDateTime": {
+            "dateTime": "2026-10-01T12:00:00Z",
+            "timeZone": "timeZone-1"
+          }
+        },
+        "from": {
+          "emailAddress": {
+            "name": "name-1",
+            "address": "address-1"
+          }
+        },
+        "isRead": false,
+        "sender": {
+          "emailAddress": {
+            "name": "name-1",
+            "address": "address-1"
+          }
+        },
+        "isDraft": false,
+        "replyTo": [
+          {
+            "emailAddress": {}
+          }
+        ],
+        "subject": "subject-1",
+        "webLink": "webLink-1",
+        "changeKey": "changeKey-1",
+        "categories": ["categories-1"],
+        "extensions": [{}],
+        "importance": "importance-1",
+        "uniqueBody": {
+          "content": "content-1",
+          "contentType": "contentType-1"
+        },
+        "@odata.etag": "@odata.etag-1",
+        "attachments": [{}],
+        "bodyPreview": "bodyPreview-1",
+        "ccRecipients": [
+          {
+            "emailAddress": {}
+          }
+        ],
+        "sentDateTime": "2026-10-01T12:00:00Z",
+        "toRecipients": [
+          {
+            "emailAddress": {}
+          }
+        ],
+        "bccRecipients": [
+          {
+            "emailAddress": {}
+          }
+        ],
+        "conversationId": "conversationId-1",
+        "hasAttachments": false,
+        "parentFolderId": "parentFolderId-1",
+        "createdDateTime": "2026-10-01T12:00:00Z",
+        "receivedDateTime": "2026-10-01T12:00:00Z",
+        "conversationIndex": "conversationIndex-1",
+        "internetMessageId": "internetMessageId-1",
+        "sensitivity_label": {
+          "id": "id-1",
+          "name": "name-1",
+          "method": "method-1",
+          "source": "source-1",
+          "status": "found",
+          "enabled": false,
+          "site_id": "site_id-1",
+          "set_date": "2026-10-01T12:00:00Z",
+          "parent_id": "parent_id-1",
+          "tenant_id": "tenant_id-1",
+          "applies_to": "applies_to-1",
+          "error_code": "ambiguous_label",
+          "parent_name": "parent_name-1",
+          "content_bits": "content_bits-1",
+          "hierarchy_status": "provided",
+          "raw_value_truncated": false
+        },
+        "lastModifiedDateTime": "2026-10-01T12:00:00Z",
+        "internetMessageHeaders": [
+          {
+            "name": "name-1",
+            "value": "value-1"
+          }
+        ],
+        "isReadReceiptRequested": false,
+        "inferenceClassification": "inferenceClassification-1",
+        "isDeliveryReceiptRequested": false,
+        "multiValueExtendedProperties": [{}],
+        "singleValueExtendedProperties": [{}]
+      }
+    ],
+    "@odata.context": "@odata.context-1",
+    "@odata.nextLink": "@odata.nextLink-1",
+    "next_page_token": "next_page_token-1"
+  },
+  "microsoft_teams-chats_get_all_chats-1": {
+    "value": [
+      {
+        "id": "id-1",
+        "topic": "topic-1",
+        "webUrl": "webUrl-1",
+        "members": [
+          {
+            "id": "id-1",
+            "email": "email-1",
+            "roles": [],
+            "userId": "userId-1",
+            "tenantId": "tenantId-1",
+            "@odata.type": "@odata.type-1",
+            "displayName": "displayName-1",
+            "visibleHistoryStartDateTime": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "chatType": "chatType-1",
+        "tenantId": "tenantId-1",
+        "viewpoint": {
+          "isHidden": false,
+          "lastMessageReadDateTime": "2026-10-01T12:00:00Z"
+        },
+        "display_url": "display_url-1",
+        "is_self_chat": false,
+        "createdDateTime": "2026-10-01T12:00:00Z",
+        "onlineMeetingInfo": {
+          "organizer": {
+            "id": "id-1",
+            "tenantId": "tenantId-1",
+            "displayName": "displayName-1",
+            "userIdentityType": "userIdentityType-1"
+          },
+          "joinWebUrl": "joinWebUrl-1",
+          "calendarEventId": "calendarEventId-1"
+        },
+        "lastMessagePreview": {
+          "id": "id-1",
+          "body": {
+            "content": "content-1",
+            "contentType": "contentType-1"
+          },
+          "from": {
+            "user": {},
+            "device": {},
+            "application": {}
+          },
+          "isDeleted": false,
+          "eventDetail": {},
+          "messageType": "messageType-1",
+          "createdDateTime": "2026-10-01T12:00:00Z"
+        },
+        "lastUpdatedDateTime": "2026-10-01T12:00:00Z",
+        "isHiddenForAllMembers": false
+      }
+    ],
+    "@odata.count": 1,
+    "@odata.context": "@odata.context-1",
+    "next_page_token": "next_page_token-1",
+    "composio_execution_message": "composio_execution_message-1"
+  },
+  "microsoft_teams-list_user_chat_messages-1": {
+    "value": [
+      {
+        "id": "id-1",
+        "body": {
+          "content": "content-1",
+          "content_type": "content_type-1"
+        },
+        "etag": "etag-1",
+        "from": {
+          "user": {
+            "id": "id-1",
+            "tenant_id": "tenant_id-1",
+            "display_name": "display_name-1",
+            "user_identity_type": "user_identity_type-1"
+          },
+          "device": {},
+          "application": {
+            "id": "id-1",
+            "tenant_id": "tenant_id-1",
+            "display_name": "display_name-1"
+          }
+        },
+        "locale": "locale-1",
+        "chat_id": "chat_id-1",
+        "subject": "subject-1",
+        "summary": "summary-1",
+        "web_url": "web_url-1",
+        "mentions": [
+          {
+            "id": 1,
+            "mentioned": {},
+            "mention_text": "mention_text-1"
+          }
+        ],
+        "reactions": [
+          {
+            "user": {},
+            "display_name": "display_name-1",
+            "reaction_type": "reaction_type-1",
+            "created_date_time": "2026-10-01T12:00:00Z",
+            "reaction_content_url": "reaction_content_url-1"
+          }
+        ],
+        "importance": "importance-1",
+        "onBehalfOf": {
+          "user": {
+            "id": "id-1",
+            "tenant_id": "tenant_id-1",
+            "display_name": "display_name-1",
+            "user_identity_type": "user_identity_type-1"
+          },
+          "device": {},
+          "application": {
+            "id": "id-1",
+            "tenant_id": "tenant_id-1",
+            "display_name": "display_name-1"
+          }
+        },
+        "attachments": [
+          {
+            "id": "id-1",
+            "name": "name-1",
+            "content": "content-1",
+            "content_url": "content_url-1",
+            "content_type": "content_type-1",
+            "teams_app_id": "teams_app_id-1",
+            "thumbnail_url": "thumbnail_url-1"
+          }
+        ],
+        "display_url": "display_url-1",
+        "reply_to_id": "reply_to_id-1",
+        "event_detail": {},
+        "message_type": "message_type-1",
+        "message_history": [
+          {
+            "actions": "actions-1",
+            "reaction": {},
+            "modified_date_time": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "channel_identity": {
+          "team_id": "team_id-1",
+          "channel_id": "channel_id-1"
+        },
+        "policy_violation": {
+          "dlp_action": "dlp_action-1",
+          "policy_tip": {
+            "general_text": "general_text-1",
+            "compliance_url": "compliance_url-1",
+            "matched_condition_descriptions": []
+          },
+          "user_action": "user_action-1",
+          "verdict_details": "verdict_details-1",
+          "justification_text": "justification_text-1"
+        },
+        "created_date_time": "2026-10-01T12:00:00Z",
+        "deleted_date_time": "2026-10-01T12:00:00Z",
+        "last_edited_date_time": "2026-10-01T12:00:00Z",
+        "last_modified_date_time": "2026-10-01T12:00:00Z"
+      }
+    ],
+    "@odata.count": 1,
+    "@odata.context": "@odata.context-1",
+    "next_page_token": "next_page_token-1"
+  },
+  "one_drive-list_folder_children-1": {
+    "value": [
+      {
+        "id": "id-1",
+        "cTag": "cTag-1",
+        "eTag": "eTag-1",
+        "file": {
+          "hashes": {
+            "sha1Hash": "sha1Hash-1",
+            "crc32Hash": "crc32Hash-1",
+            "sha256Hash": "sha256Hash-1",
+            "quickXorHash": "quickXorHash-1"
+          },
+          "mimeType": "mimeType-1"
+        },
+        "name": "name-1",
+        "root": {},
+        "size": 1,
+        "audio": {
+          "disc": 1,
+          "year": 1,
+          "album": "album-1",
+          "genre": "genre-1",
+          "title": "title-1",
+          "track": 1,
+          "artist": "artist-1",
+          "hasDrm": false,
+          "bitrate": 1,
+          "duration": 1,
+          "composers": "composers-1",
+          "copyright": "copyright-1",
+          "discCount": 1,
+          "trackCount": 1,
+          "albumArtist": "albumArtist-1",
+          "isVariableBitrate": false
+        },
+        "image": {
+          "width": 1,
+          "height": 1
+        },
+        "photo": {
+          "iso": 1,
+          "fNumber": 1,
+          "cameraMake": "cameraMake-1",
+          "cameraModel": "cameraModel-1",
+          "focalLength": 1,
+          "orientation": 1,
+          "takenDateTime": "2026-10-01T12:00:00Z",
+          "exposureNumerator": 1,
+          "exposureDenominator": 1
+        },
+        "video": {
+          "width": 1,
+          "fourCC": "fourCC-1",
+          "height": 1,
+          "bitrate": 1,
+          "duration": 1,
+          "frameRate": 1,
+          "audioFormat": "audioFormat-1",
+          "audioChannels": 1,
+          "audioBitsPerSample": 1,
+          "audioSamplesPerSecond": 1
+        },
+        "folder": {
+          "view": {},
+          "childCount": 1
+        },
+        "shared": {
+          "owner": {
+            "user": {}
+          },
+          "scope": "scope-1",
+          "sharedBy": {
+            "user": {}
+          },
+          "sharedDateTime": "2026-10-01T12:00:00Z"
+        },
+        "webUrl": "webUrl-1",
+        "deleted": {
+          "state": "state-1"
+        },
+        "malware": {
+          "description": "description-1"
+        },
+        "package": {
+          "type": "type-1"
+        },
+        "location": {
+          "altitude": 1,
+          "latitude": 1,
+          "longitude": 1
+        },
+        "createdBy": {
+          "user": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          },
+          "device": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          },
+          "application": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          }
+        },
+        "webDavUrl": "webDavUrl-1",
+        "remoteItem": {
+          "id": "id-1",
+          "file": {
+            "hashes": {},
+            "mimeType": "mimeType-1"
+          },
+          "name": "name-1",
+          "size": 1,
+          "folder": {
+            "view": {},
+            "childCount": 1
+          },
+          "webUrl": "webUrl-1",
+          "webDavUrl": "webDavUrl-1",
+          "createdDateTime": "2026-10-01T12:00:00Z",
+          "parentReference": {
+            "id": "id-1",
+            "name": "name-1",
+            "path": "path-1",
+            "siteId": "siteId-1",
+            "driveId": "driveId-1",
+            "shareId": "shareId-1",
+            "driveType": "driveType-1"
+          },
+          "lastModifiedDateTime": "2026-10-01T12:00:00Z"
+        },
+        "description": "description-1",
+        "publication": {
+          "level": "level-1",
+          "versionId": "versionId-1",
+          "checkedOutBy": {}
+        },
+        "sharepointIds": {
+          "webId": "webId-1",
+          "listId": "listId-1",
+          "siteId": "siteId-1",
+          "siteUrl": "siteUrl-1",
+          "tenantId": "tenantId-1",
+          "listItemId": "listItemId-1",
+          "listItemUniqueId": "listItemUniqueId-1"
+        },
+        "specialFolder": {
+          "name": "name-1"
+        },
+        "fileSystemInfo": {
+          "createdDateTime": "2026-10-01T12:00:00Z",
+          "lastAccessedDateTime": "2026-10-01T12:00:00Z",
+          "lastModifiedDateTime": "2026-10-01T12:00:00Z"
+        },
+        "lastModifiedBy": {
+          "user": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          },
+          "device": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          },
+          "application": {
+            "id": "id-1",
+            "displayName": "displayName-1"
+          }
+        },
+        "createdDateTime": "2026-10-01T12:00:00Z",
+        "parentReference": {
+          "id": "id-1",
+          "name": "name-1",
+          "path": "path-1",
+          "siteId": "siteId-1",
+          "driveId": "driveId-1",
+          "shareId": "shareId-1",
+          "driveType": "driveType-1"
+        },
+        "pendingOperations": {
+          "pendingContentUpdate": {
+            "queuedDateTime": "2026-10-01T12:00:00Z"
+          }
+        },
+        "lastModifiedDateTime": "2026-10-01T12:00:00Z",
+        "@microsoft.graph.downloadUrl": "@microsoft.graph.downloadUrl-1"
+      }
+    ],
+    "@odata.null": false,
+    "@odata.context": "@odata.context-1",
+    "@odata.nextLink": "@odata.nextLink-1",
+    "next_page_token": "next_page_token-1"
+  }
+}

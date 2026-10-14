@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "microsoft_teams",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "MICROSOFT_TEAMS_CHATS_GET_ALL_CHATS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "MICROSOFT_TEAMS_LIST_USER_CHAT_MESSAGES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

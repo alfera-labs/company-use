@@ -1,0 +1,131 @@
+{
+  "node_key": "notion-search_pages-1",
+  "display_name": "Search Notion Pages",
+  "description": "Search every Notion page and data source this connection can see, by title. Returns a batch of results with the id, title, url and last edited time, plus a cursor for the next batch. Notion search matches titles only, never page body text, and only reaches pages a person has shared with the integration. Send the returned next_cursor back as `cursor` to read the next batch. Set filter_object_type to \"data_source\" to find the tables you can then read with notion-query_databases-1.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": [],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Text to match against page and data source titles. Omit to list everything shared with the integration."
+      },
+      "filter_object_type": {
+        "type": "string",
+        "enum": ["page", "data_source"],
+        "description": "Return only pages, or only data sources (tables)."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor a previous call returned."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "object": {
+              "type": ["string", "null"],
+              "description": "\"page\" or \"data_source\"."
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": ["string", "null"]
+            },
+            "last_edited_time": {
+              "type": ["string", "null"]
+            }
+          },
+          "required": ["id", "object", "title", "url", "last_edited_time"]
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"]
+      },
+      "has_more": {
+        "type": "boolean"
+      }
+    },
+    "required": ["results", "next_cursor", "has_more"]
+  },
+  "response_schemas": {
+    "search": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on POST /v1/search. Reads the fields the node maps and lets Notion keep adding the rest. `title` and every property value stay untyped on purpose: on a page `title` holds rich text, on a data source's property schema the same key holds the empty configuration object, and Notion's property union grows every year.",
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": ["string", "null"]
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "object": {
+                "type": ["string", "null"]
+              },
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": ["string", "null"]
+              },
+              "last_edited_time": {
+                "type": ["string", "null"]
+              },
+              "title": {},
+              "properties": {
+                "type": ["object", "null"],
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": ["string", "null"]
+                    },
+                    "title": {}
+                  }
+                }
+              }
+            },
+            "required": ["id"]
+          }
+        },
+        "next_cursor": {
+          "type": ["string", "null"]
+        },
+        "has_more": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "required": ["results"]
+    }
+  },
+  "quirks": {
+    "endpoint": "POST /v1/search",
+    "why_execute": "Notion takes the cursor and the page size in the request body, not the query string, so the runtime's query-string pagination record cannot express it. A result's title also comes from one of two places: a data source carries it in a top-level rich text array, a page carries it inside whichever property has type `title`. Neither is a static mapping, so the work is code.",
+    "titles_only": "Notion search matches titles, never body text. To find a phrase inside a page, search the title, then read the page with notion-read_blocks-1.",
+    "sharing": "Search only reaches pages a person explicitly shared with the integration. An empty result usually means nothing was shared, not that nothing matches.",
+    "filter_value": "Since API version 2025-09-03 the object filter takes \"page\" or \"data_source\"; \"database\" is gone.",
+    "no_fan_out": "Search is the one Notion endpoint that is already batch-shaped — one request, many objects — so this node makes exactly one provider call."
+  }
+}

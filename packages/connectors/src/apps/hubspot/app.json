@@ -1,0 +1,75 @@
+{
+  "app_key": "hubspot",
+  "display_name": "HubSpot",
+  "base_url": "https://api.hubapi.com",
+  "auth": {
+    "kind": "oauth2",
+    "auth_url": "https://app.hubspot.com/oauth/authorize",
+    "token_url": "https://api.hubapi.com/oauth/v1/token",
+    "scopes": [
+      "oauth",
+      "crm.objects.contacts.read",
+      "crm.objects.contacts.write",
+      "crm.objects.companies.read",
+      "crm.objects.companies.write",
+      "crm.objects.deals.read",
+      "crm.objects.deals.write"
+    ],
+    "authorization_params": { "optional_scope": "crm.schemas.custom.read" }
+  },
+  "sync": {
+    "prompt": "Choose which HubSpot objects to sync",
+    "dimensions": [
+      {
+        "key": "objects",
+        "label": "Objects",
+        "shape": "flat",
+        "browse_node": "hubspot-list_object_types-1",
+        "allow_select_all": true
+      }
+    ],
+    "objects": {
+      "record": {
+        "label": "Records",
+        "list_node": "hubspot-list_records-1",
+        "scoped_by": { "objects": "object_type" },
+        "list_input": { "limit": 100 },
+        "page": {
+          "cursor_param": "cursor",
+          "items": { "$": "response.records" },
+          "next_cursor": { "$": "response.next_cursor" }
+        },
+        "strategy": "relist_diff",
+        "identity": { "$": "item.id" },
+        "version_signal": { "$": "item.updated_at" },
+        "title": {
+          "$default": [
+            { "$": "item.properties.name" },
+            { "$": "item.properties.subject" },
+            { "$": "item.properties.email" },
+            { "$": "item.id" }
+          ]
+        },
+        "content": { "$": "item.properties" },
+        "item_kind": "crm_record",
+        "container": { "id": { "$": "scope.id" }, "path": { "$": "scope.label" } },
+        "note": "relist_diff, because GET /crm/v3/objects/{type} takes no modified-since filter; the search endpoint does, but it is a different node with a different contract. The stored text is the record's properties as sorted JSON, which is what a CRM record honestly is - a name and a body cannot be built out of it with the four operators. NOT LIVE-TESTED: no HubSpot connection exists in dev."
+      }
+    }
+  },
+  "scope_notes": [
+    "crm.schemas.custom.read is what GET /crm/v3/schemas needs, and hubspot-list_object_types-1 is the only node that calls it. Without it the picker could offer the four standard object types and never a portal's custom ones."
+  ],
+  "rate_limits": {
+    "rpm": 600,
+    "concurrency": 5,
+    "burst": 100
+  },
+  "rate_limit_notes": [
+    "HubSpot publishes its ceiling as a 10-second window, not a minute: a marketplace OAuth app gets 110 requests per 10 seconds per installed account, and an older app gets 100.",
+    "rpm 600 is the same thing in the framework's units: a sustained 100 per 10 seconds, the conservative floor rather than the 110 ceiling.",
+    "burst 100 is exactly one window's worth fired back to back.",
+    "concurrency 5 is our own choice, not HubSpot's. It keeps one batching node from spending a whole window in a single breath while other work shares the connection.",
+    "Daily limits (650k on Professional, 1M on Enterprise) sit far above anything one workspace spends, so they are not modeled. A 429 pauses the bucket either way."
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A first day where everything already works.",
+  "summary_text": "Start accounts, kit, meetings, and paperwork the day the contract is signed.",
+  "icon": "🚪",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "operations-managers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Work started on signature day",
+    "One ask per owner, for their part",
+    "What is outstanding, tracked",
+    "No account created by the agent"
+  ],
+  "what_it_does": [
+    "Starts the day the contract is signed, not the week before",
+    "Asks each owner only for their own part",
+    "Tracks what is outstanding rather than asking again from scratch",
+    "Never creates an account itself"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the onboarding checklist",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "ask each owner for their part",
+      "risk": "reaches_outside"
+    },
+    {
+      "capability": "track what is done",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "notion",
+      "requirement_label": "Notion",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The checklist it runs."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where it asks each owner for their part."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "checklist",
+      "label": "Your onboarding checklist",
+      "input_type": "document"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where each owner is asked",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "you_ask",
+      "note": "Run it the moment a contract is signed"
+    },
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 * * MON",
+      "read_timezone_from": "ask_the_installer",
+      "note": "A weekly sweep for anyone starting soon"
+    }
+  ]
+}

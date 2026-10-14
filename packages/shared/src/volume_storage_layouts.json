@@ -1,0 +1,17 @@
+{
+  "current_layout": "volume_keyed",
+  "volume_storage_layouts": [
+    {
+      "layout_name": "workspace_keyed",
+      "status": "legacy",
+      "path_template": "coworker/workspaces/{workspace_id}/",
+      "description": "One folder per workspace. Retired because it made a second volume for a workspace impossible: a new disk mounted the same folder, so it opened onto the old files instead of an empty tree, and two live mounts could write over each other. Every volume created before 2026-08-12 uses this, and keeps using it."
+    },
+    {
+      "layout_name": "volume_keyed",
+      "status": "current",
+      "path_template": "coworker/volumes/{volume_id}/",
+      "description": "One folder per volume. A new volume is empty by construction, an old one stays readable beside it, and moving a workspace between them is a row change rather than a copy."
+    }
+  ]
+}

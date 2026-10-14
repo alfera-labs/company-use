@@ -1,0 +1,7 @@
+/* Product typeface. --font-sans-stack (globals.css) points at --font-inter, so this variable
+   must exist on :root — without it the font-family falls back to serif everywhere. */
+@import "@fontsource-variable/inter";
+
+:root {
+  --font-inter: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}

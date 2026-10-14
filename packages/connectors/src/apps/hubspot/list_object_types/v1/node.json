@@ -1,0 +1,111 @@
+{
+  "node_key": "hubspot-list_object_types-1",
+  "display_name": "List HubSpot Object Types",
+  "description": "List the HubSpot CRM object types a person can sync: the four standard ones — contacts, companies, deals, tickets — plus every custom object this portal defines. Each option's id is what hubspot-list_records-1 and hubspot-search_records-1 take as object_type. `query` keeps only the types whose label or name contains that text. This is the browse node behind the hubspot sync picker, so its output is the scope-option shape.",
+  "implementation": "execute",
+  "required_scopes": ["crm.schemas.custom.read"],
+  "endpoints": [
+    {
+      "purpose": "custom_schemas",
+      "method": "GET",
+      "path": "/crm/v3/schemas"
+    }
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. Object types are a flat list, so there is nothing to open."
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Keep only object types whose label or name contains this text, ignoring case."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Ignored. The schemas call answers with every custom object in one response."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "description": "Ignored. The schemas call takes no page size."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Always null. HubSpot returns every schema in one answer."
+      }
+    }
+  },
+  "standard_object_types": [
+    { "id": "contacts", "label": "Contacts" },
+    { "id": "companies", "label": "Companies" },
+    { "id": "deals", "label": "Deals" },
+    { "id": "tickets", "label": "Tickets" }
+  ],
+  "response_schemas": {
+    "custom_schemas": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on GET /crm/v3/schemas. HubSpot sends the whole property and association definition of every custom object here; this reads the three fields the node maps.",
+      "type": "object",
+      "required": ["results"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "objectTypeId": { "type": ["string", "null"] },
+              "fullyQualifiedName": { "type": ["string", "null"] },
+              "archived": { "type": ["boolean", "null"] },
+              "labels": {
+                "type": ["object", "null"],
+                "properties": {
+                  "singular": { "type": ["string", "null"] },
+                  "plural": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "quirks": [
+    "The four standard object types are a static list, not a call. HubSpot has no endpoint that returns contacts, companies, deals and tickets — /crm/v3/schemas answers with CUSTOM objects only — and these four exist in every portal, so declaring them beats inventing a call that cannot be made.",
+    "A custom object's id is its objectTypeId, the 2-1234567 form, because a portal can rename an object and the numeric id survives it. HubSpot accepts either form on the object endpoints, and the node falls back to the name when a schema arrives without an objectTypeId.",
+    "crm.schemas.custom.read is the scope /crm/v3/schemas needs, and it is the only scope in this app that is not about reading records. A portal with no custom objects still answers, with an empty results array.",
+    "The schemas call takes no cursor and no page size. next_cursor is always null and the cursor and limit inputs are accepted and ignored, so one generic picker can call every browse node the same way.",
+    "The path is /crm/v3/schemas, HubSpot's documented alias for /crm-object-schemas/v3/schemas. This is the one node in the app whose endpoint is not under /crm/v3/objects/."
+  ]
+}

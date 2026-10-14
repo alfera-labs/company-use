@@ -1,0 +1,100 @@
+{
+  "node_key": "salesforce-list_object_types-1",
+  "display_name": "List Salesforce Object Types",
+  "description": "List the Salesforce objects this org can query — Account, Contact, Opportunity, and every custom object — as the options a person picks from. Each option's id is the API name, which is what goes in the FROM clause of salesforce-query_records-1. `query` keeps only the objects whose label or API name contains that text. This is the browse node behind the salesforce sync picker, so its output is the scope-option shape.",
+  "implementation": "execute",
+  "required_scopes": ["api"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "description": "Ignored. Object types are a flat list, so there is nothing to open."
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Keep only objects whose label or API name contains this text, ignoring case."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Ignored. The describe call answers with every object in one response."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "description": "Ignored. The describe call takes no page size."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": {
+        "type": ["string", "null"],
+        "description": "Always null. Salesforce describes every object in one answer."
+      }
+    }
+  },
+  "requests": {
+    "describe_global": {
+      "method": "GET",
+      "path": "/services/data/v61.0/sobjects",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "describeGlobal. Lenient on purpose: Salesforce sends about forty booleans per object and adds more each release; this reads the four fields the node needs.",
+        "type": "object",
+        "required": ["sobjects"],
+        "properties": {
+          "encoding": { "type": ["string", "null"] },
+          "maxBatchSize": { "type": ["number", "null"] },
+          "sobjects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "label": { "type": ["string", "null"] },
+                "labelPlural": { "type": ["string", "null"] },
+                "queryable": { "type": ["boolean", "null"] },
+                "custom": { "type": ["boolean", "null"] },
+                "deprecatedAndHidden": { "type": ["boolean", "null"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "endpoint": "GET /services/data/v61.0/sobjects",
+    "why_execute": "The call host is per connection (see salesforce_api.ts) and the answer is filtered before it is mapped. Neither is expressible as a declarative http mapping.",
+    "id_is_the_api_name": "The option id is the API name — Account, Custom_Object__c — because that is what a SOQL FROM clause takes and what salesforce-query_records-1 therefore needs to read back out of sync_scope.",
+    "hidden_objects": "An org describes hundreds of objects a person would never sync. Three rules cut the list: not queryable means SOQL cannot read it at all, deprecatedAndHidden means Salesforce itself has retired it, and the AccountShare / AccountHistory / AccountFeed / AccountChangeEvent families are the sharing, audit, chatter and streaming shadows of another object rather than data anyone picks. Everything else stays, custom objects included.",
+    "no_paging": "describeGlobal answers with the whole catalogue in one response. next_cursor is always null and the cursor and limit inputs are accepted and ignored, so one generic picker can call every browse node the same way.",
+    "api_version": "v61.0, pinned per node version, same as every other Salesforce node here."
+  }
+}

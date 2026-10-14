@@ -1,0 +1,89 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A draft waiting for you after every meeting, with the next step and a date in it.",
+  "summary_text": "Leave a next-step draft in your drafts after every meeting.",
+  "icon": "📝",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "sales",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "sales-teams",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "One next step, not five",
+    "A date attached to the ask",
+    "A reply in the thread that exists",
+    "A draft — you send it"
+  ],
+  "what_it_does": [
+    "Turns the notes into one next step, not a list of five",
+    "Puts a date on it, so they can say no",
+    "Writes in the thread that already exists",
+    "Leaves it as a draft — you send it"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read meeting notes and the thread",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "leave a draft in your drafts folder",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_calendar",
+      "requirement_label": "Google Calendar",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "How it knows a meeting ended and who was in it."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "gmail",
+      "requirement_label": "Gmail",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the draft is left."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "which_meetings",
+      "label": "Which meetings count",
+      "input_type": "text"
+    },
+    {
+      "input_key": "notes",
+      "label": "Where the notes come from",
+      "input_type": "document"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "google_calendar-event_ended",
+        "app_key": "google_calendar",
+        "listener_config": {}
+      },
+      "label": "when a meeting ends",
+      "note": "Only the calendar you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Point it at a meeting whenever you like"
+    }
+  ]
+}

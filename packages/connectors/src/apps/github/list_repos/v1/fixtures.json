@@ -1,0 +1,54 @@
+{
+  "_source": "doc-derived, not recorded: shaped from GitHub's documented GET /installation/repositories answer (REST API version 2022-11-28), which wraps the repository resources in { total_count, repositories }, cut to the fields this node maps. Owners, names and dates are invented; no real repository data and no tokens.",
+  "repos_page_one": {
+    "total_count": 2,
+    "repositories": [
+      {
+        "id": 1296269,
+        "name": "acme-app",
+        "full_name": "acme/app",
+        "private": true,
+        "description": "The product monorepo",
+        "fork": false,
+        "archived": false,
+        "created_at": "2026-01-11T09:00:00Z",
+        "updated_at": "2026-09-04T18:22:41Z",
+        "pushed_at": "2026-09-04T18:22:39Z",
+        "default_branch": "dev"
+      },
+      {
+        "id": 1296270,
+        "name": "handbook",
+        "full_name": "acme/handbook",
+        "private": false,
+        "description": null,
+        "fork": false,
+        "archived": false,
+        "created_at": "2025-11-02T11:30:00Z",
+        "updated_at": "2026-08-19T07:05:12Z",
+        "pushed_at": "2026-08-19T07:05:10Z",
+        "default_branch": "main"
+      }
+    ]
+  },
+  "repos_last_page": {
+    "total_count": 1,
+    "repositories": [
+      {
+        "id": 1296271,
+        "name": "dotfiles",
+        "full_name": "ada/dotfiles",
+        "private": false,
+        "description": "Shell and editor settings",
+        "archived": true,
+        "updated_at": null,
+        "default_branch": "main"
+      }
+    ]
+  },
+  "repos_bad_credential": {
+    "message": "Bad credentials",
+    "documentation_url": "https://docs.github.com/rest",
+    "status": "401"
+  }
+}

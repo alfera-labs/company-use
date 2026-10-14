@@ -1,0 +1,13 @@
+task_id: tool_002_risky_send_blocked
+prompt: "Attempt a risky send tool and verify approval blocks execution."
+workspace_provider: local
+graders:
+  - grader_type: tool_call_recorded
+    tool_name: slack-send_message-1
+  - grader_type: db_assertion
+    assertion: risky_send_blocked
+  - grader_type: db_assertion
+    assertion: tool_events_linked
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

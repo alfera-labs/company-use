@@ -1,0 +1,11 @@
+task_id: trace_002_tool_events_linked
+prompt: "Call workspace-write_file and verify lifecycle run events link to the tool call."
+workspace_provider: local
+graders:
+  - grader_type: tool_call_recorded
+    tool_name: workspace-write_file
+  - grader_type: db_assertion
+    assertion: tool_events_linked
+  - grader_type: db_assertion
+    assertion: latency_fields_present
+  - grader_type: run_ended_clean

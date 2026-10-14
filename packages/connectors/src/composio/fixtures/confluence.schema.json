@@ -1,0 +1,27 @@
+{
+  "toolkit_slug": "confluence",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "CONFLUENCE_GET_SPACES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "CONFLUENCE_GET_PAGES": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

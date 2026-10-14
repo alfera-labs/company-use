@@ -1,0 +1,189 @@
+{
+  "node_key": "granola-read_transcripts-1",
+  "display_name": "Read Transcripts",
+  "description": "Read the full spoken transcript of a batch of Granola meeting notes. Each note is drained page by page, so one call returns every transcript line up to maximum_items_per_note. Each line carries the text, the start and end time, and whatever Granola knows about the speaker. Ids come from granola-list_notes-1. A note the key cannot see is reported in errors instead of failing the batch.",
+  "required_scopes": ["personal_notes", "public_notes"],
+  "implementation": "execute",
+  "provider": {
+    "endpoint": "GET /v1/notes/{note_id}/transcript",
+    "docs": "https://docs.granola.ai/api-reference/get-transcript",
+    "openapi": "https://docs.granola.ai/api-reference/openapi.json",
+    "query_parameters": ["cursor", "page_size"]
+  },
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["note_ids"],
+    "additionalProperties": false,
+    "properties": {
+      "note_ids": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 20,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "The note ids to read transcripts for, such as not_00000000000001."
+      },
+      "page_size": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "description": "Transcript lines per provider request, 1 to 100. Granola defaults to 50."
+      },
+      "maximum_items_per_note": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5000,
+        "default": 1000,
+        "description": "Stop after this many lines for one note and report it as truncated."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["transcripts", "errors"],
+    "additionalProperties": false,
+    "properties": {
+      "transcripts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["note_id", "items", "truncated"],
+          "additionalProperties": false,
+          "properties": {
+            "note_id": {
+              "type": "string"
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "True when the note has more lines than maximum_items_per_note allowed."
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["speaker", "text", "start_time", "end_time"],
+                "additionalProperties": false,
+                "properties": {
+                  "speaker": {
+                    "type": "object",
+                    "required": ["source", "attribution", "diarization_label", "name"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "source": {
+                        "type": ["string", "null"],
+                        "description": "\"microphone\" is the note-taker's own audio, \"speaker\" is everyone else. iOS returns microphone for every line today."
+                      },
+                      "attribution": {
+                        "type": ["string", "null"],
+                        "description": "\"me\" is the note's owner, \"them\" is everyone else. Null when Granola could not tell."
+                      },
+                      "diarization_label": {
+                        "type": ["string", "null"],
+                        "description": "An anonymous bucket such as \"Speaker A\". iOS only, and only when diarization ran."
+                      },
+                      "name": {
+                        "type": ["string", "null"],
+                        "description": "The resolved person, when Granola identified one."
+                      }
+                    }
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "start_time": {
+                    "type": ["string", "null"]
+                  },
+                  "end_time": {
+                    "type": ["string", "null"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "errors": {
+        "type": "array",
+        "description": "One entry per note whose transcript could not be read. The other notes still return.",
+        "items": {
+          "type": "object",
+          "required": ["note_id", "code", "message", "retryable"],
+          "additionalProperties": false,
+          "properties": {
+            "note_id": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "GET /v1/notes/{note_id}/transcript. Lenient on purpose: speaker.source is documented as the enum microphone | speaker and read here as a plain string, because Granola's own docs warn clients not to assume that set never widens.",
+    "type": "object",
+    "required": ["transcript"],
+    "properties": {
+      "transcript": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["text"],
+          "properties": {
+            "speaker": {
+              "type": ["object", "null"],
+              "properties": {
+                "source": {
+                  "type": ["string", "null"]
+                },
+                "attribution": {
+                  "type": ["string", "null"]
+                },
+                "diarization_label": {
+                  "type": ["string", "null"]
+                },
+                "name": {
+                  "type": ["string", "null"]
+                }
+              }
+            },
+            "text": {
+              "type": "string"
+            },
+            "start_time": {
+              "type": ["string", "null"]
+            },
+            "end_time": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      },
+      "hasMore": {
+        "type": ["boolean", "null"]
+      },
+      "cursor": {
+        "type": ["string", "null"]
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "Granola pages a transcript per note, and each note has its own cursor. One cursor on the node's output could not address several notes at once, so the node drains each note's pages itself and reports truncated when it stopped at the ceiling. The caller raises maximum_items_per_note to get the rest.",
+    "provider_ingress": "The lenient JSON Schema ingress on the provider's own payload is response_schema above. The runtime compiles it and runs it on the way in; execute.ts only names the shape it guaranteed.",
+    "redraining": "Raising the ceiling re-reads the pages the caller already had. The upgrade path is an input map of note_id to start cursor, worth adding the day a real transcript is long enough for that re-read to cost something.",
+    "speaker_shape_by_platform": "macOS sends source (microphone | speaker) plus attribution (me | them). iOS sends source microphone for every line because the app captures one audio stream, and carries the anonymous diarization_label instead. name appears only when Granola resolved a real person. Granola's own docs warn clients not to assume the source set never widens, so the node reads it as a plain string. https://docs.granola.ai/introduction"
+  }
+}

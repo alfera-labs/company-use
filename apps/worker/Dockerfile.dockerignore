@@ -1,0 +1,42 @@
+# The build context of apps/worker/Dockerfile is the repo root. BuildKit reads this file instead of
+# /.dockerignore for this Dockerfile. It keeps secrets and everything the worker never runs out.
+**/node_modules
+**/.next
+**/.output
+**/.vercel
+**/dist
+**/.turbo
+**/coverage
+**/__tests__
+**/*.test.ts
+**/*.test.mjs
+.git
+.github
+.claude
+.context
+.21st
+docs
+evals
+infra
+scripts
+spikes
+tests
+*.log
+*.pid
+
+# Only the committed, encrypted env files: the Dockerfile copies the one its DOTENV_FILE names and
+# dotenvx decrypts it at boot.
+.env*
+!.env.development
+!.env.production
+
+# The worker imports apps/api/src through the @api/* alias. The other apps and packages it never
+# imports keep only their package.json: `bun install --frozen-lockfile` needs every workspace.
+apps/app/*
+packages/ui/*
+packages/evals/*
+!apps/*/package.json
+!packages/*/package.json
+
+# This file and the Dockerfile: editing them must not rebuild the source layer.
+apps/worker/Dockerfile*

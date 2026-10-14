@@ -1,0 +1,70 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A seating plan you only have to argue about once.",
+  "summary_text": "Build tables that respect the notes people wrote, not just the headcount.",
+  "icon": "🪑",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "events",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "wedding-planners",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Households and plus-ones kept together",
+    "Every “not next to” honoured",
+    "Dietary notes where the kitchen sees them",
+    "A list of what it could not satisfy"
+  ],
+  "what_it_does": [
+    "Keeps households and plus-ones together without being told",
+    "Honours every \"not next to\" before it optimises anything else",
+    "Puts dietary requirements where the kitchen can see them",
+    "Names what it could not satisfy instead of quietly breaking it"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the RSVP list and its notes",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "write the plan back into a tab",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_sheets",
+      "requirement_label": "Google Sheets",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The RSVP list and the plan it writes back."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "rsvp_sheet",
+      "label": "The RSVP sheet",
+      "input_type": "document"
+    },
+    {
+      "input_key": "table_sizes",
+      "label": "Your table sizes",
+      "input_type": "text"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "you_ask",
+      "note": "Run it again after every batch of replies"
+    }
+  ]
+}

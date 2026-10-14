@@ -1,0 +1,47 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "dotenvx run -f ../../.env.keys -f ../../.env.local -f ../../.env.development -- bun --watch --no-env-file --preload ./src/instrument.ts src/server.ts",
+    "dev:portless": "dotenvx run -f ../../.env.keys -f ../../.env.local -f ../../.env.development -- portless run --name api --force bun --watch --no-env-file --preload ./src/instrument.ts src/server.ts",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "start": "dotenvx run -f ../../.env.production -- bun --no-env-file --preload ./src/instrument.ts src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bash ../../scripts/test-env.sh vitest run --maxWorkers=1 apps/api/src"
+  },
+  "dependencies": {
+    "@aws-sdk/client-scheduler": "^3.700.0",
+    "@aws-sdk/credential-providers": "^3.700.0",
+    "@coworker/config": "workspace:*",
+    "@coworker/connectors": "workspace:*",
+    "@coworker/core": "workspace:*",
+    "@coworker/memory": "workspace:*",
+    "@coworker/jobs": "workspace:*",
+    "@coworker/runtime-platform": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "@google-cloud/scheduler": "^5.0.0",
+    "@hono/node-server": "^1.19.6",
+    "@hono/zod-validator": "^0.8.0",
+    "@sentry/node": "^10.60.0",
+    "@workos-inc/node": "^10.2.0",
+    "hono": "^4.13.7",
+    "jose": "^6",
+    "p-limit": "^7.0.0",
+    "react": "^19.2.3",
+    "rivetkit": "2.3.21",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "drizzle-orm": "^0.45.2",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "_comment": "doc-derived: shaped from the documented files.list response (kind drive#fileList, nextPageToken, files[]) and the fields mask this node sends. Ids and names are invented; no real Drive content and no tokens.",
+  "list_folders_page_one": {
+    "kind": "drive#fileList",
+    "incompleteSearch": false,
+    "nextPageToken": "~!!~AI9FV7Rfb2xkZXJz",
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "0AJfolder_people_ops",
+        "name": "People Ops"
+      },
+      {
+        "kind": "drive#file",
+        "id": "0AJfolder_finance",
+        "name": "Finance"
+      }
+    ]
+  },
+  "list_folders_last_page": {
+    "kind": "drive#fileList",
+    "incompleteSearch": false,
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "0AJfolder_marketing",
+        "name": "Marketing"
+      }
+    ]
+  },
+  "list_folders_sparse_page": {
+    "kind": "drive#fileList",
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "0AJfolder_legal",
+        "name": "Legal"
+      },
+      {
+        "kind": "drive#file",
+        "name": "A folder the fields mask returned without an id"
+      }
+    ],
+    "nextPageToken": null
+  },
+  "list_folders_bad_query": {
+    "error": {
+      "code": 400,
+      "message": "Invalid Value",
+      "errors": [
+        {
+          "domain": "global",
+          "reason": "invalid",
+          "message": "Invalid Value",
+          "location": "q",
+          "locationType": "parameter"
+        }
+      ]
+    }
+  }
+}

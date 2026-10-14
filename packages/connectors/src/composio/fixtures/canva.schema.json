@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "updated_at"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "updated_at": { "type": "integer" },
+          "owner": { "type": "object" },
+          "thumbnail": { "type": "object" },
+          "urls": { "type": "object" }
+        }
+      }
+    },
+    "continuation": { "type": ["string", "null"] }
+  }
+}

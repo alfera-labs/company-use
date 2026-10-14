@@ -1,0 +1,77 @@
+{
+  "_comment": "doc-derived: shaped from the documented files.list response (kind drive#fileList, nextPageToken, files[]) and the fields mask this node sends. Ids, names, and links are invented; no real Drive content and no tokens.",
+  "list_files_page_one": {
+    "kind": "drive#fileList",
+    "incompleteSearch": false,
+    "nextPageToken": "~!!~AI9FV7QmZ0dHJhY2tlcg==",
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "1aBcD_handbook",
+        "name": "Employee Handbook",
+        "mimeType": "application/vnd.google-apps.document",
+        "modifiedTime": "2026-08-30T09:14:22.481Z",
+        "version": "418",
+        "webViewLink": "https://docs.google.com/document/d/1aBcD_handbook/edit?usp=drivesdk",
+        "parents": ["0AJfolder_people_ops"]
+      },
+      {
+        "kind": "drive#file",
+        "id": "1eFgH_pricing",
+        "name": "Pricing 2026.xlsx",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "modifiedTime": "2026-08-28T17:02:00.000Z",
+        "version": "12",
+        "webViewLink": "https://docs.google.com/spreadsheets/d/1eFgH_pricing/edit?usp=drivesdk",
+        "parents": ["0AJfolder_finance", "0AJfolder_shared_with_sales"]
+      }
+    ]
+  },
+  "list_files_last_page": {
+    "kind": "drive#fileList",
+    "incompleteSearch": false,
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "1iJkL_offsite_deck",
+        "name": "Offsite Deck",
+        "mimeType": "application/vnd.google-apps.presentation",
+        "modifiedTime": "2026-07-04T11:45:10.132Z",
+        "version": "77",
+        "webViewLink": "https://docs.google.com/presentation/d/1iJkL_offsite_deck/edit?usp=drivesdk",
+        "parents": ["0AJfolder_marketing"]
+      }
+    ]
+  },
+  "list_files_sparse_page": {
+    "kind": "drive#fileList",
+    "files": [
+      {
+        "kind": "drive#file",
+        "id": "1mNoP_scan",
+        "name": "Scanned Contract.pdf",
+        "mimeType": "application/pdf"
+      },
+      {
+        "kind": "drive#file",
+        "name": "A file the fields mask returned without an id"
+      }
+    ],
+    "nextPageToken": null
+  },
+  "list_files_bad_query": {
+    "error": {
+      "code": 400,
+      "message": "Invalid Value",
+      "errors": [
+        {
+          "domain": "global",
+          "reason": "invalid",
+          "message": "Invalid Value",
+          "location": "q",
+          "locationType": "parameter"
+        }
+      ]
+    }
+  }
+}

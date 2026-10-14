@@ -1,0 +1,165 @@
+{
+  "node_key": "notion-create_pages-1",
+  "display_name": "Create Notion Pages",
+  "description": "Create one or more Notion pages. Each page names a parent — page_id for a page nested under another page, or data_source_id (or database_id) for a row in a table — and carries Notion property values under `properties`, keyed by the property name the table uses. Optional `children_markdown` fills the page body from a small, exact subset of markdown: \"# \", \"## \" and \"### \" become headings, \"- \" and \"* \" become bullets, and every other non-empty line becomes a paragraph. Nothing else is interpreted, so bold, links, tables and code fences arrive as literal text; send at most 100 non-empty lines. Notion creates one page per request, so the batch runs as bounded concurrent single requests under the connection limit of about three per second. Each page succeeds or fails on its own: a failure never rolls back the pages already created.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": [],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "pages": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 25,
+        "description": "The pages to create, one provider call each.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "parent": {
+              "type": "object",
+              "description": "Where the page goes. Give exactly one of these three ids.",
+              "properties": {
+                "data_source_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The table to add a row to. Preferred: it costs one request instead of two."
+                },
+                "database_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The database to add a row to, when the data source id is unknown. Its first data source is used."
+                },
+                "page_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The page to nest this page under."
+                }
+              }
+            },
+            "properties": {
+              "type": "object",
+              "description": "Notion property values keyed by property name, forwarded untouched — for example {\"Task name\": {\"title\": [{\"text\": {\"content\": \"Bug bash\"}}]}}."
+            },
+            "children_markdown": {
+              "type": "string",
+              "description": "The page body, in the supported markdown subset: headings (#, ##, ###), bullets (-, *), and paragraphs."
+            }
+          },
+          "required": ["parent", "properties"]
+        }
+      }
+    },
+    "required": ["pages"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer"
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "page_id": {
+              "type": ["string", "null"]
+            },
+            "title": {
+              "type": ["string", "null"]
+            },
+            "url": {
+              "type": ["string", "null"]
+            },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["code", "message", "retryable"]
+            }
+          },
+          "required": ["index", "ok", "page_id", "title", "url", "error"]
+        }
+      }
+    },
+    "required": ["results"]
+  },
+  "response_schemas": {
+    "created_page": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on POST /v1/pages. Property values stay open: Notion's property union grows every year.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"]
+        },
+        "properties": {
+          "type": ["object", "null"],
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": ["string", "null"]
+              },
+              "title": {}
+            }
+          }
+        }
+      },
+      "required": ["id"]
+    },
+    "database": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on GET /v1/databases/{database_id}, used only to turn a database_id parent into the data source to write into.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data_sources": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["id"]
+          }
+        }
+      },
+      "required": ["id"]
+    }
+  },
+  "quirks": {
+    "endpoint": "POST /v1/pages, and GET /v1/databases/{database_id} first when the parent is a database_id.",
+    "why_execute": "Notion creates one page per request, so the plural contract runs as a fan-out with per-item results. The markdown-to-blocks conversion and the database-id-to-data-source lookup are both code.",
+    "not_atomic": "A batch of five where the third parent was never shared returns four created pages and one clear error. Half a batch is the right answer here: the four correct pages are already what the person asked for, and Notion has no transaction to roll back into.",
+    "markdown_subset": "Only headings, bullets and paragraphs are converted, and only from the start of a line. No bold, links, tables, code fences or nested lists — a guess writes wrong content into somebody's workspace, and the caller can always send explicit blocks later.",
+    "block_limit": "Notion accepts at most 100 blocks on a page create. Markdown that makes more fails that one item with a clear message rather than writing a truncated page.",
+    "span_limit": "Notion rejects a rich text span over 2000 characters, so a long line is split across several spans of one block.",
+    "parent_kind": "Since API version 2025-09-03 a page in a table has a data_source_id parent, not a database_id parent. A database_id given here is resolved to its first data source."
+  }
+}

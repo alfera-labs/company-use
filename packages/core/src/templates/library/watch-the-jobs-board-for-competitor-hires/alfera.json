@@ -1,0 +1,76 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "You find out what a competitor is building from their job ads, not their launch.",
+  "summary_text": "See what competitors are hiring for, which is what they will build.",
+  "icon": "👀",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "founders",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Only the competitors you name",
+    "The pattern, not every posting",
+    "What three of the same role means",
+    "Silence in a week with no change"
+  ],
+  "what_it_does": [
+    "Watches the named list, not the whole market",
+    "Reports the pattern, not every individual posting",
+    "Says what three of the same role probably means",
+    "Stays quiet in a week where nothing changed"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read public job boards",
+      "risk": "reaches_outside"
+    },
+    {
+      "capability": "post the note",
+      "risk": "reaches_outside"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the note is posted."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "competitors",
+      "label": "Which competitors to watch",
+      "input_type": "list"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where the note is posted",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 * * MON",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Ask for a check before a board meeting"
+    }
+  ]
+}

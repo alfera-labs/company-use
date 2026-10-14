@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["data"],
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "number": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "amount_due": { "type": "integer" },
+          "currency": { "type": "string" },
+          "status": { "type": "string" },
+          "customer_email": { "type": ["string", "null"] },
+          "hosted_invoice_url": { "type": "string" }
+        }
+      }
+    },
+    "next_cursor": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,988 @@
+/*
+ * Alfera hero illustration ("agents at work") of the marketing app. Every rule is scoped under .alfera, so it never touches the
+ * mk-* marketing design system. Rendered inside <div className="alfera"> in the
+ * home hero. Background is forced transparent so the light cards sit on the dark hero.
+ */
+.alfera {
+  --bg: #fafaf7;
+  --bg-alt: #f4f3ee;
+  --surface: #ffffff;
+  --ink: #0b0b0a;
+  --ink-2: #1f1f1d;
+  --muted: #6b6b66;
+  --muted-2: #9a9a92;
+  --line: rgba(11, 11, 10, 0.08);
+  --line-2: rgba(11, 11, 10, 0.14);
+  --orange: #ff5a1f;
+  --orange-2: #ff7a3d;
+  --orange-soft: #fff1ea;
+  --orange-ink: #b93a0f;
+  --blue: #2b5bff;
+  --blue-soft: #eef1ff;
+  --green: #0e8a5f;
+  --green-soft: #e7f6ee;
+  --shadow-sm: 0 1px 2px rgba(11, 11, 10, 0.04), 0 1px 1px rgba(11, 11, 10, 0.03);
+  --shadow-md: 0 4px 16px -4px rgba(11, 11, 10, 0.08), 0 2px 4px rgba(11, 11, 10, 0.04);
+  --shadow-lg: 0 24px 48px -12px rgba(11, 11, 10, 0.12), 0 8px 16px -8px rgba(11, 11, 10, 0.06);
+  --alfera-radius-sm: 6px;
+  --alfera-radius: 10px;
+  --alfera-radius-lg: 16px;
+  --alfera-radius-xl: 22px;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    var(--font-geist), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+.alfera * {
+  box-sizing: border-box;
+}
+
+.alfera .mono {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
+  font-feature-settings: "zero";
+}
+.alfera .serif {
+  font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
+}
+
+.alfera a {
+  color: inherit;
+  text-decoration: none;
+}
+.alfera button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+.alfera {
+  background: transparent;
+  min-height: 0;
+}
+@keyframes hero-float {
+  0% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes hero-cursor-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(10px, -8px);
+  }
+  50% {
+    transform: translate(16px, 4px);
+  }
+  75% {
+    transform: translate(4px, 12px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@media (max-width: 1023px) {
+  .alfera .hero-floater,
+  .alfera .hero-cursor {
+    display: none;
+  }
+}
+
+/* ---------- HERO SURFACE (Vercel / Linear language) ---------- */
+.alfera .hero-collab-wrap {
+  margin: 40px auto 0;
+  max-width: 1120px;
+  padding: 0 24px;
+}
+.alfera .hero-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+  text-align: left;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  color: #171717;
+  font-feature-settings: "ss01", "cv11";
+  position: relative;
+}
+
+/* Shared surface: shadow-as-border + inner glow (Vercel) */
+.alfera .hero-surface {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    inset 0 0 0 1px #fafafa,
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px -12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Floating popups (skills / tools / integrations / activity) --- */
+.alfera .float-popup {
+  position: absolute;
+  z-index: 3;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 12px 11px;
+  width: 220px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 16px 32px -16px rgba(0, 0, 0, 0.18);
+  transform: rotate(var(--popup-tilt, 0deg));
+  transform-origin: center center;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: -0.003em;
+  color: #1d1c1d;
+  pointer-events: none;
+  opacity: 0;
+  animation: popup-fade-in 0.6s ease-out 0.4s forwards;
+}
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.alfera .popup-skills {
+  top: 24px;
+  left: -185px;
+}
+.alfera .popup-tools {
+  bottom: 70px;
+  left: -195px;
+  width: 220px;
+}
+.alfera .popup-integrations {
+  top: -22px;
+  right: -180px;
+  width: 200px;
+}
+.alfera .popup-activity {
+  bottom: 80px;
+  right: -185px;
+  width: 232px;
+}
+
+.alfera .popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.alfera .popup-head-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8f8f8f;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.alfera .popup-head-sub {
+  font-size: 10.5px;
+  color: #b5b5b5;
+  font-variant-numeric: tabular-nums;
+}
+.alfera .popup-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+  animation: hero-pulse 2.4s ease-in-out infinite;
+}
+
+.alfera .popup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Skills */
+.alfera .popup-skill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alfera .popup-skill-face {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.alfera .popup-skill-face svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.alfera .popup-skill-body {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+.alfera .popup-skill-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1c1d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alfera .popup-skill-meta {
+  display: block;
+  font-size: 10.5px;
+  color: #8f8f8f;
+}
+.alfera .popup-skill-check {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e8f5ee;
+  color: #1a7f37;
+  flex-shrink: 0;
+}
+
+/* Tools */
+.alfera .popup-list-tools {
+  gap: 4px;
+}
+.alfera .popup-tool {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: #f8f8f8;
+  border: 1px solid #ececec;
+}
+.alfera .popup-tool img {
+  display: block;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.alfera .popup-tool-call {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, "Menlo", monospace;
+  font-size: 11px;
+  color: #454545;
+  letter-spacing: -0.005em;
+}
+
+/* Integrations grid */
+.alfera .popup-int-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.alfera .popup-int-tile {
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+  border: 1px solid #ececec;
+  border-radius: 6px;
+}
+.alfera .popup-int-tile img {
+  display: block;
+  border-radius: 3px;
+}
+
+/* Activity */
+.alfera .popup-list-activity {
+  gap: 7px;
+}
+.alfera .popup-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: #1d1c1d;
+}
+.alfera .popup-activity-row svg {
+  flex-shrink: 0;
+}
+.alfera .popup-activity-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #454545;
+}
+.alfera .popup-activity-time {
+  font-size: 10.5px;
+  color: #8f8f8f;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1380px) {
+  .alfera .popup-skills {
+    left: -160px;
+  }
+  .alfera .popup-tools {
+    left: -170px;
+  }
+  .alfera .popup-integrations {
+    right: -150px;
+  }
+  .alfera .popup-activity {
+    right: -160px;
+  }
+}
+@media (max-width: 1180px) {
+  .alfera .float-popup {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alfera .float-popup {
+    transform: rotate(0deg);
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* --- Slack thread (DM-style) --- */
+.alfera .st {
+  padding: 6px 0 10px;
+  display: flex;
+  flex-direction: column;
+  max-height: 520px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+}
+.alfera .st-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid #ebebeb;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #171717;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.alfera .st-hash {
+  color: #8f8f8f;
+  font-weight: 500;
+}
+.alfera .st-head-name {
+  color: #171717;
+}
+
+.alfera .st-msg {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 10px;
+  padding: 7px 18px;
+  opacity: 0;
+  animation: hero-fade-up 0.45s ease-out forwards;
+}
+.alfera .st-msg:hover {
+  background: #fafafa;
+}
+.alfera .st-msg:nth-of-type(1) {
+  animation-delay: 0.05s;
+}
+.alfera .st-msg:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+.alfera .st-msg:nth-of-type(3) {
+  animation-delay: 0.25s;
+}
+.alfera .st-msg:nth-of-type(4) {
+  animation-delay: 0.35s;
+}
+.alfera .st-msg:nth-of-type(5) {
+  animation-delay: 0.45s;
+}
+
+.alfera .st-msg-avatar {
+  line-height: 0;
+}
+.alfera .st-avatar-agent {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  line-height: 0;
+}
+.alfera .st-avatar-agent svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.alfera .st-avatar-person {
+  display: inline-block;
+  line-height: 0;
+}
+
+.alfera .st-msg-body {
+  min-width: 0;
+}
+.alfera .st-msg-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+.alfera .st-msg-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #171717;
+  letter-spacing: -0.01em;
+}
+.alfera .st-app-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: #dddddd;
+  color: #5c5c5c;
+  text-transform: uppercase;
+  position: relative;
+  top: -1px;
+}
+.alfera .st-msg-title {
+  font-size: 11.5px;
+  color: #8f8f8f;
+  font-weight: 400;
+}
+.alfera .st-msg-time {
+  font-size: 12px;
+  color: #8f8f8f;
+  font-variant-numeric: tabular-nums;
+}
+.alfera .st-msg-content {
+  font-size: 14px;
+  color: #1d1c1d;
+  line-height: 1.5;
+  letter-spacing: -0.003em;
+}
+.alfera .st-msg-content code {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, "Menlo", monospace;
+  font-size: 12.5px;
+  background: #f4f4f4;
+  color: #c7254e;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #ebebeb;
+}
+
+/* @mention pill */
+.alfera .st-mention {
+  display: inline-block;
+  background: #e8f3ff;
+  color: #1264a3;
+  font-weight: 500;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+.alfera .st-mention[data-tone="engineering"] {
+  background: #eef0ff;
+  color: #2b5bff;
+}
+
+/* Reactions */
+.alfera .st-reactions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.alfera .st-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #efefef;
+  font-size: 12px;
+  color: #1d1c1d;
+}
+.alfera .st-reaction-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+.alfera .st-reaction-count {
+  font-weight: 500;
+  font-size: 11.5px;
+  color: #1d1c1d;
+  font-variant-numeric: tabular-nums;
+}
+.alfera .st-reaction-add {
+  background: transparent;
+  color: #8f8f8f;
+  padding: 0 6px;
+  height: 22px;
+}
+.alfera .st-reaction-add:hover {
+  background: #efefef;
+}
+
+/* Working panel (task plan) */
+.alfera .wp {
+  margin-top: 8px;
+  border-top: 1px solid #ececec;
+  padding-top: 10px;
+}
+.alfera .wp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #454545;
+  margin-bottom: 8px;
+}
+.alfera .wp-head-label {
+  font-weight: 500;
+  color: #1d1c1d;
+}
+.alfera .wp-head-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8f8f8f;
+  font-weight: 400;
+}
+.alfera .wp-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alfera .wp-step {
+  padding: 0;
+}
+.alfera .wp-step-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #454545;
+  letter-spacing: -0.003em;
+  line-height: 1.4;
+}
+.alfera .wp-bullet {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1.5px solid #c7c7c7;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+.alfera .wp-step[data-state="done"] .wp-bullet {
+  background: #1d1c1d;
+  border-color: #1d1c1d;
+}
+.alfera .wp-step[data-state="done"] .wp-step-title {
+  color: #1d1c1d;
+}
+.alfera .wp-step[data-state="current"] .wp-bullet {
+  border-color: #1d1c1d;
+  box-shadow: 0 0 0 3px rgba(29, 28, 29, 0.08);
+  animation: wp-pulse 1.8s ease-in-out infinite;
+}
+.alfera .wp-step[data-state="current"] .wp-step-title {
+  color: #1d1c1d;
+  font-weight: 500;
+}
+.alfera .wp-step-title {
+  font-weight: 400;
+}
+
+.alfera .wp-substeps {
+  list-style: none;
+  margin: 4px 0 0 24px;
+  padding: 0 0 0 14px;
+  border-left: 1px solid #ececec;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.alfera .wp-sub {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #454545;
+  letter-spacing: -0.003em;
+}
+.alfera .wp-sub-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #8f8f8f;
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+.alfera .wp-sub-text {
+  color: #454545;
+}
+.alfera .wp-sub-tool {
+  align-items: center;
+  gap: 7px;
+}
+.alfera .wp-sub-logo {
+  border-radius: 3px;
+  display: block;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+.alfera .wp-sub-call {
+  font-size: 13px;
+  color: #454545;
+}
+.alfera .wp-sub-call-mono {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, "Menlo", monospace;
+  font-size: 12px;
+  color: #1d1c1d;
+  background: #f4f4f4;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #ececec;
+}
+.alfera .wp-sub-call-arg {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, "Menlo", monospace;
+  font-size: 12px;
+  color: #1264a3;
+}
+
+@keyframes wp-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(29, 28, 29, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(29, 28, 29, 0.04);
+  }
+}
+
+/* Unfurl card (Linear / GitHub link preview) */
+.alfera .st-unfurl {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 8px;
+  max-width: 480px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #ffffff;
+  border-left: 4px solid #dddddd;
+  box-shadow: inset 0 0 0 1px #ebebeb;
+  text-decoration: none;
+  font-size: 13px;
+  color: #1d1c1d;
+}
+.alfera .st-unfurl:hover {
+  background: #fafafa;
+}
+.alfera .st-unfurl-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #454545;
+}
+.alfera .st-unfurl-icon img {
+  display: block;
+  border-radius: 2px;
+}
+.alfera .st-unfurl-id {
+  font-family: var(--font-geist-mono), "Geist Mono", ui-monospace, "Menlo", monospace;
+  font-size: 11.5px;
+  color: #8f8f8f;
+}
+.alfera .st-unfurl-title {
+  font-weight: 500;
+  color: #1264a3;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alfera .st-unfurl-meta {
+  grid-column: 1 / -1;
+  font-size: 11.5px;
+  color: #8f8f8f;
+  margin-top: 2px;
+}
+
+/* --- Reactions --- */
+.alfera .reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #ebebeb;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #171717;
+}
+.alfera .reaction-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+.alfera .reaction-count {
+  font-weight: 500;
+  font-size: 11.5px;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+.alfera .reaction-add {
+  color: #8f8f8f;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* --- Roster --- */
+.alfera .roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 6px;
+}
+.alfera .roster-head {
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid #ebebeb;
+  margin-bottom: 6px;
+}
+.alfera .roster-title {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: #171717;
+}
+.alfera .roster-sub {
+  font-size: 11.5px;
+  color: #8f8f8f;
+  margin-top: 2px;
+}
+.alfera .agent-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: transparent;
+  transition: background 120ms ease;
+}
+.alfera .agent-card + .agent-card {
+  border-top: 1px solid #f2f2f2;
+  border-radius: 0;
+}
+.alfera .agent-card:hover {
+  background: #fafafa;
+}
+.alfera .agent-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.alfera .agent-avatar {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  line-height: 0;
+  flex-shrink: 0;
+}
+.alfera .agent-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.alfera .agent-id {
+  min-width: 0;
+  flex: 1;
+}
+.alfera .agent-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #171717;
+  letter-spacing: -0.005em;
+}
+.alfera .agent-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+  animation: hero-pulse 2.6s ease-in-out infinite;
+}
+.alfera .agent-role {
+  font-size: 11.5px;
+  color: #8f8f8f;
+  margin-top: 1px;
+  letter-spacing: 0;
+}
+.alfera .agent-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.alfera .agent-stat-num {
+  font-size: 20px;
+  font-weight: 500;
+  color: #171717;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+}
+.alfera .agent-stat-label {
+  font-size: 11.5px;
+  color: #666;
+  line-height: 1.3;
+}
+.alfera .agent-apps {
+  display: flex;
+  gap: -4px;
+}
+.alfera .agent-app {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1.5px #ffffff,
+    0 0 0 2.5px rgba(0, 0, 0, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.alfera .agent-app + .agent-app {
+  margin-left: -4px;
+}
+.alfera .agent-app img {
+  width: 14px;
+  height: 14px;
+  display: block;
+  border-radius: 2px;
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes hero-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alfera .hero-stage *,
+  .alfera .st-msg {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* --- Responsive --- */
+@media (max-width: 960px) {
+  .alfera .hero-stage {
+    grid-template-columns: 1fr;
+  }
+  .alfera .roster {
+    order: 2;
+  }
+  .alfera .st {
+    order: 1;
+  }
+}
+@media (max-width: 640px) {
+  .alfera .hero-collab-wrap {
+    padding: 0 12px;
+  }
+  .alfera .st-head {
+    padding: 10px 14px 8px;
+    font-size: 13px;
+  }
+  .alfera .st-msg {
+    padding: 6px 14px;
+    grid-template-columns: 32px 1fr;
+    gap: 8px;
+  }
+  .alfera .st-avatar-agent {
+    width: 32px;
+    height: 32px;
+  }
+  .alfera .st-msg-content {
+    font-size: 13.5px;
+  }
+  .alfera .st-unfurl {
+    max-width: none;
+  }
+}
+
+/* Hide the floating popups on tablet/mobile so they never overflow the viewport
+   (the central thread + roster stack on their own below 960px). */
+@media (max-width: 1023px) {
+  .alfera .float-popup {
+    display: none;
+  }
+}

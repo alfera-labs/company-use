@@ -1,0 +1,82 @@
+{
+  "node_key": "attio-create_note-1",
+  "display_name": "Create Attio Note",
+  "description": "Add a note to one Attio record — a person, company, deal or any object. Plain text. A title is optional and defaults to the first line of the note.",
+  "implementation": "execute",
+  "required_scopes": ["note:read-write", "record_permission:read", "object_configuration:read"],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "object": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The record's object slug or id, for example 'people', 'companies' or 'deals'."
+      },
+      "record_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The record the note goes on."
+      },
+      "content": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10000,
+        "description": "The note, as plain text. Line breaks are kept."
+      },
+      "title": {
+        "type": "string",
+        "maxLength": 200,
+        "description": "Optional. Shown above the note in Attio; defaults to the first line of the content."
+      }
+    },
+    "required": ["object", "record_id", "content"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "note_id": { "type": "string" },
+      "object": { "type": "string" },
+      "record_id": { "type": "string" },
+      "title": { "type": "string" },
+      "content": { "type": "string" },
+      "created_at": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+    },
+    "required": ["note_id", "object", "record_id", "title", "content", "created_at"]
+  },
+  "response_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "data": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "object",
+            "properties": {
+              "workspace_id": { "type": "string" },
+              "note_id": { "type": "string" }
+            },
+            "required": ["workspace_id", "note_id"],
+            "additionalProperties": {}
+          },
+          "parent_object": { "type": "string" },
+          "parent_record_id": { "type": "string" },
+          "title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "content_plaintext": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "created_at": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+        },
+        "required": ["id", "parent_object", "parent_record_id"],
+        "additionalProperties": {}
+      }
+    },
+    "required": ["data"],
+    "additionalProperties": {}
+  },
+  "quirks": {
+    "one_endpoint": "POST /v2/notes takes one note. parent_object accepts a slug or an object id; parent_record_id is the record's uuid.",
+    "format": "Attio stores notes as plaintext or markdown; this node always sends plaintext so what the run wrote is what a person reads.",
+    "scope": "Notes need note:read-write on the token, on top of the record scopes every other node here needs."
+  }
+}

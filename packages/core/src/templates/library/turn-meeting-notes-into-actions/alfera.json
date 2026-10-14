@@ -1,0 +1,94 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "Actions that exist somewhere other than a document nobody reopens.",
+  "summary_text": "Create owned, dated actions from saved meeting notes.",
+  "icon": "✅",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "operations",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "operations-managers",
+      "is_primary": false
+    },
+    {
+      "facet_kind": "topic",
+      "facet_key": "featured",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Only what somebody committed to",
+    "A named owner on every action",
+    "A date, asked for when the notes miss it",
+    "The discussion left behind"
+  ],
+  "what_it_does": [
+    "Only takes things somebody actually committed to",
+    "Every action gets a named owner, never \"the team\"",
+    "Asks for a date when the notes did not give one",
+    "Skips the discussion, keeps the commitments"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read meeting notes",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "create tracked actions",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "google_drive",
+      "requirement_label": "Google Drive",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The notes it reads."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "notion",
+      "requirement_label": "Notion",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "Where the actions are created."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "notes_folder",
+      "label": "The notes folder",
+      "input_type": "document"
+    },
+    {
+      "input_key": "tracker",
+      "label": "Where the actions are created",
+      "input_type": "list"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "something_happens",
+      "listens_to": {
+        "node_key": "google_drive-file_updated",
+        "app_key": "google_drive",
+        "listener_config": {}
+      },
+      "label": "when notes are saved",
+      "note": "Only the folder you choose"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Point it at a document whenever you like"
+    }
+  ]
+}

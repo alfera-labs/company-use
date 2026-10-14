@@ -1,0 +1,101 @@
+{
+  "node_key": "google_drive-list_folders-1",
+  "display_name": "List Drive Folders",
+  "description": "List the folders inside one Drive folder, as the options a person picks from. `parent_id` is the folder to open; omit it to start at My Drive's root. `query` keeps only folders whose name contains that text. Trashed folders are never returned. Pass `next_cursor` back as `cursor` for the next page; a null `next_cursor` ends the list. This is the browse node behind the google_drive sync picker, so its output is the scope-option shape: id, label, kind, has_children, selectable.",
+  "required_scopes": ["https://www.googleapis.com/auth/drive.readonly"],
+  "implementation": "execute",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "parent_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The folder to open. Omit for My Drive's root, which Drive names \"root\"."
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Keep only folders whose name contains this text."
+      },
+      "cursor": {
+        "type": "string",
+        "description": "The next_cursor from the previous call. Omit for the first page."
+      },
+      "limit": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 1000,
+        "description": "Folders per page, 1 to 1000. Drive defaults to 100."
+      }
+    }
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["options", "next_cursor"],
+    "additionalProperties": false,
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "kind", "has_children", "selectable"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "sublabel": { "type": "string" },
+            "preview": { "type": "string" },
+            "kind": { "type": "string" },
+            "has_children": { "type": "boolean" },
+            "selectable": { "type": "boolean" }
+          }
+        }
+      },
+      "next_cursor": { "type": ["string", "null"] }
+    }
+  },
+  "requests": {
+    "folders_list": {
+      "method": "GET",
+      "path": "files",
+      "query": {
+        "q": "built by execute.ts: trashed = false, the folder mime type, the parent, and the optional name filter",
+        "fields": "nextPageToken, files(id, name)",
+        "orderBy": "name",
+        "includeItemsFromAllDrives": true,
+        "supportsAllDrives": true,
+        "pageToken": "input.cursor",
+        "pageSize": "input.limit"
+      },
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "description": "files.list under the folder mime type. Lenient on purpose: Drive omits a field rather than sending null and adds fields between releases.",
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "nextPageToken": { "type": ["string", "null"] }
+        }
+      }
+    }
+  },
+  "quirks": {
+    "why_execute": "Drive expresses every filter in one `q` string with its own quoting rules, so the query is built in code, exactly as google_drive-list_files-1 builds its own.",
+    "query_escaping": "Drive quotes values in single quotes and escapes with a backslash, so a folder name containing an apostrophe would otherwise be a syntax error.",
+    "has_children_is_always_true": "Drive cannot say whether a folder has subfolders without a second list call per folder, which would cost one request per row. So every folder reports has_children true and the picker finds an empty child page when it opens one. A cheap answer, and never a folder a person cannot open.",
+    "root_is_the_default_parent": "Omitting parent_id lists My Drive's root, which Drive addresses by the literal id \"root\".",
+    "shared_drives": "supportsAllDrives and includeItemsFromAllDrives are both always sent, so a shared-drive folder appears once the caller opens one. A shared drive's own top level is NOT under \"root\", so the root page shows My Drive only. Listing the shared drives themselves is drives.list, a second endpoint and a v2 of this node.",
+    "dropped_rows": "An entry with no id or name is not a folder anyone can pick, so it is dropped and the rest of the page is kept."
+  }
+}

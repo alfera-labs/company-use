@@ -1,0 +1,45 @@
+{
+  "_source": "Doc-derived, not recorded: Granola's public API needs a Business-plan grn_ key that this repo does not hold. Every field and value comes from the published OpenAPI examples for GET /v1/notes/{note_id}/transcript — https://docs.granola.ai/api-reference/openapi.json and https://docs.granola.ai/api-reference/get-transcript. The macos_* pages carry the macOS speaker shape (source + attribution); ios_page carries the iOS shape (diarization_label, no attribution). Re-record against a real key when one exists.",
+  "macos_page_one": {
+    "transcript": [
+      {
+        "speaker": { "source": "microphone", "attribution": "me" },
+        "text": "Let's start with the numbers for this quarter.",
+        "start_time": "2026-01-27T15:30:00Z",
+        "end_time": "2026-01-27T15:30:06Z"
+      },
+      {
+        "speaker": { "source": "speaker", "attribution": "them", "name": "Raisin Patel" },
+        "text": "Agreed. Revenue is up and the plan holds.",
+        "start_time": "2026-01-27T15:30:07Z",
+        "end_time": "2026-01-27T15:30:13Z"
+      }
+    ],
+    "hasMore": true,
+    "cursor": "eyJyb3dfb2Zmc2V0Ijo1MCwiaXRlbV9vZmZzZXQiOjB9"
+  },
+  "macos_last_page": {
+    "transcript": [
+      {
+        "speaker": { "source": "microphone", "attribution": "me" },
+        "text": "Then we move the whole budget to Greek and close the quarter.",
+        "start_time": "2026-01-27T15:30:14Z",
+        "end_time": "2026-01-27T15:30:20Z"
+      }
+    ],
+    "hasMore": false,
+    "cursor": null
+  },
+  "ios_page": {
+    "transcript": [
+      {
+        "speaker": { "source": "microphone", "diarization_label": "Speaker A" },
+        "text": "Let's start with the numbers for this quarter.",
+        "start_time": "2026-01-27T15:30:00Z",
+        "end_time": "2026-01-27T15:30:06Z"
+      }
+    ],
+    "hasMore": false,
+    "cursor": null
+  }
+}

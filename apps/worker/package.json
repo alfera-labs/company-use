@@ -1,0 +1,32 @@
+{
+  "license": "AGPL-3.0-only",
+  "name": "@coworker/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenvx run -f ../../.env.keys -f ../../.env.local -f ../../.env.development -- bun --watch --no-env-file --preload ./src/instrument.ts src/server.ts",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "bundle": "rm -rf dist && bun build --target=bun --splitting --outdir=dist src/instrument.ts src/server.ts",
+    "start": "dotenvx run -f ../../.env.production -- bun --no-env-file --preload ./src/instrument.ts src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bash ../../scripts/test-env.sh vitest run --maxWorkers=1 apps/worker/src"
+  },
+  "dependencies": {
+    "@coworker/config": "workspace:*",
+    "@coworker/core": "workspace:*",
+    "@coworker/jobs": "workspace:*",
+    "@coworker/runtime-platform": "workspace:*",
+    "@coworker/shared": "workspace:*",
+    "@dotenvx/dotenvx": "^1.51.1",
+    "@hono/node-server": "^1.19.6",
+    "@sentry/node": "^10.60.0",
+    "rivetkit": "2.3.21",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "drizzle-orm": "^0.45.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

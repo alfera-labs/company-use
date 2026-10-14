@@ -1,0 +1,395 @@
+{
+  "comment": [
+    "Every way this deployment can reach a language model, one record per proxy.",
+    "A proxy is who we call and which credential we present \u2014 not who provided the model.",
+    "Claude is provided by Anthropic whether we buy it direct or through Vercel's gateway.",
+    "Adding a proxy is a record here plus its credential in the environment. No code change:",
+    "every field below either names data (a URL, an env name, a model name) or selects one of a",
+    "finite set of named operations that already exist in code. The operation vocabularies are",
+    "listed in model_configuration_schema.ts, and tsc checks this file on every build.",
+    "Model names are read from `<prefix>_MODEL` for agent runs and `<prefix>_<USE_CASE>_MODEL`",
+    "for every other use case, with the prefix each proxy declares below.",
+    "Several proxies reach the same model, so `offer_models_made_by` names the single proxy the",
+    "catalog lists each model provider through: we buy Anthropic and OpenAI direct, and reach",
+    "every other model provider through the gateway. A model provider whose direct proxy has no",
+    "credential configured falls to the first configured proxy flagged",
+    "`offer_models_no_other_proxy_offers`, in the order of this file."
+  ],
+  "model_catalog_sources": {
+    "models_dev": {
+      "fetch_from": "https://models.dev/api.json",
+      "refresh_after_ms": 86400000,
+      "retry_after_failure_ms": 300000,
+      "request_timeout_ms": 10000
+    }
+  },
+  "model_proxies": [
+    {
+      "model_proxy": "vercel_ai_gateway",
+      "display_name": "Vercel AI Gateway",
+      "also_known_as": ["ai_gateway"],
+      "reach_models_through_pi_provider": "vercel-ai-gateway",
+      "authenticate_with_first_env_name_present": ["VERCEL_AI_GATEWAY_API_KEY"],
+      "model_ids_are_written_as": "provider_slash_model",
+      "offer_models_no_other_proxy_offers": true,
+      "models_dev_provider_name": "vercel",
+      "read_model_names_from_env_prefixed": "VERCEL_AI_GATEWAY",
+      "model_name_when_env_is_unset": "zai/glm-4.6",
+      "model_name_when_env_is_unset_by_use_case": {
+        "session_title": "openai/gpt-4.1-nano",
+        "session_summary": "openai/gpt-5.4-mini",
+        "classification": "openai/gpt-4.1-mini",
+        "onboarding_scan": "zai/glm-5.2-fast",
+        "evaluation": "openai/gpt-5.5",
+        "slack_discovery": "zai/glm-5.2-fast",
+        "slack_workflow_proposal": "zai/glm-5.2-fast"
+      },
+      "models_dev_names_of_model_providers": {
+        "spacexai": "xai"
+      }
+    },
+    {
+      "model_proxy": "anthropic_direct",
+      "display_name": "Anthropic",
+      "also_known_as": ["anthropic"],
+      "reach_models_through_pi_provider": "anthropic",
+      "authenticate_with_first_env_name_present": ["ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "anthropic",
+      "claim_model_ids_starting_with": ["claude-"],
+      "offer_models_made_by": ["anthropic"],
+      "models_dev_provider_name": "anthropic",
+      "read_model_names_from_env_prefixed": "ANTHROPIC",
+      "model_name_when_env_is_unset": "claude-sonnet-5",
+      "model_name_when_env_is_unset_by_use_case": {
+        "onboarding_scan": "claude-opus-5-5"
+      }
+    },
+    {
+      "comment": [
+        "A workspace's own ChatGPT subscription, reached with the access token its sign-in returned.",
+        "It claims no model ids and offers no model provider, so nothing routes here by accident:",
+        "only a run whose model names this proxy spends somebody's ChatGPT plan.",
+        "models.dev has no catalog for this route, so the picker lists nothing for it. Real gap, not",
+        "a hidden one: naming OpenAI's catalog here would advertise models this route cannot serve."
+      ],
+      "model_proxy": "openai_codex",
+      "display_name": "ChatGPT",
+      "also_known_as": ["openai-codex", "chatgpt"],
+      "reach_models_through_pi_provider": "openai-codex",
+      "authenticate_with_first_env_name_present": ["OPENAI_CODEX_ACCESS_TOKEN"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "openai",
+      "models_dev_provider_name": "openai-codex",
+      "read_model_names_from_env_prefixed": "OPENAI_CODEX",
+      "model_name_when_env_is_unset": "gpt-5.6-luna"
+    },
+    {
+      "comment": [
+        "A model the operator of a self-hosted install hosts, or any other server that speaks the",
+        "OpenAI chat completions API. The address is an operator setting of the install: no",
+        "workspace, chat or agent can name it. It is configured when the address is set; the key",
+        "is optional, because a server on the operator's own machine usually needs none.",
+        "Nothing is known about a model at such an address, so this proxy runs only the model",
+        "names the operator wrote in its env settings: a request for any other name runs the",
+        "operator's model for that use case. It takes any model name and so claims none, and it",
+        "is served only where the self-host switch is true, so the hosted product never routes here."
+      ],
+      "model_proxy": "openai_compatible",
+      "display_name": "Your own model",
+      "also_known_as": ["openai-compatible"],
+      "reach_models_through_pi_provider": "openai-compatible",
+      "reach_models_at_the_address_in_env": "OPENAI_COMPATIBLE_BASE_URL",
+      "serve_only_when_env_is_true": "COWORKER_SELF_HOSTED",
+      "run_only_the_models_named_in_env": true,
+      "authenticate_with_first_env_name_present": ["OPENAI_COMPATIBLE_API_KEY"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "openai_compatible",
+      "models_dev_provider_name": "openai-compatible",
+      "read_model_names_from_env_prefixed": "OPENAI_COMPATIBLE",
+      "model_name_when_env_is_unset": "default"
+    },
+    {
+      "model_proxy": "openai_direct",
+      "display_name": "OpenAI",
+      "also_known_as": ["openai"],
+      "reach_models_through_pi_provider": "openai",
+      "authenticate_with_first_env_name_present": ["OPENAI_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "openai",
+      "claim_model_ids_no_other_proxy_claims": true,
+      "offer_models_made_by": ["openai"],
+      "models_dev_provider_name": "openai",
+      "read_model_names_from_env_prefixed": "OPENAI",
+      "model_name_when_env_is_unset": "gpt-5.5",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "gpt-5.6-luna",
+        "session_title": "gpt-4.1-nano",
+        "session_summary": "gpt-5.6-luna",
+        "classification": "gpt-4.1-mini",
+        "onboarding_scan": "gpt-5.6-luna",
+        "slack_discovery": "gpt-5.6-luna",
+        "slack_workflow_proposal": "gpt-5.6-luna"
+      }
+    },
+    {
+      "model_proxy": "openrouter",
+      "display_name": "OpenRouter",
+      "reach_models_through_pi_provider": "openrouter",
+      "authenticate_with_first_env_name_present": ["OPENROUTER_API_KEY"],
+      "model_ids_are_written_as": "provider_slash_model",
+      "offer_models_no_other_proxy_offers": true,
+      "models_dev_provider_name": "openrouter",
+      "read_model_names_from_env_prefixed": "OPENROUTER",
+      "model_name_when_env_is_unset": "openai/gpt-5.4-mini",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "anthropic/claude-sonnet-5",
+        "session_title": "openai/gpt-5.4-nano",
+        "evaluation": "openai/gpt-5.5"
+      },
+      "suggest_as_one_key_for_every_model": true,
+      "models_dev_names_of_model_providers": {
+        "x-ai": "xai",
+        "z-ai": "zai",
+        "mistralai": "mistral",
+        "qwen": "alibaba",
+        "meta-llama": "llama"
+      }
+    },
+    {
+      "model_proxy": "google_direct",
+      "display_name": "Google",
+      "also_known_as": ["google", "gemini"],
+      "reach_models_through_pi_provider": "google",
+      "authenticate_with_first_env_name_present": ["GEMINI_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "google",
+      "claim_model_ids_starting_with": ["gemini-", "gemma-"],
+      "offer_models_made_by": ["google"],
+      "models_dev_provider_name": "google",
+      "read_model_names_from_env_prefixed": "GEMINI",
+      "model_name_when_env_is_unset": "gemini-3.5-flash-lite",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "gemini-3.6-flash",
+        "evaluation": "gemini-3.6-flash"
+      }
+    },
+    {
+      "model_proxy": "xai_direct",
+      "display_name": "xAI",
+      "also_known_as": ["xai"],
+      "reach_models_through_pi_provider": "xai",
+      "authenticate_with_first_env_name_present": ["XAI_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "xai",
+      "claim_model_ids_starting_with": ["grok-"],
+      "offer_models_made_by": ["xai"],
+      "models_dev_provider_name": "xai",
+      "read_model_names_from_env_prefixed": "XAI",
+      "model_name_when_env_is_unset": "grok-4.3",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "grok-4.5",
+        "evaluation": "grok-4.5"
+      }
+    },
+    {
+      "model_proxy": "deepseek_direct",
+      "display_name": "DeepSeek",
+      "also_known_as": ["deepseek"],
+      "reach_models_through_pi_provider": "deepseek",
+      "authenticate_with_first_env_name_present": ["DEEPSEEK_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "deepseek",
+      "claim_model_ids_starting_with": ["deepseek-"],
+      "offer_models_made_by": ["deepseek"],
+      "models_dev_provider_name": "deepseek",
+      "read_model_names_from_env_prefixed": "DEEPSEEK",
+      "model_name_when_env_is_unset": "deepseek-v4-flash",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "deepseek-v4-pro",
+        "evaluation": "deepseek-v4-pro"
+      }
+    },
+    {
+      "model_proxy": "mistral_direct",
+      "display_name": "Mistral",
+      "also_known_as": ["mistral"],
+      "reach_models_through_pi_provider": "mistral",
+      "authenticate_with_first_env_name_present": ["MISTRAL_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "mistral",
+      "claim_model_ids_starting_with": [
+        "mistral-",
+        "ministral-",
+        "magistral-",
+        "codestral-",
+        "devstral-",
+        "pixtral-"
+      ],
+      "offer_models_made_by": ["mistral"],
+      "models_dev_provider_name": "mistral",
+      "read_model_names_from_env_prefixed": "MISTRAL",
+      "model_name_when_env_is_unset": "mistral-small-latest",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "mistral-medium-latest",
+        "evaluation": "mistral-medium-latest"
+      }
+    },
+    {
+      "comment": [
+        "Groq serves models other labs made, and names some of them with a slash, so its ids take",
+        "any shape and claim none. Every model listed through Groq counts as Groq's."
+      ],
+      "model_proxy": "groq_direct",
+      "display_name": "Groq",
+      "also_known_as": ["groq"],
+      "reach_models_through_pi_provider": "groq",
+      "authenticate_with_first_env_name_present": ["GROQ_API_KEY"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "groq",
+      "offer_models_made_by": ["groq"],
+      "models_dev_provider_name": "groq",
+      "read_model_names_from_env_prefixed": "GROQ",
+      "model_name_when_env_is_unset": "openai/gpt-oss-120b"
+    },
+    {
+      "model_proxy": "moonshotai_direct",
+      "display_name": "Moonshot AI",
+      "also_known_as": ["moonshot", "kimi"],
+      "reach_models_through_pi_provider": "moonshotai",
+      "authenticate_with_first_env_name_present": ["MOONSHOT_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "moonshotai",
+      "claim_model_ids_starting_with": ["kimi-"],
+      "offer_models_made_by": ["moonshotai"],
+      "models_dev_provider_name": "moonshotai",
+      "read_model_names_from_env_prefixed": "MOONSHOT",
+      "model_name_when_env_is_unset": "kimi-k2.6",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "kimi-k3",
+        "evaluation": "kimi-k3"
+      }
+    },
+    {
+      "model_proxy": "minimax_direct",
+      "display_name": "MiniMax",
+      "also_known_as": ["minimax"],
+      "reach_models_through_pi_provider": "minimax",
+      "authenticate_with_first_env_name_present": ["MINIMAX_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "minimax",
+      "claim_model_ids_starting_with": ["MiniMax-"],
+      "offer_models_made_by": ["minimax"],
+      "models_dev_provider_name": "minimax",
+      "read_model_names_from_env_prefixed": "MINIMAX",
+      "model_name_when_env_is_unset": "MiniMax-M3"
+    },
+    {
+      "model_proxy": "xiaomi_direct",
+      "display_name": "Xiaomi",
+      "also_known_as": ["xiaomi", "mimo"],
+      "reach_models_through_pi_provider": "xiaomi",
+      "authenticate_with_first_env_name_present": ["XIAOMI_API_KEY"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "xiaomi",
+      "claim_model_ids_starting_with": ["mimo-"],
+      "offer_models_made_by": ["xiaomi"],
+      "models_dev_provider_name": "xiaomi",
+      "read_model_names_from_env_prefixed": "XIAOMI",
+      "model_name_when_env_is_unset": "mimo-v2-flash",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "mimo-v2.5-pro",
+        "evaluation": "mimo-v2.5-pro"
+      }
+    },
+    {
+      "model_proxy": "cerebras_direct",
+      "display_name": "Cerebras",
+      "also_known_as": ["cerebras"],
+      "reach_models_through_pi_provider": "cerebras",
+      "authenticate_with_first_env_name_present": ["CEREBRAS_API_KEY"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "cerebras",
+      "offer_models_made_by": ["cerebras"],
+      "models_dev_provider_name": "cerebras",
+      "read_model_names_from_env_prefixed": "CEREBRAS",
+      "model_name_when_env_is_unset": "gpt-oss-120b"
+    },
+    {
+      "model_proxy": "together_direct",
+      "display_name": "Together AI",
+      "also_known_as": ["together", "togetherai"],
+      "reach_models_through_pi_provider": "together",
+      "authenticate_with_first_env_name_present": ["TOGETHER_API_KEY"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "together",
+      "offer_models_made_by": ["together"],
+      "models_dev_provider_name": "togetherai",
+      "read_model_names_from_env_prefixed": "TOGETHER",
+      "model_name_when_env_is_unset": "openai/gpt-oss-120b",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "moonshotai/Kimi-K2.6",
+        "evaluation": "moonshotai/Kimi-K2.6"
+      }
+    },
+    {
+      "model_proxy": "fireworks_direct",
+      "display_name": "Fireworks",
+      "also_known_as": ["fireworks"],
+      "reach_models_through_pi_provider": "fireworks",
+      "authenticate_with_first_env_name_present": ["FIREWORKS_API_KEY"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "fireworks",
+      "offer_models_made_by": ["fireworks"],
+      "models_dev_provider_name": "fireworks-ai",
+      "read_model_names_from_env_prefixed": "FIREWORKS",
+      "model_name_when_env_is_unset": "accounts/fireworks/models/gpt-oss-120b",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "accounts/fireworks/models/kimi-k2p6",
+        "evaluation": "accounts/fireworks/models/kimi-k2p6"
+      }
+    },
+    {
+      "model_proxy": "huggingface_direct",
+      "display_name": "Hugging Face",
+      "also_known_as": ["huggingface", "hf"],
+      "reach_models_through_pi_provider": "huggingface",
+      "authenticate_with_first_env_name_present": ["HF_TOKEN"],
+      "model_ids_are_written_as": "any_model_name",
+      "model_provider": "huggingface",
+      "offer_models_made_by": ["huggingface"],
+      "models_dev_provider_name": "huggingface",
+      "read_model_names_from_env_prefixed": "HUGGINGFACE",
+      "model_name_when_env_is_unset": "openai/gpt-oss-120b",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "moonshotai/Kimi-K2.6",
+        "evaluation": "moonshotai/Kimi-K2.6"
+      }
+    },
+    {
+      "comment": [
+        "A ChatGPT plan, connected through OpenAI's sign-in for open-source and self-hosted apps.",
+        "Runs go to OpenAI's public Responses API with the plan's access token, never to ChatGPT's",
+        "own endpoints.",
+        "Served only on a self-hosted install: OpenAI offers this sign-in to self-hosted apps only."
+      ],
+      "model_proxy": "chatgpt_plan",
+      "display_name": "ChatGPT",
+      "also_known_as": ["chatgpt-plan"],
+      "reach_models_through_pi_provider": "openai",
+      "serve_only_when_env_is_true": "COWORKER_SELF_HOSTED",
+      "authenticate_with_first_env_name_present": ["CHATGPT_PLAN_ACCESS_TOKEN"],
+      "model_ids_are_written_as": "bare_model_name",
+      "model_provider": "openai",
+      "offer_only_the_model_ids_listed_in_env": "CHATGPT_PLAN_MODEL_IDS",
+      "rewrite_provider_payload_as": "chatgpt_plan_responses",
+      "models_dev_provider_name": "openai",
+      "read_model_names_from_env_prefixed": "CHATGPT_PLAN",
+      "model_name_when_env_is_unset": "gpt-5.6-luna",
+      "model_name_when_env_is_unset_by_use_case": {
+        "agent_run": "gpt-6.1-sol",
+        "evaluation": "gpt-6.1-sol"
+      }
+    }
+  ]
+}

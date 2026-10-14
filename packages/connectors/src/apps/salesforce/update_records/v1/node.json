@@ -1,0 +1,181 @@
+{
+  "node_key": "salesforce-update_records-1",
+  "display_name": "Update Salesforce Records",
+  "description": "Update a batch of existing Salesforce records in one call. Each item names its object type, the record id, and only the fields to change. Object types may be mixed in one batch, and every item gets its own success or error result.",
+  "implementation": "execute",
+  "required_scopes": ["api"],
+  "atomic": false,
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "records": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "sobject_type": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The Salesforce object API name, for example \"Account\", \"Contact\", or \"My_Object__c\"."
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The 15 or 18 character Salesforce record id to update."
+            },
+            "fields": {
+              "type": "object",
+              "description": "Only the field values to change, keyed by field API name. Fields left out keep their current values.",
+              "additionalProperties": true
+            }
+          },
+          "required": ["sobject_type", "id", "fields"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["records"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "description": "One result per input record, in the order they were sent.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer",
+              "description": "The record's position in the input array."
+            },
+            "id": {
+              "type": ["string", "null"],
+              "description": "The updated record id, echoed back. Null when the record was rejected."
+            },
+            "success": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status_code": {
+                    "type": ["string", "null"]
+                  },
+                  "message": {
+                    "type": ["string", "null"]
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["status_code", "message", "fields"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["index", "id", "success", "errors"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["results"],
+    "additionalProperties": false
+  },
+  "requests": {
+    "composite_update": {
+      "method": "PATCH",
+      "path": "/services/data/v61.0/composite/sobjects",
+      "response_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "success": {
+              "type": "boolean"
+            },
+            "errors": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fields": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": ["success"],
+          "additionalProperties": {}
+        }
+      }
+    }
+  },
+  "quirks": {
+    "why_execute_and_not_http": "The call host is per connection (see salesforce_api.ts), and more than 200 records must be split into whole composite batches. Neither fits a declarative http mapping.",
+    "endpoint": "PATCH /services/data/v61.0/composite/sobjects — a real batch endpoint, up to 200 records of mixed object types per call.",
+    "all_or_none_false": "The body sends allOrNone: false on purpose. One rejected row must not roll back its 199 neighbours; the caller gets per-item errors instead of one opaque failure.",
+    "chunking": "Above 200 records the node fans out over 200-record chunks under the app's rate limits and flattens the results back into the caller's order. A chunk that never reached Salesforce yields one named failure per record in it, so the results array always has one entry per input record.",
+    "object_type_travels_in_attributes": "Salesforce reads the object type from a per-record attributes: { type } block and the record id from a per-record id field. The node writes both after the caller fields, so a field named attributes or id cannot hide them.",
+    "partial_update_only": "Only the named fields change. This is a PATCH, so a field left out of fields is left alone, not blanked."
+  }
+}

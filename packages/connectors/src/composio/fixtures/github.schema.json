@@ -1,0 +1,37 @@
+{
+  "toolkit_slug": "github",
+  "verified_time": null,
+  "source": "offline_placeholder",
+  "tools": {
+    "GITHUB_LIST_REPOSITORIES_FOR_THE_AUTHENTICATED_USER": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "GITHUB_FIND_PULL_REQUESTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    "GITHUB_SEARCH_ISSUES_AND_PULL_REQUESTS": {
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "output": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

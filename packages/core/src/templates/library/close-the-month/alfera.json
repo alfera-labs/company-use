@@ -1,0 +1,89 @@
+{
+  "sidecar_version": 1,
+  "outcome_text": "A close that takes an afternoon instead of a week.",
+  "summary_text": "Run your close checklist, chase what's missing, report what's left.",
+  "icon": "📊",
+  "listing_state": "ready",
+  "facets": [
+    {
+      "facet_kind": "category",
+      "facet_key": "finance",
+      "is_primary": true
+    },
+    {
+      "facet_kind": "role",
+      "facet_key": "bookkeepers",
+      "is_primary": false
+    }
+  ],
+  "what_you_get": [
+    "Your checklist, in your order",
+    "The person who owes it, chased",
+    "A daily list of what is left",
+    "No step ticked that it could not verify"
+  ],
+  "what_it_does": [
+    "Walks your checklist in your order, not a generic one",
+    "Chases the person who owes the thing, not the whole channel",
+    "Reports what is left every day until it is empty",
+    "Never ticks a step it could not verify"
+  ],
+  "it_will_be_able_to": [
+    {
+      "capability": "read the ledger and the checklist",
+      "risk": "reads_data"
+    },
+    {
+      "capability": "chase people for what is missing",
+      "risk": "reaches_outside"
+    },
+    {
+      "capability": "tick off completed steps",
+      "risk": "changes_data"
+    }
+  ],
+  "requires": [
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "xero",
+      "requirement_label": "Xero",
+      "is_optional": false,
+      "requirement_config": {
+        "explain_to_the_installer": "The ledger it reconciles against."
+      }
+    },
+    {
+      "requirement_kind": "app_connection",
+      "requirement_key": "slack",
+      "requirement_label": "Slack",
+      "is_optional": true,
+      "requirement_config": {
+        "explain_to_the_installer": "Where it chases people."
+      }
+    }
+  ],
+  "asks_you_for": [
+    {
+      "input_key": "checklist",
+      "label": "Your close checklist",
+      "input_type": "document"
+    },
+    {
+      "input_key": "channel",
+      "label": "Where it chases people",
+      "input_type": "channel"
+    }
+  ],
+  "starts_when": [
+    {
+      "start_mode": "on_a_schedule",
+      "schedule_expression": "0 9 1 * *",
+      "read_timezone_from": "ask_the_installer",
+      "note": "Use your selected time and timezone"
+    },
+    {
+      "start_mode": "you_ask",
+      "note": "Run it mid-month for a dry run"
+    }
+  ]
+}

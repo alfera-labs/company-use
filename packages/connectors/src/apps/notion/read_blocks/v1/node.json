@@ -1,0 +1,157 @@
+{
+  "node_key": "notion-read_blocks-1",
+  "display_name": "Read Notion Blocks",
+  "description": "Read the content of one or more Notion pages. A page id is also a block id, so pass page ids to read page bodies. Each block comes back with its type, its text flattened to plain text, and has_children: only the first level is returned, so read a nested block by passing its id in another call. Notion returns one block's children per request, so the batch runs as bounded concurrent single requests under the connection limit of about three per second. Each id answers on its own, with its own cursor — send a returned next_cursor back as that item's `cursor` to read its next batch.",
+  "implementation": "execute",
+  "atomic": false,
+  "required_scopes": [],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "blocks": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 25,
+        "description": "The blocks or pages to read, one provider call each.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "block_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A page id, or the id of a block with has_children true."
+            },
+            "cursor": {
+              "type": "string",
+              "description": "The cursor this block returned last time. Paging is per block, because each block is its own provider call with its own pages."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": ["block_id"]
+        }
+      }
+    },
+    "required": ["blocks"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer"
+            },
+            "block_id": {
+              "type": "string"
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "blocks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The Notion block type, for example paragraph, heading_2, bulleted_list_item, to_do, image."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "The block's rich text joined to plain text. Empty for a block that carries no text, such as an image or a divider."
+                  },
+                  "has_children": {
+                    "type": "boolean",
+                    "description": "True when this block holds blocks of its own. Send its id back to read them."
+                  }
+                },
+                "required": ["id", "type", "text", "has_children"]
+              }
+            },
+            "next_cursor": {
+              "type": ["string", "null"]
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["code", "message", "retryable"]
+            }
+          },
+          "required": ["index", "block_id", "ok", "blocks", "next_cursor", "has_more", "error"]
+        }
+      }
+    },
+    "required": ["results"]
+  },
+  "response_schemas": {
+    "block_children": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Lenient ingress on GET /v1/blocks/{block_id}/children. A block's content sits under a key named after its own type, which no fixed schema can name, so only the identity fields are described and the rest rides along.",
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": ["string", "null"]
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "has_children": {
+                "type": ["boolean", "null"]
+              }
+            },
+            "required": ["id", "type"]
+          }
+        },
+        "next_cursor": {
+          "type": ["string", "null"]
+        },
+        "has_more": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "required": ["results"]
+    }
+  },
+  "quirks": {
+    "endpoint": "GET /v1/blocks/{block_id}/children",
+    "why_execute": "Notion returns one block's children per request, so the plural contract runs as a fan-out with a cursor per item. A block also keeps its text under a key named after its own type, which no static mapping can address.",
+    "one_level": "Notion returns only the first level of children. A toggle, a column, or a nested list needs another call with the child block's id.",
+    "type_keyed_payload": "A block keeps its content under a key named after its own type — a paragraph under `paragraph`, a to-do under `to_do`. The node reads that key by name, so it flattens block types Notion adds later too.",
+    "no_text_blocks": "An image, a divider, or an unfamiliar block reports empty text rather than failing the batch. Its type still comes back, so the caller knows something is there.",
+    "not_found": "A block the integration was never given access to answers 404, not an empty list.",
+    "page_id_is_a_block_id": "Notion gives a page and its block the same id, which is why this node reads page bodies."
+  }
+}

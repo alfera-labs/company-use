@@ -1,0 +1,323 @@
+{
+  "node_key": "hubspot-update_records-1",
+  "display_name": "Update HubSpot Records",
+  "description": "Update HubSpot CRM records of one object type. Each entry gives an id and only the properties to change; properties left out keep their current value. Any number of records; HubSpot's 100-per-call limit is handled for you. Each input gets a result at its own index, matched back by id, so a partly failed batch still names exactly which records did not update.",
+  "implementation": "execute",
+  "required_scopes": [
+    "crm.objects.contacts.write",
+    "crm.objects.companies.write",
+    "crm.objects.deals.write"
+  ],
+  "endpoints": [
+    {
+      "purpose": "batch_update",
+      "method": "POST",
+      "path": "/crm/v3/objects/{object_type}/batch/update",
+      "batch_size": 100
+    }
+  ],
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$|^\\d+-\\d+$",
+        "description": "contacts, companies, deals, tickets, or a custom object type id like 2-1234567"
+      },
+      "records": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The HubSpot record id, or the id_property value."
+            },
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "description": "Only the properties to change. Properties left out keep their current value."
+            }
+          },
+          "required": ["id", "properties"]
+        },
+        "description": "One entry per record to update. Any length; batching is handled for you."
+      },
+      "id_property": {
+        "description": "Address records by a unique property instead of the record id, for example \"email\".",
+        "type": "string"
+      }
+    },
+    "required": ["object_type", "records"]
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "record": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "updated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["id", "properties", "created_at", "updated_at", "archived"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["index", "ok", "record"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "const": false
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": ["index", "ok", "error"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "updated_count": {
+        "type": "integer"
+      },
+      "failed_count": {
+        "type": "integer"
+      }
+    },
+    "required": ["results", "updated_count", "failed_count"],
+    "additionalProperties": false
+  },
+  "response_schemas": {
+    "batch_update": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "updatedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "archived": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "numErrors": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "category": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "message": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "quirks": [
+    "More than 100 records is cut into 100-record calls and fanned out under the app rate limits.",
+    "Every input carries an id and every returned record carries the same id, so results map back by id, not by position. A partly failed chunk still names exactly which records did not update.",
+    "For that reason this node has no unmapped_records field: there is nothing HubSpot can return that cannot be tied to an input.",
+    "An update is a merge. Properties left out of an entry keep their current value.",
+    "id_property addresses records by a unique property such as email instead of the record id."
+  ]
+}

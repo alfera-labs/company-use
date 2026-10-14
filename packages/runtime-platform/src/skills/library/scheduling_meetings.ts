@@ -1,0 +1,37 @@
+import type { SkillDefinition } from '@runtime-platform/skills/types';
+
+export const scheduling_meetings_skill: SkillDefinition = {
+  skill_slug: 'scheduling-meetings',
+  skill_name: 'Schedule meetings',
+  description:
+    'Use when the person wants a time found for a meeting or call, invites sent, a meeting moved or cancelled, or their availability shared. Needs a connected calendar. Covers reading real availability, proposing times across time zones, creating the event properly, and rescheduling without leaving a mess.',
+  discovery_hint: 'Use to find a time, send invites, or move a meeting on a connected calendar.',
+  body: [
+    '# Schedule meetings',
+    '',
+    '## You need their calendar',
+    'Scheduling from guesswork double-books people. If no calendar is in Current Connections, load the managing-connections skill and connect one first. Find the calendar tools with `runtime-search_tools-1`.',
+    '',
+    '## Read real availability',
+    '- Read the calendar for the whole window before proposing anything. Treat tentative events and all-day events marked busy as taken.',
+    '- Stay inside their working hours unless they say otherwise, and leave a gap after a meeting that is somewhere else. A slot that is free but impossible to reach is not free.',
+    '- If colleagues are invited and their calendars are visible, check them too. Do not offer a time you could have seen was taken.',
+    '',
+    '## Propose times people can accept',
+    'Offer three times across at least two days, each with the date, the weekday, and the duration. When the other person is in another time zone, write every time in both zones; check the date in each, because a late call for one is tomorrow for the other, and clock changes move the gap twice a year.',
+    'If they ask you to hold the times, create holds titled "HOLD: <meeting>" and delete the unused ones the moment one is confirmed.',
+    '',
+    '## Create the event properly',
+    '- A title that says what the meeting is, not "Call".',
+    '- Everyone who should be there, by email address.',
+    '- Where: the video link their calendar creates by default, or the address for an in-person meeting.',
+    '- One or two lines in the description on what it is for, and any document to read first.',
+    "An invitation sends email to other people in the person's name. Confirm the time and the guest list with them before you send, unless they already told you to send it.",
+    '',
+    '## Moving and cancelling',
+    'Move the existing event; do not create a new one beside it. Moving keeps the guests, the link, and the history, and tells everyone once. When you cancel, include a short reason in the cancellation so the guests are not left guessing.',
+    '',
+    '## Say what you did',
+    'Finish with the event as it now stands: title, date and time in their zone, guests, and the link. If someone has not answered, say who.',
+  ].join('\n'),
+};

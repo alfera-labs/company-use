@@ -1,0 +1,72 @@
+{
+  "_note": "Shapes taken from the GitHub REST documentation for GET /repos/{owner}/{repo}/pulls (API version 2022-11-28). Ids, names, and urls are the documentation's own placeholders.",
+  "pull_requests_page_one": [
+    {
+      "id": 1,
+      "node_id": "MDExOlB1bGxSZXF1ZXN0MQ==",
+      "url": "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
+      "html_url": "https://github.com/octocat/Hello-World/pull/1347",
+      "diff_url": "https://github.com/octocat/Hello-World/pull/1347.diff",
+      "number": 1347,
+      "state": "open",
+      "locked": true,
+      "title": "Amazing new feature",
+      "body": "Please pull these awesome changes in!",
+      "user": { "login": "octocat", "id": 1, "type": "User", "site_admin": false },
+      "labels": [],
+      "draft": false,
+      "created_at": "2011-01-26T19:01:12Z",
+      "updated_at": "2011-01-26T19:01:12Z",
+      "closed_at": "2011-01-26T19:01:12Z",
+      "merged_at": "2011-01-26T19:01:12Z",
+      "merge_commit_sha": "e5bd3914e2e596debea16f433f57875b5b90bcd6",
+      "head": {
+        "label": "octocat:new-topic",
+        "ref": "new-topic",
+        "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+      },
+      "base": {
+        "label": "octocat:master",
+        "ref": "master",
+        "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+      },
+      "author_association": "OWNER"
+    },
+    {
+      "id": 2,
+      "node_id": "MDExOlB1bGxSZXF1ZXN0Mg==",
+      "url": "https://api.github.com/repos/octocat/Hello-World/pulls/1348",
+      "html_url": "https://github.com/octocat/Hello-World/pull/1348",
+      "diff_url": "https://github.com/octocat/Hello-World/pull/1348.diff",
+      "number": 1348,
+      "state": "open",
+      "locked": false,
+      "title": "Work in progress",
+      "body": null,
+      "user": null,
+      "labels": [],
+      "draft": true,
+      "created_at": "2011-02-01T09:00:00Z",
+      "updated_at": "2011-02-02T09:00:00Z",
+      "closed_at": null,
+      "merged_at": null,
+      "merge_commit_sha": null,
+      "head": {
+        "label": "hubot:wip",
+        "ref": "wip",
+        "sha": "aa218f56b14c9653891f9e74264a383fa43fefbd"
+      },
+      "base": {
+        "label": "octocat:main",
+        "ref": "main",
+        "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+      },
+      "author_association": "CONTRIBUTOR"
+    }
+  ],
+  "repository_not_found": {
+    "message": "Not Found",
+    "documentation_url": "https://docs.github.com/rest/pulls/pulls#list-pull-requests",
+    "status": "404"
+  }
+}

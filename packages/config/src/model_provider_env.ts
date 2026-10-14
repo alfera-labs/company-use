@@ -1,0 +1,38 @@
+import { discovery_model_env_schema } from '@coworker/config/discovery_model_env';
+import { boolean_env_schema } from '@coworker/config/env_value_schemas';
+import { z } from 'zod';
+
+export const model_provider_env_schema = {
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-5.6-luna'),
+  OPENAI_SESSION_TITLE_MODEL: z.string().optional(),
+  OPENAI_SESSION_SUMMARY_MODEL: z.string().optional(),
+  OPENAI_CLASSIFICATION_MODEL: z.string().optional(),
+  OPENAI_ONBOARDING_SCAN_MODEL: z.string().optional(),
+  OPENAI_EVALUATION_MODEL: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_OAUTH_TOKEN: z.string().optional(),
+  ANTHROPIC_MODEL: z.string().default('claude-sonnet-5'),
+  ANTHROPIC_SESSION_TITLE_MODEL: z.string().optional(),
+  ANTHROPIC_SESSION_SUMMARY_MODEL: z.string().optional(),
+  ANTHROPIC_CLASSIFICATION_MODEL: z.string().optional(),
+  ANTHROPIC_ONBOARDING_SCAN_MODEL: z.string().optional(),
+  ANTHROPIC_EVALUATION_MODEL: z.string().optional(),
+  VERCEL_AI_GATEWAY_API_KEY: z.string().optional(),
+  VERCEL_AI_GATEWAY_BASE_URL: z.string().url().optional(),
+  COWORKER_DOOR_JUDGE: z.enum(['llm', 'jev']).default('llm'),
+  VERCEL_AI_GATEWAY_MODEL: z.string().default('zai/glm-4.6'),
+  VERCEL_AI_GATEWAY_SESSION_TITLE_MODEL: z.string().optional(),
+  VERCEL_AI_GATEWAY_SESSION_SUMMARY_MODEL: z.string().optional(),
+  VERCEL_AI_GATEWAY_CLASSIFICATION_MODEL: z.string().optional(),
+  VERCEL_AI_GATEWAY_ONBOARDING_SCAN_MODEL: z.string().optional(),
+  VERCEL_AI_GATEWAY_EVALUATION_MODEL: z.string().optional(),
+  OPENAI_COMPATIBLE_BASE_URL: z.string().url().optional(),
+  OPENAI_COMPATIBLE_API_KEY: z.string().optional(),
+  OPENAI_COMPATIBLE_MODEL: z.string().optional(),
+  OPENAI_COMPATIBLE_CONTEXT_WINDOW: z.coerce.number().int().positive().optional(),
+  OPENAI_COMPATIBLE_READS_IMAGES: boolean_env_schema.optional(),
+  MODEL_GATEWAY_UNLOCKED: boolean_env_schema.default(false),
+  MODEL_CATALOG_REFRESH: boolean_env_schema.optional(),
+  ...discovery_model_env_schema,
+};

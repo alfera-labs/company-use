@@ -1,0 +1,52 @@
+{
+  "app_key": "granola",
+  "display_name": "Granola",
+  "base_url": "https://public-api.granola.ai",
+  "auth": {
+    "kind": "api_key",
+    "header": "Authorization",
+    "value_template": "Bearer {api_key}",
+    "key_prefix": "grn_",
+    "scopes": [],
+    "key_permissions": [
+      {
+        "key": "personal_notes",
+        "display_name": "Personal notes",
+        "covers": "Notes you own, notes shared directly with you, and notes in private folders shared with you."
+      },
+      {
+        "key": "public_notes",
+        "display_name": "Public notes",
+        "covers": "Notes visible to everyone in the workspace, and notes in the Team space."
+      }
+    ]
+  },
+  "rate_limits": { "rpm": 120, "concurrency": 4, "burst": 8 },
+  "sync": {
+    "prompt": "Choose which Granola folders to sync",
+    "dimensions": [
+      {
+        "key": "folders",
+        "label": "Folders",
+        "shape": "flat",
+        "browse_node": "granola-list_folders-1",
+        "allow_select_all": true
+      }
+    ]
+  },
+  "docs": {
+    "api_overview": "https://docs.granola.ai/introduction",
+    "openapi": "https://docs.granola.ai/api-reference/openapi.json",
+    "api_keys": "https://docs.granola.ai/help-center/sharing/integrations/granola-api",
+    "webhooks": "https://docs.granola.ai/webhooks"
+  },
+  "notes": {
+    "auth": "No OAuth exists. A person mints a grn_ key in the desktop app under Settings > Connectors > API keys and pastes it here; it travels as 'Authorization: Bearer grn_...'. There is no authorize url and no token url. https://docs.granola.ai/introduction",
+    "who_can_mint": "Any workspace member on a Business plan. Admins on Business and Enterprise can also mint workspace keys, which never expire and read the workspace's public notes plus the spaces granted API access. On Enterprise, an admin decides which scopes members may use.",
+    "scope_effect": "The key's permissions decide what every node can see. Granola names the two permissions in its own UI, so they live under auth.key_permissions. They are not OAuth scope strings, nothing sends them over the wire, and auth.scopes stays empty.",
+    "sync": "One dimension, folders, served by granola-list_folders-1. Flat, not a tree: one page holds every folder a key can see, and granola-list_notes-1 already includes a folder's child folders when it filters on folder_id, so picking a parent picks what is under it.",
+    "only_finished_notes": "The API returns only notes that already have a generated AI summary and transcript. A meeting still being processed is absent from the list and 404s on read. Documented behaviour, not a bug. https://docs.granola.ai/introduction",
+    "base_url": "The OpenAPI document's own server. Each node's path carries its own /v1.",
+    "rate_limits": "Granola publishes burst 25 requests per 5 seconds and sustained 5 requests/second (300/minute), applied per user or per workspace depending on the key's scope. The limits above sit well under both: connector work is background work, and a 429 costs more than the pace it buys. https://docs.granola.ai/introduction#rate-limits"
+  }
+}

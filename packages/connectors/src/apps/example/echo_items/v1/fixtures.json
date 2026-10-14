@@ -1,0 +1,16 @@
+{
+  "echo_items_page_one": {
+    "echoed": [{ "id": "itm_01", "value": "first" }, { "id": "itm_02", "value": "second" }],
+    "next_cursor": "cur_02",
+    "request_id": "req_9f2c1a"
+  },
+  "echo_items_last_page": {
+    "echoed": [{ "id": "itm_03", "value": "third" }],
+    "next_cursor": null,
+    "request_id": "req_9f2c1b"
+  },
+  "echo_items_rate_limited": {
+    "error": "rate_limited",
+    "message": "Too many requests for this connection."
+  }
+}
